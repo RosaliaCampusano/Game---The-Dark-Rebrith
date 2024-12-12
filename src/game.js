@@ -1,5 +1,5 @@
 import globals from "./globals.js";
-import { initHTMLelements, loadAssets, initSprites, initSpritesHUD, initVars, initLevel} from "./initialize.js";
+import { initHTMLelements, loadAssets, initSprites, initSpritesHUD, initSpritesMenu, initSpriteBackground, initStory, initControls, initVars, initLevel} from "./initialize.js";
 import update from "./gameLogic.js";
 import render from "./gameRender.js";
 
@@ -14,6 +14,14 @@ function init() {
   initHTMLelements();
 
   loadAssets();
+
+  initSpritesMenu();
+  
+  initSpriteBackground();
+
+  initStory();
+
+  initControls();
 
   initSpritesHUD();
 

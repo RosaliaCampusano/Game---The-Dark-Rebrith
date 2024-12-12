@@ -35,6 +35,33 @@ function initSprites()
     initBat();
 }
 
+function initSpritesMenu()
+{
+    initOldJosephs();
+    initActive();
+}
+
+function initSpriteBackground()
+{
+    GameOverScreen();
+    
+}
+
+function initStory()
+{
+    initBackgroundStory();
+}
+
+function initControls()
+{
+    initA();
+    initD();
+    initS();
+    initW();
+    initL();
+    initM();
+}
+
 function initSpritesHUD()
 {
     initHealthBarHUD();
@@ -102,6 +129,30 @@ function initBat()
     globals.sprites.push(bat);
 }
 
+function initOldJosephs()
+{
+    const imageSet1 = new ImageSet(700, 48, 50, 49, 50, 49, 0, 0);
+    const imageSet2 = new ImageSet(700, 99, 50,49, 50, 49, 0, 0);
+
+    const frames1 = new Frames(6);
+    const frames2 = new Frames(6);
+
+    const oldJoseph1 = new Sprite(SpriteID.OLD_JOSEPH1, State.RIGHT_JOSEPH, 100, 10, imageSet1, frames1);
+    const oldJoseph2 = new Sprite(SpriteID.OLD_JOSEPH2, State.LEFT_JOSEPH, 100, 10, imageSet2, frames2);
+
+    globals.spriteMenu.push(oldJoseph1);
+    globals.spriteMenu.push(oldJoseph2);
+}
+
+function initActive()
+{
+    const imageSet = new ImageSet(1326, 3, 13, 16, 13, 16, 0, 0);
+    const frames = new Frames(1);
+
+    const active = new Sprite(SpriteID.ACTIVE, State.BE, 100, 10, imageSet, frames);
+
+    globals.spriteMenu.push(active);
+}
 function initThroneHUD()
 {
     const imageSet = new ImageSet(256, 442, 70, 75, 83, 87, 0, 0);
@@ -138,6 +189,95 @@ function initStages()
 
 }
 
+function GameOverScreen()
+{
+    const imageSet  = new ImageSet(870, 257, 426, 539, 402, 285, 0, 0);
+    const frames = new Frames(1);
+
+
+    const rip = new Sprite(SpriteID.RIP, State.BE, 100, 10, imageSet, frames);
+
+    
+    globals.spriteBackground.push(rip);
+
+}
+function initBackgroundStory()
+{
+    const imageSet = new ImageSet(1382, 5, 344, 290, 344, 290, 0, 0);
+    const frames = new Frames(1);
+
+    const backgroundStory = new Sprite(SpriteID.BACKGROUND_STORY, State.BE, 0, 0, imageSet, frames);
+
+    globals.spriteStory.push(backgroundStory);
+}
+
+function initW()
+{
+    //UP
+    const imageSet = new ImageSet(1153, 35, 18, 17, 18, 17, 0, 0);
+    const frames = new Frames(1);
+
+    const w = new Sprite(SpriteID.KEYBOARD_W, State.BE, 0, 0, imageSet, frames);
+
+    globals.spriteControls.push(w);
+}
+
+function initS()
+{
+    //DOWN
+    const imageSet = new ImageSet(1152, 52, 18, 17, 18, 17, 0, 0);
+    const frames = new Frames(1);
+
+    const s = new Sprite(SpriteID.KEYBOARD_S, State.BE, 0, 0, imageSet, frames);
+
+    globals.spriteControls.push(s);
+}
+
+function initM()
+{
+    //MERGE WITH THE THRONE
+    const imageSet = new ImageSet(1152, 68, 18, 17, 18, 17, 0, 0);
+    const frames = new Frames(1);
+
+    const m = new Sprite(SpriteID.KEYBOARD_M, State.BE, 0, 0, imageSet, frames);
+
+    globals.spriteControls.push(m);
+}
+
+function initL()
+{
+    //ATTACK
+    const imageSet = new ImageSet(1153, 85, 18, 17, 18, 17, 0, 0);
+    const frames = new Frames(1);
+
+    const l = new Sprite(SpriteID.KEYBOARD_L, State.BE, 0, 0, imageSet, frames);
+
+    globals.spriteControls.push(l);
+}
+
+function initD()
+{
+    //RIGHT
+    const imageSet = new ImageSet(1153, 103, 18, 17, 18, 17, 0, 0);
+    const frames = new Frames(1);
+
+    const d = new Sprite(SpriteID.KEYBOARD_D, State.BE, 0, 0, imageSet, frames);
+
+
+    globals.spriteControls.push(d);
+}
+
+function initA()
+{
+    //LEFT
+    const imageSet = new ImageSet(1153, 120, 18, 17, 18, 17, 0, 0);
+    const frames = new Frames(1);
+
+    const a = new Sprite(SpriteID.KEYBOARD_A, State.BE, 0, 0, imageSet, frames);
+
+    globals.spriteControls.push(a);
+}
+
 
 
 function loadAssets()
@@ -151,7 +291,7 @@ function loadAssets()
 
     tileSet = new Image();
     tileSet.addEventListener("load", loadHandler, false);
-    tileSet.src = "./images/tileSet2.png";
+    tileSet.src = "./images/tileSet.png";
     globals.tileSets.push(tileSet);
     globals.assetsToLoad.push(tileSet);
 }
@@ -169,7 +309,7 @@ function loadHandler()
 
         console.log("Assets finished loading");
 
-        globals.gameState = Game.PLAYING;
+        globals.gameState = Game.MAIN_MENU;
     }
 }
 
@@ -187,5 +327,9 @@ export
     loadAssets,
     initSpritesHUD,
     initSprites,
+    initSpritesMenu,
+    initSpriteBackground,
+    initStory,
+    initControls,
     initLevel
 }

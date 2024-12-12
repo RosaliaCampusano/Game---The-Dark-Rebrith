@@ -26,6 +26,13 @@ export default
 
     sprites: [],
 
+    spriteMenu: [],
+    
+    spriteBackground: [],
+
+    spriteStory: [],
+    
+    spriteControls: [],
 
     tileSet: {},
 

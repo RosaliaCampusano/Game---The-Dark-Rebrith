@@ -5,11 +5,26 @@ export const Game =
     INVALID:                -1,
     LOADING:                 0,
     PLAYING:                 1,
-    OVER:                    2                   
+    OVER:                    2,
+    MAIN_MENU:               3,
+    STORY:                   4,
+    CONTROLS:                5,
+    HIGHSCORE:               6                  
 };
 
 //Game Speed
 export const FPS = 30;
+
+export const MainMenuTexts = 
+[
+    ["NEW GAME"],
+    ["CONTROLS"],
+    ["STORY"],
+    ["HIGHSCORE"]
+];
+
+export const WayOut = 
+"Press ESC to exit";
 
 export const SpriteID = {
     PLAYER:                 0,
@@ -22,7 +37,18 @@ export const SpriteID = {
     POTION:                 7,
     SUN:                    8,
     MOON:                   9,
-    BAT:                    10
+    BAT:                    10,
+    OLD_JOSEPH1:            11,
+    OLD_JOSEPH2:            12,
+    ACTIVE:                 13,
+    BACKGROUND_STORY:       14,
+    RIP:                    15,
+    KEYBOARD_W:             16,
+    KEYBOARD_A:             17,
+    KEYBOARD_S:             18,
+    KEYBOARD_D:             19,
+    KEYBOARD_L:             20,
+    KEYBOARD_M:             21 
 }
 
 export const State = {
@@ -66,7 +92,14 @@ export const State = {
     //Level 1 = SUN
     //Level 2 = MOON
     MOON:                   0,
-    SUN:                    1
+    SUN:                    1,
+
+    //Old Joseph  1 State 
+    RIGHT_JOSEPH:                   0,
+    
+    //Old Joseph 2 State 
+    LEFT_JOSEPH:                  0,
+    
 
 }
 
