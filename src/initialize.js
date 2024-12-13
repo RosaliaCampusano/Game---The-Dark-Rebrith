@@ -309,7 +309,7 @@ function loadHandler()
 
         console.log("Assets finished loading");
 
-        globals.gameState = Game.OVER;
+        globals.gameState = Game.PLAYING;
     }
 }
 

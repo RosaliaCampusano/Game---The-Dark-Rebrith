@@ -157,9 +157,9 @@ function renderHUD()
 
     //Draw High Score
     globals.ctxHUD.fillStyle = 'red';
-    globals.ctxHUD.fillText("HIGH SCORE", 110, 25);
+    globals.ctxHUD.fillText("HIGH SCORE", 140, 57);
     globals.ctxHUD.fillStyle = 'white';
-    globals.ctxHUD.fillText(" " + highScore, 117, 40);
+    globals.ctxHUD.fillText(" " + highScore, 170, 71);
 
 
     //Draw Life
@@ -170,9 +170,6 @@ function renderHUD()
     globals.ctxHUD.fillStyle = 'red';
     globals.ctxHUD.fillText("MADNESS", 233, 15);
 
-    //Draw Level
-    globals.ctxHUD.fillStyle = 'red';
-    globals.ctxHUD.fillText("Level", 9, 37);
 
     renderSpritesHUD();
 
