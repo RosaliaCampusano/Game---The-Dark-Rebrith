@@ -72,8 +72,8 @@ function updateThroneHUB(sprite)
 
 function updateStages(sprite)
 {
-    sprite.xPos = 2;
-    sprite.yPos = 40;
+    sprite.xPos = 100;
+    sprite.yPos = 5;
 
     sprite.frames.frameCounter = 0;
 

@@ -175,7 +175,7 @@ function renderHUD()
 
 }
 
-function deleteHUD()
+function deleteHUDAndClearScreen()
 {
     
     globals.ctx.clearRect(0, 0, globals.canvas.width, globals.canvas.height);
@@ -190,7 +190,7 @@ function deleteHUD()
 
 function renderMainMenu()
 {
-    deleteHUD();
+    deleteHUDAndClearScreen();
 
     const canvasDividedBy2 = globals.canvas.width / 2;
     globals.ctx.textAlign = 'center';
@@ -243,7 +243,7 @@ function renderMainMenu()
 
 function renderHihgscore()
 {
-    deleteHUD();
+    deleteHUDAndClearScreen();
     const canvasDividedBy2 = globals.canvas.width / 2;
     globals.ctx.textAlign = 'center';
     //Title
@@ -341,7 +341,7 @@ function renderHihgscore()
 function renderControls()
 {
 
-    deleteHUD();
+    deleteHUDAndClearScreen();
 
 
     for (let i = 0; i < globals.spriteControls.length; i ++)
@@ -428,7 +428,7 @@ function renderControls()
 
 function renderStory()
 {
-    deleteHUD();
+    deleteHUDAndClearScreen();
 
     for ( let i = 0; i < globals.spriteStory.length; i++)
         {
@@ -508,7 +508,7 @@ function renderStory()
 
 function renderGameOver()
 {
-    deleteHUD();
+    deleteHUDAndClearScreen();
 
 
     for ( let i = 0; i < globals.spriteBackground.length; i++)
