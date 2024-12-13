@@ -259,7 +259,7 @@ function updateJoseph2(sprite)
     sprite.xPos = 300;
     sprite.yPos = 208;
 
-    sprite.frames.frameCounter = 0;
+    sprite.frames.frameCounter = 2;
 
     sprite.state = State.LEFT_JOSEPH;
 }

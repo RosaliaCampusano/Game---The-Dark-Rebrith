@@ -147,7 +147,6 @@ function renderHUD()
 {
     const score = 1500;
     const highScore = 130000;
-    const time = 3000; 
 
     //Draw score
     globals.ctxHUD.font = '8px emulogic';
@@ -162,11 +161,6 @@ function renderHUD()
     globals.ctxHUD.fillStyle = 'white';
     globals.ctxHUD.fillText(" " + highScore, 117, 40);
 
-    //Draw Time
-    globals.ctxHUD.fillStyle = 'red';
-    globals.ctxHUD.fillText("TIME", 190, 57);
-    globals.ctxHUD.fillStyle = 'white';
-    globals.ctxHUD.fillText(" " + time, 183, 71);
 
     //Draw Life
     globals.ctxHUD.fillStyle = 'red';
