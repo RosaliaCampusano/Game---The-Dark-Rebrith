@@ -151,20 +151,20 @@ function renderHUD()
     //Draw score
     globals.ctxHUD.font = '8px emulogic';
     globals.ctxHUD.fillStyle = 'red';
-    globals.ctxHUD.fillText("SCORE", 65, 57);
+    globals.ctxHUD.fillText("SCORE", 15, 57);
     globals.ctxHUD.fillStyle = 'white';
-    globals.ctxHUD.fillText(" " + score, 61, 71);
+    globals.ctxHUD.fillText(" " + score, 10, 72);
 
     //Draw High Score
     globals.ctxHUD.fillStyle = 'red';
     globals.ctxHUD.fillText("HIGH SCORE", 140, 57);
     globals.ctxHUD.fillStyle = 'white';
-    globals.ctxHUD.fillText(" " + highScore, 170, 71);
+    globals.ctxHUD.fillText(" " + highScore, 150, 71);
 
 
     //Draw Life
     globals.ctxHUD.fillStyle = 'red';
-    globals.ctxHUD.fillText("LIFE", 135, 77);
+    globals.ctxHUD.fillText("LIFE", 90, 77);
 
     //Draw Madness
     globals.ctxHUD.fillStyle = 'red';

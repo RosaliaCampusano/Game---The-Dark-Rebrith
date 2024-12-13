@@ -72,7 +72,7 @@ function updateThroneHUB(sprite)
 
 function updateStages(sprite)
 {
-    sprite.xPos = 100;
+    sprite.xPos = 80;
     sprite.yPos = 5;
 
     sprite.frames.frameCounter = 0;
@@ -132,9 +132,9 @@ function updatePotion(sprite)
 
 function updateHealthBar(sprite)
 {
-    sprite.xPos = 115;
+    sprite.xPos = 72;
     sprite.yPos = 85;
-    sprite.imageSet.xSize = 60;
+    sprite.imageSet.xSize = 80;
     
     sprite.imageSet.xSize *= 0.5;
 
@@ -143,7 +143,7 @@ function updateHealthBar(sprite)
 
 function updateEmptybar(sprite)
 {
-    sprite.xPos = 123;
+    sprite.xPos = 80;
     sprite.yPos = 83;
 
     sprite.imageSet.xSize = 55;
