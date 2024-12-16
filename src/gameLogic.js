@@ -59,6 +59,32 @@ function updatePlayer(sprite)
     sprite.state = State.DOWN;
 }
 
+function updatePlayerWizard(sprite)
+{
+    sprite.xPos = 150;
+    sprite.yPos = 140;
+
+    sprite.frames.frameCounter = 3;
+
+    sprite.state = State.LEFT_ATTACK_WIZARD;
+} 
+
+function updateJumpGuy(sprite)
+{
+    sprite.xPos = 20;
+    sprite.yPos = 15;
+
+    sprite.frames.frameCounter = 2;
+} 
+
+function updateAttack(sprite)
+{
+    sprite.xPos = 140;
+    sprite.yPos = 142;
+
+    sprite.frames.frameCounter = 2;
+
+}
 
 function updateThroneHUB(sprite)
 {
@@ -194,6 +220,17 @@ function updateSprite(sprite)
 
         case SpriteID.BAT:
             updateBat(sprite);
+            break;
+        
+        case SpriteID.PLAYER_WIZARD:
+            updatePlayerWizard(sprite);
+            break;
+
+        case SpriteID.ATTACK:
+            updateAttack(sprite); 
+            break;
+        case SpriteID.JUMPGUY:
+            updateJumpGuy(sprite);
             break;
         default:
 

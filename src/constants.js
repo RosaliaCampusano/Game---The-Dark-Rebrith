@@ -48,7 +48,10 @@ export const SpriteID = {
     KEYBOARD_S:             18,
     KEYBOARD_D:             19,
     KEYBOARD_L:             20,
-    KEYBOARD_M:             21 
+    KEYBOARD_M:             21,
+    PLAYER_WIZARD:          22,
+    ATTACK:                 23,
+    JUMPGUY:                24
 }
 
 export const State = {
@@ -95,11 +98,28 @@ export const State = {
     SUN:                    1,
 
     //Old Joseph  1 State 
-    RIGHT_JOSEPH:                   0,
+    RIGHT_JOSEPH:           0,
     
     //Old Joseph 2 State 
-    LEFT_JOSEPH:                  0,
+    LEFT_JOSEPH:            0,
     
+       //Player Wizard 
+    DOWN_WIZARD:            0,
+    UP_WIZARD:              1,
+    RIGHT_WIZARD:           2,
+    LEFT_WIZARD:            3,
+    UP_ATTACK_WIZARD:       4,
+    RIGHT_ATTACK_WIZARD:    5,
+    DOWN_ATTACK_WIZARD:     6,
+    LEFT_ATTACK_WIZARD:     7,
+    PUNCH_WIZARD:           8,
+    
+
+    //Attack
+    ACTIVE:                 0,
+
+    //Jump Guy State
+    JUMP:                   0
 
 }
 

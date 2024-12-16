@@ -27,7 +27,10 @@ function initVars()
 
 function initSprites()
 {
-    initPlayer();
+    /* initPlayer(); */
+    initPlayerhWizard();
+    initJumpGuy();
+    initAttack();
     initGoblin();
     initDemon();
     initThrone();
@@ -87,6 +90,36 @@ function initPlayer()
     const player = new Sprite(SpriteID.PLAYER, State.UP, 3, 289, imageSet, frames);
 
     globals.sprites.push(player);
+}
+
+function initPlayerhWizard()
+{
+    const imageSet = new ImageSet(1330, 283, 35, 35, 35, 35, 0, 0);
+    const frames = new Frames(6);
+
+    const playerWizard = new Sprite(SpriteID.PLAYER_WIZARD, State.DOWN_ATTACK_WIZARD, 100, 10, imageSet, frames);
+    
+    globals.sprites.push(playerWizard);
+}
+
+function initJumpGuy()
+{
+    const imageSet = new ImageSet(289, 229, 16, 19, 16, 19, 0, 0);
+    const frames = new Frames(7);
+
+    const jumpGuy = new Sprite(SpriteID.JUMPGUY, State.JUMP, 0, 0, imageSet, frames);
+
+    globals.sprites.push(jumpGuy);
+}
+
+function initAttack()
+{
+    const imageSet = new ImageSet(289, 250, 19, 22, 17, 19, 0, 0);
+    const frames =  new Frames(3);
+
+    const attack = new Sprite(SpriteID.ATTACK, State.ACTIVE, 100, 10, imageSet, frames);
+
+    globals.sprites.push(attack);
 }
 
 function initDemon()
