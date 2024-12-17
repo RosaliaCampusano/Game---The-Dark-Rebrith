@@ -119,8 +119,20 @@ export const State = {
     ACTIVE:                 0,
 
     //Jump Guy State
-    JUMP:                   0
+    JUMP:                   0,
 
+    OFF:                    0
+
+}
+
+//Keyboard key codes
+export const Key = {
+    UP:                 87,         //W
+    DOWN:               83,         //S
+    RIGHT:              68,         //D
+    LEFT:               65,         //A
+    ATTACK_:            76,         //L
+    MERGE_THRONE:       77          //M   
 }
 
 export const Tile = {

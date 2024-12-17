@@ -1,9 +1,11 @@
 import globals from "./globals.js";
 import {Game, SpriteID,State, FPS} from "./constants.js";
-import Sprite from "./Sprites.js";
+import Sprite, { Enemies} from "./Sprites.js";
 import ImageSet from "./ImageSet.js";
 import Frames from "./Frames.js";
 import { Level, level } from "./Level.js";
+import { keydownHandler, keyupHandler } from "./events.js";
+import Physics from "./Physics.js";
 
 function initHTMLelements()
 {
@@ -23,6 +25,23 @@ function initVars()
     globals.frameTimeObj = 1 / FPS;
 
     globals.gameState = Game.LOADING;
+
+    globals.action = 
+    {
+        moveLeft:       false,
+        moveRight:      false,
+        moveUp:         false,
+        moveDown:       false,
+        moveAttack:     false,
+        merge:          false
+    }
+}
+
+
+function initEvents()
+{
+    window.addEventListener("keydown", keydownHandler, false);
+    window.addEventListener("keyup", keyupHandler, false);
 }
 
 function initSprites()
@@ -30,7 +49,7 @@ function initSprites()
     /* initPlayer(); */
     initPlayerhWizard();
     initJumpGuy();
-    initAttack();
+  /*   initAttack(); */
     initGoblin();
     initDemon();
     initThrone();
@@ -75,10 +94,14 @@ function initSpritesHUD()
 function initGoblin()
 {
     //Create the properties: xInit, yInit, xSize, ySize, xGridSize, yGridSize, xOffset, yOffset
-    const imageSet = new ImageSet(5, 3, 57, 55, 57, 57, 0, 2);
-    const frames = new Frames(11);
+    const imageSet = new ImageSet(5, 3, 57, 55, 57, 56, 0, 2);
+    const frames = new Frames(11, 5);
 
-    const goblin = new Sprite(SpriteID.GOBLIN, State.DOWN_2, 0, 0, imageSet, frames);
+    const physics = new Physics(40);
+
+    const initTimeToChangeDirection = Math.floor(Math.random() * 3) + 1;
+
+    const goblin = new Enemies(SpriteID.GOBLIN, State.LEFT_2, 55, 120, imageSet, frames, physics, initTimeToChangeDirection);
     globals.sprites.push(goblin);
 }
 function initPlayer()
@@ -95,9 +118,11 @@ function initPlayer()
 function initPlayerhWizard()
 {
     const imageSet = new ImageSet(1330, 283, 35, 35, 35, 35, 0, 0);
-    const frames = new Frames(6);
+    const frames = new Frames(4, 5);
 
-    const playerWizard = new Sprite(SpriteID.PLAYER_WIZARD, State.DOWN_ATTACK_WIZARD, 100, 10, imageSet, frames);
+    const physics = new Physics(40, 40, 0.98);
+
+    const playerWizard = new Sprite(SpriteID.PLAYER_WIZARD, State.STILL_RIGHT, 100, 10, imageSet, frames, physics);
     
     globals.sprites.push(playerWizard);
 }
@@ -124,20 +149,24 @@ function initAttack()
 
 function initDemon()
 {
-    const imageSet = new ImageSet(0, 442, 64, 63, 64, 64, 0, 0);
-    const frames = new Frames(4);
+    const imageSet = new ImageSet(0, 445, 64, 63, 64, 64, 0, 0);
+    const frames = new Frames(4, 5);
 
-    const demon = new Sprite(SpriteID.DEMON, State.DOWN_3, 38, 9, imageSet, frames);
+    const physics = new Physics(40);
+
+    const initTimeToChangeDirection = Math.floor(Math.random() * 2) + 1;
+
+    const demon = new Enemies(SpriteID.DEMON, State.DOWN_3, 305, 75, imageSet, frames, physics,initTimeToChangeDirection);
 
     globals.sprites.push(demon);
 }
 
 function initPotion()
 {
-    const imageSet = new ImageSet(510, 561, 30, 33, 27, 35, 0, 0);
-    const frames = new Frames(5);
+    const imageSet = new ImageSet(510, 561, 30, 33, 28, 35, 0, 0);
+    const frames = new Frames(5, 5);
 
-    const potion = new Sprite(SpriteID.POTION, State.POISON_OFF, 25, 15, imageSet, frames);
+    const potion = new Sprite(SpriteID.POTION, State.ACTIVATED_SKILL, 210, 58, imageSet, frames);
 
     globals.sprites.push(potion);
 }
@@ -154,10 +183,12 @@ function initThrone()
 
 function initBat()
 {
-    const imageSet = new ImageSet(513, 292, 51, 58, 47, 58, 0, 0);
-    const frames = new Frames(3);
+    const imageSet = new ImageSet(512, 292, 51, 58, 47, 58, 0, 0);
+    const frames = new Frames(3, 5);
 
-    const bat = new Sprite(SpriteID.BAT, State.DOWN_4, 64, 64, imageSet, frames);
+    const physics = new Physics(40);
+
+    const bat = new Sprite(SpriteID.BAT, State.DOWN_4, 64, 64, imageSet, frames, physics);
 
     globals.sprites.push(bat);
 }
@@ -358,6 +389,7 @@ export
     initHTMLelements,
     initVars,
     loadAssets,
+    initEvents,
     initSpritesHUD,
     initSprites,
     initSpritesMenu,

@@ -41,5 +41,7 @@ export default
 
     tileSets: [],
 
-    level: {}
+    level: {},
+
+    action: {},
 }

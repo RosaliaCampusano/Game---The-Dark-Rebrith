@@ -1,5 +1,11 @@
 import globals from "./globals.js";
 import {Game, State, SpriteID } from "./constants.js";
+import Sprite from "./Sprites.js";
+import ImageSet from "./ImageSet.js";
+import Frames from "./Frames.js";
+import Physics from "./Physics.js";
+
+
 export default function update()
 {
     switch(globals.gameState)
@@ -61,12 +67,79 @@ function updatePlayer(sprite)
 
 function updatePlayerWizard(sprite)
 {
-    sprite.xPos = 150;
-    sprite.yPos = 140;
+    
+    readKeyboardAndAssignState(sprite);
 
-    sprite.frames.frameCounter = 3;
+    switch(sprite.state)
+    {
+        case State.UP_WIZARD:
+            sprite.physics.vx = 0;
+            sprite.physics.vy = -sprite.physics.vLimit;
+            break;
+        case State.DOWN_WIZARD:
+            sprite.physics.vx = 0;
+            sprite.physics.vy = sprite.physics.vLimit;
+            break;
+        case State.RIGHT_WIZARD:
+            sprite.physics.vx = sprite.physics.vLimit;
+            sprite.physics.vy = 0;
+            break;
+        case State.LEFT_WIZARD:
+            sprite.physics.vx = -sprite.physics.vLimit;
+            sprite.physics.vy = 0;
+            break;
+        default: 
+            sprite.physics.vx = 0;
+            sprite.physics.vy = 0;
+            
+    }
+    
 
-    sprite.state = State.LEFT_ATTACK_WIZARD;
+    sprite.xPos += sprite.physics.vx * globals.deltaTime;
+    sprite.yPos += sprite.physics.vy * globals.deltaTime;
+    updateAnimationFrames(sprite);
+
+}
+
+function readKeyboardAndAssignState(sprite)
+{
+    sprite.state =  globals.action.moveLeft                             ? State.LEFT_WIZARD           : //Left key
+                    globals.action.moveRight                            ? State.RIGHT_WIZARD          : //Right key
+                    globals.action.moveUp                               ? State.UP_WIZARD             : //Up key
+                    globals.action.moveDown                             ? State.DOWN_WIZARD           : //Down key
+                    sprite.state === State.LEFT_WIZARD                  ? State.STILL_LEFT            : //No  key press left
+                    sprite.state === State.RIGHT_WIZARD                 ? State.STILL_RIGHT           : //No  key press right
+                    sprite.state === State.UP_WIZARD                    ? State.STILL_UP              : //No  key press up
+                    sprite.state === State.DOWN_WIZARD                  ? State.STILL_DOWN            : //No  key press down
+                    sprite.state;
+
+}
+
+function updateAnimationFrames(sprite)
+{
+    switch(sprite.state)
+    {
+        case State.STILL_UP:
+        case State.STILL_LEFT:
+        case State.STILL_DOWN:
+        case State.STILL_RIGHT:
+            sprite.frames.frameCounter = 0;
+            sprite.frames.framesChangeCounter = 0;
+            break;
+        default:
+            sprite.frames.framesChangeCounter++;
+            
+        if (sprite.frames.framesChangeCounter === sprite.frames.speed)
+        {
+            sprite.frames.frameCounter++;
+            sprite.frames.framesChangeCounter = 0;
+        }
+
+        if (sprite.frames.frameCounter === sprite.frames.framesPerState)
+        {
+            sprite.frames.frameCounter = 0;
+        }
+    }
 } 
 
 function updateJumpGuy(sprite)
@@ -111,20 +184,135 @@ function updateStages(sprite)
 function updateGoblin(sprite)
 {
 
-    sprite.xPos = 100;
-    sprite.yPos = 120;
-    sprite.frames.frameCounter = 3;
-    sprite.state = State.DOWN_2;
+    switch (sprite.state)
+    {
+        case State.RIGHT_2:
+            sprite.physics.vx = sprite.physics.vLimit;
+            break;
+
+        case State.LEFT_2:
+            sprite.physics.vx = -sprite.physics.vLimit;
+            break;
+    
+        default:
+            console.error("Error, Game State invalid");
+    }
+
+    sprite.xPos += sprite.physics.vx * globals.deltaTime;
+
+    updateAnimationFrames(sprite);
+
+    updateDirectionRandomGoblin(sprite);
+
+    const isCollision = calculateCollisionWithBordersGoblin(sprite);
+    if (isCollision)
+    {
+        adjustPositionAfterCollision(sprite);
+        swapDirectionGoblin(sprite);
+    } 
+}
+
+function swapDirectionGoblin(sprite)
+{
+    sprite.state = sprite.state === State.RIGHT_2 ?  State.LEFT_2  : State.RIGHT_2;
+}
+
+function updateDirectionRandomGoblin(sprite)
+{
+    sprite.directionChangeCounter += globals.deltaTime;
+
+    if (sprite.directionChangeCounter > sprite.maxTimeToChangeDirection)
+    {
+        sprite.directionChangeCounter = 0;
+
+        sprite.maxTimeToChangeDirection = Math.floor(Math.random() * 15) + 1;
+
+        swapDirectionGoblin(sprite);
+        
+    }
+}
+
+function calculateCollisionWithBordersGoblin(sprite)
+{
+    let isCollision = false;
+
+    if (sprite.xPos + sprite.imageSet.xSize > globals.canvas.width)
+    {
+        isCollision = true;
+    }
+    else if (sprite.xPos < 0)
+    {
+        isCollision = true;
+    }
+
+    return isCollision;
 }
 
 function updateDemon(sprite)
 {
-    sprite.xPos = 310;
-    sprite.yPos = 60;
+  
+    switch (sprite.state)
+    {
+        case State.DOWN_3:
+            sprite.physics.vy = sprite.physics.vLimit;
+            break;
+        
+        case State.UP_3:
+            sprite.physics.vy = -sprite.physics.vLimit;
+            break;
+    
+        default:
+            console.error("Error, Game State invalid");
+    }
 
-    sprite.frames.frameCounter = 0;
+    sprite.yPos += sprite.physics.vy * globals.deltaTime;
 
-    sprite.state = State.DOWN_3;
+    updateAnimationFrames(sprite);
+
+    updateDirectionRandom(sprite);
+
+    const isCollision = calculateCollisionWithBorders(sprite);
+    if (isCollision)
+    {
+    adjustPositionAfterCollision(sprite);
+    swapDirection(sprite);
+    }
+}
+
+function updateDirectionRandom(sprite)
+{
+    sprite.directionChangeCounter += globals.deltaTime;
+
+    if (sprite.directionChangeCounter > sprite.maxTimeToChangeDirection)
+    {
+        sprite.directionChangeCounter = 0;
+
+        sprite.maxTimeToChangeDirection = Math.floor(Math.random() * 8) + 1;
+
+    swapDirection(sprite);
+        
+    }
+}
+
+function swapDirection(sprite)
+{
+    sprite.state = sprite.state === State.UP_3 ? State.DOWN_3 : State.UP_3;
+}
+
+function calculateCollisionWithBorders(sprite)
+{
+    let isCollision = false;
+
+    if (sprite.yPos + sprite.imageSet.ySize > globals.canvas.height)
+    {
+        isCollision = true;
+    }
+    else if (sprite.yPos < 0)
+    {
+        isCollision = true;
+    }
+
+    return isCollision;
 }
 function updateThrone(sprite)
 {
@@ -136,24 +324,127 @@ function updateThrone(sprite)
     sprite.state = State.BE;
 }
 
+function adjustPositionAfterCollision(sprite) 
+{
+
+    if (sprite.yPos < 0) 
+    {
+        sprite.yPos = 0;
+    } else if (sprite.yPos + sprite.imageSet.ySize > globals.canvas.height) 
+    {
+        sprite.yPos = globals.canvas.height - sprite.imageSet.ySize;
+    }
+
+    
+    if (sprite.xPos < 0) 
+    {
+        sprite.xPos = 0;
+    } else if (sprite.xPos + sprite.imageSet.xSize > globals.canvas.width) 
+    {
+        sprite.xPos = globals.canvas.width - sprite.imageSet.xSize;
+    }
+}//NEW
+
 function updateBat(sprite)
 {
-    sprite.xPos = 295;
-    sprite.yPos = 185;
+    switch (sprite.state) {
+        case State.UP_4:
+            sprite.physics.vx = 0; 
+            sprite.physics.vy = -sprite.physics.vLimit; 
+            break;
+        case State.DOWN_4:
+            sprite.physics.vx = 0; 
+            sprite.physics.vy = sprite.physics.vLimit; 
+            break;
+        case State.RIGHT_4:
+            sprite.physics.vx = sprite.physics.vLimit; 
+            sprite.physics.vy = 0; 
+            break;
+        case State.LEFT_4:
+            sprite.physics.vx = -sprite.physics.vLimit; 
+            sprite.physics.vy = 0; 
+            break;
+        default:
+            console.error("Error, Game State invalid");
+            return;
+    }
 
-    sprite.frames.frameCounter = 0;
+   
+    sprite.xPos += sprite.physics.vx * globals.deltaTime;
+    sprite.yPos += sprite.physics.vy * globals.deltaTime;
 
-    sprite.state = State.UP_4;
+    
+    updateAnimationFrames(sprite);
+    updateDirectionRandomBat(sprite);
+
+    
+    const isCollision = calculateCollisionWithBordersBat(sprite);
+    if (isCollision) 
+    {
+        adjustPositionAfterCollision(sprite);
+        swapDirectionBat(sprite);
+    }
 }
+
+function swapDirectionBat(sprite)
+{
+    const directions = [State.UP_4, State.DOWN_4, State.LEFT_4, State.RIGHT_4];
+   const random = Math.floor(Math.random() * directions.length);
+    sprite.state = directions[random];
+
+}
+
+function updateDirectionRandomBat(sprite)
+{
+    sprite.directionChangeCounter += globals.deltaTime;
+
+    if (sprite.directionChangeCounter > sprite.maxTimeToChangeDirection) 
+    {
+        sprite.directionChangeCounter = 0;
+
+        sprite.maxTimeToChangeDirection = Math.floor(Math.random() * 8) + 1;
+        swapDirectionBat(sprite);
+    }
+}
+
+function calculateCollisionWithBordersBat(sprite)
+{
+    let isCollision = false;
+
+    if (sprite.yPos + sprite.imageSet.ySize > globals.canvas.height)
+    {
+        isCollision = true;
+    } else if (sprite.yPos < 0) 
+    {
+        isCollision = true;
+    } else if (sprite.xPos + sprite.imageSet.xSize > globals.canvas.width) 
+    {
+        isCollision = true;
+    } else if (sprite.xPos < 0) 
+    {
+        isCollision = true;
+    }
+    return isCollision;
+}
+
 
 function updatePotion(sprite)
 {
-    sprite.xPos = 210;
-    sprite.yPos = 58;
+    sprite.frames.framesChangeCounter += globals.deltaTime;
+    
+     if (sprite.frames.framesChangeCounter >= sprite.frames.speed) 
+    {
+        sprite.frames.framesChangeCounter = 0; 
+        sprite.frames.frameCounter++;
+                
+    if (sprite.frames.frameCounter >= sprite.frames.framesPerState) 
+        {
+            sprite.frames.frameCounter = 0; 
+        }
+        
+    }
+        
 
-    sprite.frames.frameCounter = 1;
-
-    sprite.state = State.ACTIVATED_SKILL;
 }
 
 function updateHealthBar(sprite)
