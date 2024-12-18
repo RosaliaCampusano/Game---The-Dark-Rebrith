@@ -94,14 +94,14 @@ function initSpritesHUD()
 function initGoblin()
 {
     //Create the properties: xInit, yInit, xSize, ySize, xGridSize, yGridSize, xOffset, yOffset
-    const imageSet = new ImageSet(5, 3, 57, 55, 57, 56, 0, 2);
+    const imageSet = new ImageSet(0, 6, 57, 56, 57, 59, 0, 0);
     const frames = new Frames(11, 5);
 
     const physics = new Physics(40);
 
     const initTimeToChangeDirection = Math.floor(Math.random() * 3) + 1;
 
-    const goblin = new Enemies(SpriteID.GOBLIN, State.LEFT_2, 55, 120, imageSet, frames, physics, initTimeToChangeDirection);
+    const goblin = new Enemies(SpriteID.GOBLIN, State.LEFT_2, 55, 50, imageSet, frames, physics, initTimeToChangeDirection);
     globals.sprites.push(goblin);
 }
 function initPlayer()
@@ -129,15 +129,18 @@ function initPlayerhWizard()
 
 function initJumpGuy()
 {
-    const imageSet = new ImageSet(289, 229, 16, 19, 16, 19, 0, 0);
+    const imageSet = new ImageSet(287, 240, 16, 19, 16, 19, 0, 0);
+
     const frames = new Frames(7);
 
-    const jumpGuy = new Sprite(SpriteID.JUMPGUY, State.JUMP, 0, 0, imageSet, frames);
+    const physics = new Physics(40, 40, 0.9, -100);
+
+    const jumpGuy = new Sprite(SpriteID.JUMPGUY, State.JUMP, 0, 0, imageSet, frames, physics);
 
     globals.sprites.push(jumpGuy);
 }
 
-function initAttack()
+/* function initAttack()
 {
     const imageSet = new ImageSet(289, 250, 19, 22, 17, 19, 0, 0);
     const frames =  new Frames(3);
@@ -145,11 +148,11 @@ function initAttack()
     const attack = new Sprite(SpriteID.ATTACK, State.ACTIVE, 100, 10, imageSet, frames);
 
     globals.sprites.push(attack);
-}
+} */
 
 function initDemon()
 {
-    const imageSet = new ImageSet(0, 445, 64, 63, 64, 64, 0, 0);
+    const imageSet = new ImageSet(0, 456, 64, 63, 64, 65, 0, 0);
     const frames = new Frames(4, 5);
 
     const physics = new Physics(40);
@@ -163,7 +166,8 @@ function initDemon()
 
 function initPotion()
 {
-    const imageSet = new ImageSet(510, 561, 30, 33, 28, 35, 0, 0);
+    const imageSet = new ImageSet(510, 567, 30, 33, 28, 35, 0, 0);
+
     const frames = new Frames(5, 5);
 
     const potion = new Sprite(SpriteID.POTION, State.ACTIVATED_SKILL, 210, 58, imageSet, frames);
@@ -173,7 +177,8 @@ function initPotion()
 
 function initThrone()
 {
-    const imageSet = new ImageSet(325, 272, 81, 90, 81, 90, 0, 0);
+    const imageSet = new ImageSet(415, 302, 59, 60, 59, 60, 0, 0);
+    
     const frames = new Frames(1);
 
     const throne = new Sprite(SpriteID.THRONE, State.BE, 64, 69, imageSet, frames);
