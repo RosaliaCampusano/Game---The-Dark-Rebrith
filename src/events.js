@@ -51,12 +51,12 @@ export function keyupHandler(event)
             globals.action.moveRight = false;
             break;
         
-            case Key.ATTACK:
-                globals.action.attack = false;
-                break;
+        case Key.ATTACK:
+            globals.action.attack = false;
+            break;
             
-            case Key.MERGE_THRONE:
-                globals.action.merge = false;
-                break;
+        case Key.MERGE_THRONE:
+            globals.action.merge = false;
+            break;
     }
 }

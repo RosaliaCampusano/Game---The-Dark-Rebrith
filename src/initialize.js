@@ -177,8 +177,8 @@ function initPotion()
 
 function initThrone()
 {
-    const imageSet = new ImageSet(415, 302, 59, 60, 59, 60, 0, 0);
-    
+    const imageSet = new ImageSet(415, 285, 59, 70, 59, 60, 0, 0);
+
     const frames = new Frames(1);
 
     const throne = new Sprite(SpriteID.THRONE, State.BE, 64, 69, imageSet, frames);

@@ -1,9 +1,6 @@
 import globals from "./globals.js";
-import {Game, State, SpriteID } from "./constants.js";
-import Sprite from "./Sprites.js";
-import ImageSet from "./ImageSet.js";
-import Frames from "./Frames.js";
-import Physics from "./Physics.js";
+import {Game, State, SpriteID, GRAVITY} from "./constants.js";
+
 
 
 export default function update()
@@ -55,6 +52,7 @@ function updateControls()
 {
     updateKeyboardControls();
 }
+
 function updatePlayer(sprite)
 {
     sprite.xPos = 101;
@@ -144,10 +142,91 @@ function updateAnimationFrames(sprite)
 
 function updateJumpGuy(sprite)
 {
-    sprite.xPos = 20;
-    sprite.yPos = 15;
+    switch (sprite.state) {
+        case State.JUMP:
+            sprite.physics.vx = 50; 
+            break;
+        default:
+            console.error("Error, Game State invalid");
+            return;
+    }
 
-    sprite.frames.frameCounter = 2;
+    sprite.physics.ay = GRAVITY;
+
+    if (!sprite.physics.isOnGround) {
+        sprite.physics.vy += sprite.physics.ay * globals.deltaTime
+    }
+
+    sprite.xPos += sprite.physics.vx * globals.deltaTime;
+    sprite.yPos += sprite.physics.vy * globals.deltaTime;  
+    
+    onGroupJumpGuy(sprite)
+} 
+
+let countJumps = 1;
+
+function onGroupJumpGuy(sprite) 
+{
+
+    switch (countJumps) {
+        case 1:
+            if (sprite.yPos > globals.canvas.height/3 - sprite.imageSet.ySize)
+            {
+                sprite.physics.isOnGroup = true;
+                adjustPositionAfterCollision(sprite)
+                sprite.physics.vy = 0;
+        
+                updateAnimationFrames(sprite)
+                countJumps++;              
+            }
+            break;
+        
+        case 3:
+            if (sprite.xPos > globals.canvas.width/3 - sprite.imageSet.xSize)
+            {
+                sprite.physics.isOnGroup = true;
+                adjustPositionAfterCollision(sprite)
+                sprite.physics.vy = 0;
+    
+                updateAnimationFrames(sprite)
+                countJumps++;
+            }
+            break;
+            
+        case 5:
+            if (sprite.xPos > globals.canvas.width/2 - sprite.imageSet.xSize)
+            {
+                sprite.physics.isOnGroup = true;
+                adjustPositionAfterCollision(sprite)
+                sprite.physics.vy = 0;
+                
+                updateAnimationFrames(sprite)
+            }
+            if (sprite.xPos > globals.canvas.width - 55 - sprite.imageSet.xSize)
+            {
+                
+                sprite.physics.isOnGroup = true;
+                adjustPositionAfterCollision(sprite)
+                sprite.physics.vy = 0;
+                
+                updateAnimationFrames(sprite)
+                countJumps++;
+            }
+            break;
+        case 6:
+            if (sprite.xPos > globals.canvas.width - sprite.imageSet.xSize)
+            {
+                countJumps= 1;
+                sprite.xPos = 0;
+                sprite.yPos = 0;
+                sprite.physics.vy = 0;
+            }
+            break;
+        default:
+            sprite.physics.isOnGround = false;
+            countJumps++;
+            break;
+    }
 } 
 
 function updateAttack(sprite)
@@ -171,8 +250,8 @@ function updateThroneHUB(sprite)
 
 function updateStages(sprite)
 {
-    sprite.xPos = 80;
-    sprite.yPos = 5;
+    sprite.xPos = 0;
+    sprite.yPos = 40;
 
     sprite.frames.frameCounter = 0;
 
@@ -202,9 +281,9 @@ function updateGoblin(sprite)
 
     updateAnimationFrames(sprite);
 
-    updateDirectionRandomGoblin(sprite);
+    updateDirectionRandom(sprite);
 
-    const isCollision = calculateCollisionWithBordersGoblin(sprite);
+    const isCollision = calculateCollisionWithBorders(sprite);
     if (isCollision)
     {
         adjustPositionAfterCollision(sprite);
@@ -217,36 +296,6 @@ function swapDirectionGoblin(sprite)
     sprite.state = sprite.state === State.RIGHT_2 ?  State.LEFT_2  : State.RIGHT_2;
 }
 
-function updateDirectionRandomGoblin(sprite)
-{
-    sprite.directionChangeCounter += globals.deltaTime;
-
-    if (sprite.directionChangeCounter > sprite.maxTimeToChangeDirection)
-    {
-        sprite.directionChangeCounter = 0;
-
-        sprite.maxTimeToChangeDirection = Math.floor(Math.random() * 15) + 1;
-
-        swapDirectionGoblin(sprite);
-        
-    }
-}
-
-function calculateCollisionWithBordersGoblin(sprite)
-{
-    let isCollision = false;
-
-    if (sprite.xPos + sprite.imageSet.xSize > globals.canvas.width)
-    {
-        isCollision = true;
-    }
-    else if (sprite.xPos < 0)
-    {
-        isCollision = true;
-    }
-
-    return isCollision;
-}
 
 function updateDemon(sprite)
 {
@@ -288,8 +337,6 @@ function updateDirectionRandom(sprite)
         sprite.directionChangeCounter = 0;
 
         sprite.maxTimeToChangeDirection = Math.floor(Math.random() * 8) + 1;
-
-    swapDirection(sprite);
         
     }
 }
@@ -310,18 +357,51 @@ function calculateCollisionWithBorders(sprite)
     else if (sprite.yPos < 0)
     {
         isCollision = true;
+    } 
+    else if (sprite.xPos + sprite.imageSet.xSize > globals.canvas.width) 
+    {
+        isCollision = true;
+
+    } else if (sprite.xPos < 0) 
+    {
+        isCollision = true;
+
     }
 
     return isCollision;
 }
+
+let elapsedTime = 0; 
+
 function updateThrone(sprite)
 {
-    sprite.xPos = 75;
-    sprite.yPos = 170;
+    const thronePositions = [
+        { xPos: 75, yPos: 180 },
+        { xPos: 15, yPos: 15 },
+        { xPos: 140, yPos: 180 },
+        { xPos: 100, yPos: 50 },
+        { xPos: 205, yPos: 15 },
+        { xPos: 230, yPos: 110 },
+        { xPos: 310, yPos: 100 },
+        { xPos: 250, yPos: 5 },
+        { xPos: 250, yPos: 75 },
+        { xPos: 69, yPos: 69 }
+    ];
 
-    sprite.frames.frameCounter = 1;
+    const changeInterval = 2; 
+    
+    elapsedTime += globals.deltaTime;
 
-    sprite.state = State.BE;
+    if (elapsedTime >= changeInterval) 
+    {
+        const randomIndex = Math.floor(Math.random() * thronePositions.length);
+        const newPosition = thronePositions[randomIndex];
+        sprite.xPos = newPosition.xPos;
+        sprite.yPos = newPosition.yPos;
+        
+        elapsedTime = 0;
+    }
+
 }
 
 function adjustPositionAfterCollision(sprite) 
@@ -343,7 +423,7 @@ function adjustPositionAfterCollision(sprite)
     {
         sprite.xPos = globals.canvas.width - sprite.imageSet.xSize;
     }
-}//NEW
+}
 
 function updateBat(sprite)
 {
@@ -375,10 +455,10 @@ function updateBat(sprite)
 
     
     updateAnimationFrames(sprite);
-    updateDirectionRandomBat(sprite);
+    updateDirectionRandom(sprite);
 
     
-    const isCollision = calculateCollisionWithBordersBat(sprite);
+    const isCollision = calculateCollisionWithBorders(sprite);
     if (isCollision) 
     {
         adjustPositionAfterCollision(sprite);
@@ -394,38 +474,6 @@ function swapDirectionBat(sprite)
 
 }
 
-function updateDirectionRandomBat(sprite)
-{
-    sprite.directionChangeCounter += globals.deltaTime;
-
-    if (sprite.directionChangeCounter > sprite.maxTimeToChangeDirection) 
-    {
-        sprite.directionChangeCounter = 0;
-
-        sprite.maxTimeToChangeDirection = Math.floor(Math.random() * 8) + 1;
-        swapDirectionBat(sprite);
-    }
-}
-
-function calculateCollisionWithBordersBat(sprite)
-{
-    let isCollision = false;
-
-    if (sprite.yPos + sprite.imageSet.ySize > globals.canvas.height)
-    {
-        isCollision = true;
-    } else if (sprite.yPos < 0) 
-    {
-        isCollision = true;
-    } else if (sprite.xPos + sprite.imageSet.xSize > globals.canvas.width) 
-    {
-        isCollision = true;
-    } else if (sprite.xPos < 0) 
-    {
-        isCollision = true;
-    }
-    return isCollision;
-}
 
 
 function updatePotion(sprite)
@@ -449,8 +497,8 @@ function updatePotion(sprite)
 
 function updateHealthBar(sprite)
 {
-    sprite.xPos = 72;
-    sprite.yPos = 85;
+    sprite.xPos = 152;
+    sprite.yPos = 76;
     sprite.imageSet.xSize = 80;
     
     sprite.imageSet.xSize *= 0.5;
@@ -460,8 +508,8 @@ function updateHealthBar(sprite)
 
 function updateEmptybar(sprite)
 {
-    sprite.xPos = 80;
-    sprite.yPos = 83;
+    sprite.xPos = 160;
+    sprite.yPos = 75;
 
     sprite.imageSet.xSize = 55;
 
