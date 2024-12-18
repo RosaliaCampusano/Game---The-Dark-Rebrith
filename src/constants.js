@@ -125,13 +125,15 @@ export const State = {
 
 }
 
+export const GRAVITY = 80;
+
 //Keyboard key codes
 export const Key = {
     UP:                 87,         //W
     DOWN:               83,         //S
     RIGHT:              68,         //D
     LEFT:               65,         //A
-    ATTACK_:            76,         //L
+    ATTACK:             76,         //L
     MERGE_THRONE:       77          //M   
 }
 
