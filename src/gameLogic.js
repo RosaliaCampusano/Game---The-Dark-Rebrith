@@ -302,6 +302,21 @@ function readKeyboardAndAssignState(sprite)
 
 }
 
+function readKeyboardAndAssignStatePlayer(sprite)
+{
+  
+    sprite.state =  globals.action.moveLeft ? State.LEFT : // Left key
+                    globals.action.moveRight ? State.RIGHT : // Right key
+                    globals.action.moveUp ? State.UP : // Up key
+                    globals.action.moveDown ? State.DOWN : // Down key
+                    sprite.state === State.LEFT                  ? State.STILL_LEFT            : //No  key press left
+                    sprite.state === State.RIGHT                 ? State.STILL_RIGHT           : //No  key press right
+                    sprite.state === State.UP                    ? State.STILL_UP              : //No  key press up
+                    sprite.state === State.DOWN                  ? State.STILL_DOWN            : //No  key press down
+                    sprite.state; // Maintain current state if no keys are pressed
+}
+
+
 function updateAnimationFrames(sprite)
 {
     switch(sprite.state)
