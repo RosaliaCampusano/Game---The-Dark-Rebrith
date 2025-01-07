@@ -405,7 +405,15 @@ function swapDirectionGoblin(sprite)
 
 function updateDemon(sprite)
 {
-  
+    if (sprite.isCollidingWithObstacleOnTheTop) 
+        {
+            sprite.state = State.DOWN_3
+        }
+        else if(sprite.isCollidingWithObstacleOnTheBottom)
+        {
+            sprite.state = State.UP_3
+        }
+        
     switch (sprite.state)
     {
         case State.DOWN_3:
