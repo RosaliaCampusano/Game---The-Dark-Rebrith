@@ -51,7 +51,8 @@ export const SpriteID = {
     KEYBOARD_M:             21,
     PLAYER_WIZARD:          22,
     ATTACK:                 23,
-    JUMPGUY:                24
+    JUMPGUY:                24,
+    ATTACK:                 25
 }
 
 export const State = {
@@ -113,6 +114,10 @@ export const State = {
     DOWN_ATTACK_WIZARD:     6,
     LEFT_ATTACK_WIZARD:     7,
     PUNCH_WIZARD:           8,
+    STILL_DOWN:             9,
+    STILL_UP:               10,
+    STILL_RIGHT:            11,
+    STILL_LEFT:             12,
     
 
     //Attack
@@ -144,20 +149,21 @@ export const Tile = {
 
 export const Block = 
 {
-    BRICK:                  4,
-    UP_DOOR_LEFT:           20,
-    UP_DOOR_MIDDLE:         21,
-    UP_DOOR_RIGTH:          22,
-    DOWN_DOOR_MIDDLE:       23,
-    DOWN_DOOR_RIGHT:        24,
-    DOWN_DOOR_LEFT:         25,
-    RUG:                    84,
-    RUG_UP_SHADOW:          87,
-    RUG_SHADOW:             89,
-    RUG_LEFT:               92,
-    RUG_MIDDLE:             93,
-    RUG_RIGHT:              94,
-    COLUMN_UP:              101,
-    COLUMN_DOWN:            102
+    EMPTY:              0,
+    BRICK:              1,
+    COLUMN_UP:          2,
+    COLUMN_DOWN:        3,
+    RUG_LEFT:           4,
+    RUG_MIDDLE:         5,
+    RUG_RIGHT:          6,
+    RUG_SHADOW:         7,
+    RUG:                8,
+    RUG_UP_SHADOW:      9,
+    UP_DOOR_LEFT:       10,
+    UP_DOOR_MIDDLE:     11,
+    UP_DOOR_RIGHT:      12,
+    DOWN_DOOR_LEFT:     13,
+    DOWN_DOOR_MIDDLE:   14,
+    DOWN_DOOR_RIGHT:    15
 
 }
