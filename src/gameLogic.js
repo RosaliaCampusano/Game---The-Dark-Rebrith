@@ -166,27 +166,118 @@ function updatePlayerWizard(sprite)
     
     readKeyboardAndAssignState(sprite);
 
+    let attack;
+
+        for (let index = 0; index < globals.sprites.length; index++) 
+        {
+            const sprite = globals.sprites[index];
+            const type = sprite.id
+            if (type == SpriteID.ATTACK) 
+            {
+                attack = sprite
+            }
+        }
+
     switch(sprite.state)
     {
         case State.UP_WIZARD:
             sprite.physics.vx = 0;
             sprite.physics.vy = -sprite.physics.vLimit;
+            countFrameAttack = 0;
+            attack.xPos = -10;
+            attack.yPos = -10;
             break;
         case State.DOWN_WIZARD:
             sprite.physics.vx = 0;
             sprite.physics.vy = sprite.physics.vLimit;
+            countFrameAttack = 0;
+            attack.xPos = -10;
+            attack.yPos = -10;
             break;
         case State.RIGHT_WIZARD:
             sprite.physics.vx = sprite.physics.vLimit;
             sprite.physics.vy = 0;
+            countFrameAttack = 0;
+            attack.xPos = -10;
+            attack.yPos = -10;
             break;
         case State.LEFT_WIZARD:
             sprite.physics.vx = -sprite.physics.vLimit;
             sprite.physics.vy = 0;
+            countFrameAttack = 0;
+            attack.xPos = -10;
+            attack.yPos = -10;
             break;
+        
+        case State.LEFT_ATTACK_WIZARD:
+                countFrameAttack++;
+                attack.xPos = sprite.xPos - (countFrameAttack*2);
+                attack.yPos = sprite.yPos;
+                
+                sprite.physics.vx = 0;
+                sprite.physics.vy = 0;
+                if (countFrameAttack == 30) {
+                    sprite.state = State.STILL_LEFT
+                    countFrameAttack=0;
+                    attack.xPos = -10;
+                    attack.yPos = -10;
+                }
+                break;
+
+        case State.RIGHT_ATTACK_WIZARD:
+                countFrameAttack++;
+                attack.xPos = sprite.xPos + (countFrameAttack*2);
+                attack.yPos = sprite.yPos;
+
+                sprite.physics.vx = 0;
+                sprite.physics.vy = 0;
+                if (countFrameAttack == 30) 
+                {
+                    sprite.state = State.STILL_RIGHT
+                    countFrameAttack=0;
+                    attack.xPos = -10;
+                    attack.yPos = -10;
+                }
+                break;
+
+        case State.UP_ATTACK_WIZARD:
+                countFrameAttack++;
+                attack.xPos = sprite.xPos;
+                attack.yPos = sprite.yPos - (countFrameAttack*2);
+
+                sprite.physics.vx = 0;
+                sprite.physics.vy = 0;
+                if (countFrameAttack == 15) 
+                {
+                    sprite.state = State.STILL_UP
+                    countFrameAttack=0;
+                    attack.xPos = -10;
+                    attack.yPos = -10;
+                }
+                break;
+
+        case State.DOWN_ATTACK_WIZARD:
+                countFrameAttack++;
+                attack.xPos = sprite.xPos;
+                attack.yPos = sprite.yPos + (countFrameAttack*2);
+
+                sprite.physics.vx = 0;
+                sprite.physics.vy = 0;
+                if (countFrameAttack == 20) 
+                {
+                    sprite.state = State.STILL_DOWN
+                    countFrameAttack = 0;
+                    attack.xPos = -10;
+                    attack.yPos = -10;
+                }
+                break;
         default: 
+    
             sprite.physics.vx = 0;
             sprite.physics.vy = 0;
+            countFrameAttack = 0;
+            attack.xPos = -10;
+            attack.yPos = -10;
             
     }
     
@@ -502,7 +593,7 @@ function updateThrone(sprite)
         { xPos: 69, yPos: 69  }
     ];
 
-    const changeInterval = 2; 
+    const changeInterval = 7; 
     
     elapsedTime += globals.deltaTime;
 
@@ -543,20 +634,20 @@ function updateBat(sprite)
 {
     switch (sprite.state) {
         case State.UP_4:
-            sprite.physics.vx = 0; 
+            sprite.physics.vx = 20; 
             sprite.physics.vy = -sprite.physics.vLimit; 
             break;
         case State.DOWN_4:
-            sprite.physics.vx = 0; 
+            sprite.physics.vx = 20; 
             sprite.physics.vy = sprite.physics.vLimit; 
             break;
         case State.RIGHT_4:
             sprite.physics.vx = sprite.physics.vLimit; 
-            sprite.physics.vy = 0; 
+            sprite.physics.vy = 20; 
             break;
         case State.LEFT_4:
             sprite.physics.vx = -sprite.physics.vLimit; 
-            sprite.physics.vy = 0; 
+            sprite.physics.vy = 20; 
             break;
         default:
             console.error("Error, Game State invalid");
