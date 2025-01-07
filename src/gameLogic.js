@@ -53,15 +53,113 @@ function updateControls()
     updateKeyboardControls();
 }
 
+
+function updateState() 
+{
+    for(let i = 0; i < globals.sprites.length; i++)
+    {
+        const sprite = globals.sprites[i];
+        if (sprite.isCollidingWithPlayer)
+        {
+            /* if (sprite.id === SpriteID.THRONE)
+            {
+                window.location.reload();
+                // alert("You have won the game");
+            } */
+
+            if (sprite.constructor.name === "Enemies")
+            {
+                if (globals.life == 0)
+                {
+                    window.location.reload();
+                    // globals.gameState = Game.OVER;
+                    // alert("You have lost the game");
+                }
+            }
+
+            if (sprite.id === SpriteID.POTION){
+
+            }
+        }
+    }
+}
+
+/**
+ * Function that updates the life of the player
+ * @return {void}
+ */
+
+
+function updateLife()
+{
+    /**
+     * Loop through all the sprites in the game
+     */
+    for (let i = 0; i < globals.sprites.length; i++)
+    {
+        const sprite = globals.sprites[i];
+        /**
+         * Check if the sprite is colliding with the player
+         */
+        if (sprite.isCollidingWithPlayer)
+        {
+            /**
+             * If the sprite is an enemy, decrease the life of the player
+             */
+            if (sprite.constructor.name === "Enemies")
+            {                
+                globals.life--;
+            }
+        }
+    }
+}
 function updatePlayer(sprite)
 {
-    sprite.xPos = 101;
-    sprite.yPos = 5;
-
-    sprite.frames.frameCounter = 1;
-
-    sprite.state = State.DOWN;
+    readKeyboardAndAssignStatePlayer(sprite);
+    
+    switch(sprite.state)
+        {
+            case State.UP:
+                sprite.physics.vx = 0;
+                sprite.physics.vy = -sprite.physics.vLimit;
+                break;
+    
+            case State.DOWN:
+                sprite.physics.vx = 0;
+                sprite.physics.vy = sprite.physics.vLimit;
+                break;
+    
+            case State.RIGHT:
+                sprite.physics.vx = sprite.physics.vLimit;
+                sprite.physics.vy = 0;
+                break;
+    
+            case State.LEFT:
+                sprite.physics.vx = -sprite.physics.vLimit;
+                sprite.physics.vy = 0;
+                break;
+            
+            case State.STILL_UP:
+                sprite.physics.vx = 0;
+                sprite.physics.vy = 0;
+    
+                /* sprite.frames.frameCounter = 0; */
+                break;
+    
+            default:             
+                sprite.physics.vx = 0;
+                sprite.physics.vy = 0;
+                
+        }
+    
+        sprite.xPos += sprite.physics.vx * globals.deltaTime;
+        sprite.yPos += sprite.physics.vy * globals.deltaTime;
+        updateAnimationFrames(sprite);
+    
+        calculateCollisionWithBorders(sprite);
+        adjustPositionAfterCollision(sprite);
 }
+    
 
 function updatePlayerWizard(sprite)
 {
@@ -262,6 +360,14 @@ function updateStages(sprite)
 
 function updateGoblin(sprite)
 {
+    if (sprite.isCollidingWithObstacleOnTheLeft) 
+        {
+            sprite.state = State.RIGHT_2
+        }
+        else if(sprite.isCollidingWithObstacleOnTheRight)
+        {
+            sprite.state = State.LEFT_2
+        }
 
     switch (sprite.state)
     {
