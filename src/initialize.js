@@ -6,6 +6,8 @@ import Frames from "./Frames.js";
 import { Level, level } from "./Level.js";
 import { keydownHandler, keyupHandler } from "./events.js";
 import Physics from "./Physics.js";
+import HitBox from "./HitBox.js";
+
 
 function initHTMLelements()
 {
@@ -35,6 +37,8 @@ function initVars()
         moveAttack:     false,
         merge:          false
     }
+
+    globals.life = 125;
 }
 
 
@@ -49,7 +53,7 @@ function initSprites()
     /* initPlayer(); */
     initPlayerhWizard();
     initJumpGuy();
-  /*   initAttack(); */
+    initAttack();
     initGoblin();
     initDemon();
     initThrone();
@@ -99,9 +103,11 @@ function initGoblin()
 
     const physics = new Physics(40);
 
+    const hitBox = new HitBox(20, 25, 8, 5);
+
     const initTimeToChangeDirection = Math.floor(Math.random() * 3) + 1;
 
-    const goblin = new Enemies(SpriteID.GOBLIN, State.LEFT_2, 55, 50, imageSet, frames, physics, initTimeToChangeDirection);
+    const goblin = new Enemies(SpriteID.GOBLIN, State.LEFT_2, 55, 50, imageSet, frames, physics, initTimeToChangeDirection, hitBox);
     globals.sprites.push(goblin);
 }
 function initPlayer()
@@ -110,7 +116,11 @@ function initPlayer()
     const imageSet = new ImageSet(3, 289, 41, 30, 41, 41, 0, 0);
     const frames = new Frames(10);
 
-    const player = new Sprite(SpriteID.PLAYER, State.UP, 3, 289, imageSet, frames);
+    const physics = new Physics(40, 40, 0.98);
+
+    const hitBox = new HitBox(10, 13, 6, 6);   
+
+    const player = new Sprite(SpriteID.PLAYER, State.UP, 3, 289, imageSet, frames, physics, hitBox);
 
     globals.sprites.push(player);
 }
@@ -122,7 +132,9 @@ function initPlayerhWizard()
 
     const physics = new Physics(40, 40, 0.98);
 
-    const playerWizard = new Sprite(SpriteID.PLAYER_WIZARD, State.STILL_RIGHT, 100, 10, imageSet, frames, physics);
+    const hitBox = new HitBox(10, 12, 6, 6);
+
+    const playerWizard = new Sprite(SpriteID.PLAYER_WIZARD, State.STILL_RIGHT, 100, 10, imageSet, frames, physics, hitBox);
     
     globals.sprites.push(playerWizard);
 }
@@ -140,15 +152,16 @@ function initJumpGuy()
     globals.sprites.push(jumpGuy);
 }
 
-/* function initAttack()
+function initAttack()
 {
     const imageSet = new ImageSet(289, 250, 19, 22, 17, 19, 0, 0);
     const frames =  new Frames(3);
+    const hitBox = new HitBox(6, 6, 3, 3);
 
-    const attack = new Sprite(SpriteID.ATTACK, State.ACTIVE, 100, 10, imageSet, frames);
+    const attack = new Sprite(SpriteID.ATTACK, State.ACTIVE, 100, 10, imageSet, frames, null, hitBox);
 
     globals.sprites.push(attack);
-} */
+}
 
 function initDemon()
 {
@@ -157,9 +170,11 @@ function initDemon()
 
     const physics = new Physics(40);
 
+    const hitBox = new HitBox(37, 34, 0, 5);
+
     const initTimeToChangeDirection = Math.floor(Math.random() * 2) + 1;
 
-    const demon = new Enemies(SpriteID.DEMON, State.DOWN_3, 305, 75, imageSet, frames, physics,initTimeToChangeDirection);
+    const demon = new Enemies(SpriteID.DEMON, State.DOWN_3, 305, 75, imageSet, frames, physics,initTimeToChangeDirection, hitBox);
 
     globals.sprites.push(demon);
 }
@@ -170,7 +185,9 @@ function initPotion()
 
     const frames = new Frames(5, 5);
 
-    const potion = new Sprite(SpriteID.POTION, State.ACTIVATED_SKILL, 210, 58, imageSet, frames);
+    const hitBox = new HitBox(18, 20, 0, 0);
+
+    const potion = new Sprite(SpriteID.POTION, State.ACTIVATED_SKILL, 210, 58, imageSet, frames, null, hitBox);
 
     globals.sprites.push(potion);
 }
@@ -181,7 +198,9 @@ function initThrone()
 
     const frames = new Frames(1);
 
-    const throne = new Sprite(SpriteID.THRONE, State.BE, 64, 69, imageSet, frames);
+    const hitBox = new HitBox(33, 33, 0, 0);
+
+    const throne = new Sprite(SpriteID.THRONE, State.BE, 64, 69, imageSet, frames, null, hitBox);
 
     globals.sprites.push(throne);
 }
@@ -193,7 +212,11 @@ function initBat()
 
     const physics = new Physics(40);
 
-    const bat = new Sprite(SpriteID.BAT, State.DOWN_4, 64, 64, imageSet, frames, physics);
+    const initTimeToChangeDirection = Math.floor(Math.random() * 2) + 1;
+
+    const hitBox = new HitBox(20, 20, 0, 12);
+
+    const bat = new Sprite(SpriteID.BAT, State.DOWN_4, 64, 64, imageSet, frames, physics, initTimeToChangeDirection, hitBox);
 
     globals.sprites.push(bat);
 }
