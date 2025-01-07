@@ -406,7 +406,7 @@ function onGroupJumpGuy(sprite)
                 
                 updateAnimationFrames(sprite)
             }
-            if (sprite.xPos > globals.canvas.width - 55 - sprite.imageSet.xSize)
+            if (sprite.xPos > globals.canvas.width - 40 - sprite.imageSet.xSize)
             {
                 
                 sprite.physics.isOnGroup = true;
@@ -698,20 +698,41 @@ function swapDirectionBat(sprite)
 
 function updatePotion(sprite)
 {
+    const changeInterval = 30; // Change the position every 30 seconds
+    // Increment the frames change counter by the elapsed delta time
     sprite.frames.framesChangeCounter += globals.deltaTime;
-    
-     if (sprite.frames.framesChangeCounter >= sprite.frames.speed) 
+
+    // Check if the potion is colliding with the player
+    if (sprite.isCollidingWithPlayer) 
     {
-        sprite.frames.framesChangeCounter = 0; 
-        sprite.frames.frameCounter++;
-                
-    if (sprite.frames.frameCounter >= sprite.frames.framesPerState) 
+        // Increment the score
+        if (sprite.frames.frameCounter === 0)
         {
-            sprite.frames.frameCounter = 0; 
+            globals.score += 100;
         }
-        
+
+        // Set the player's life to 5
+        if (sprite.frames.frameCounter === 1)
+        {
+            if (globals.life + 50 <= 125) {
+                globals.life += 50;
+            }else{
+                globals.life = 125
+            }
+        }
+
+        // Set the player's life to 5
+        if (sprite.frames.frameCounter === 2)
+        {
+            if (globals.life > 5)
+            {
+                globals.life = 5;
+            }
+        }
+
+        // Move the potion off the screen
+        sprite.xPos = -20;
     }
-        
 
 }
 
