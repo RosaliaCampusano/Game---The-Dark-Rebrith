@@ -413,7 +413,7 @@ function updateDemon(sprite)
         {
             sprite.state = State.UP_3
         }
-        
+
     switch (sprite.state)
     {
         case State.DOWN_3:
@@ -491,15 +491,15 @@ function updateThrone(sprite)
 {
     const thronePositions = [
         { xPos: 75, yPos: 180 },
-        { xPos: 15, yPos: 15 },
-        { xPos: 140, yPos: 180 },
+        { xPos: 20, yPos: 20  },
+        { xPos: 150, yPos: 170},
         { xPos: 100, yPos: 50 },
-        { xPos: 205, yPos: 15 },
-        { xPos: 230, yPos: 110 },
-        { xPos: 310, yPos: 100 },
-        { xPos: 250, yPos: 5 },
-        { xPos: 250, yPos: 75 },
-        { xPos: 69, yPos: 69 }
+        { xPos: 205, yPos: 20 },
+        { xPos: 230, yPos: 110},
+        { xPos: 310, yPos: 100},
+        { xPos: 230, yPos: 20 },
+        { xPos: 250, yPos: 120},
+        { xPos: 69, yPos: 69  }
     ];
 
     const changeInterval = 2; 
