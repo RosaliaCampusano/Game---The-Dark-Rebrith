@@ -109,8 +109,22 @@ function drawControls()
                 xPos, yPos,
                 sprite.imageSet.xSize * 0.6, sprite.imageSet.ySize * 0.6
             );
+
+            drawHitBox(sprite);
         }
-    }
+}
+
+function drawHitBox(sprite)
+{
+   
+    const x1 = Math.floor(sprite.xPos) + Math.floor(sprite.hitBox.xOffset);
+    const y1 = Math.floor(sprite.yPos) + Math.floor(sprite.hitBox.yOffset);
+    const w1 = sprite.hitBox.xSize;
+    const h1 = sprite.hitBox.ySize;
+
+    globals.ctx.strokeStyle = "red" /* "transparent" */;
+    globals.ctx.strokeRect(x1, y1, w1, h1);
+}
 
 
 function renderMap()
