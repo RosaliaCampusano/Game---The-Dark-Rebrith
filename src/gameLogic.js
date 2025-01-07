@@ -734,13 +734,39 @@ function updatePotion(sprite)
         sprite.xPos = -20;
     }
 
+      // Check if the potion has been off the screen for longer than the change interval
+      if (sprite.xPos === -20) {
+        elapsedTimePotion += globals.deltaTime;
+    }
+
+    // If the potion has been off the screen for longer than the change interval, move it to the bottom of the screen
+    if (elapsedTimePotion >= changeInterval) {
+        sprite.xPos = 210;
+        elapsedTimePotion = 0;
+    }
+
+    // Check if it's time to advance the animation frame
+    if (sprite.frames.framesChangeCounter >= sprite.frames.speed) 
+    {
+        // Reset the frames change counter
+        sprite.frames.framesChangeCounter = 0;
+        
+        // Move to the next frame
+        sprite.frames.frameCounter++;
+
+        // Reset frame counter if it exceeds the number of frames per state
+        if (sprite.frames.frameCounter >= sprite.frames.framesPerState) {
+            sprite.frames.frameCounter = 0;
+        }
+    }
+
 }
 
 function updateHealthBar(sprite)
 {
     sprite.xPos = 152;
     sprite.yPos = 76;
-    sprite.imageSet.xSize = 80;
+    sprite.imageSet.xSize = globals.life;
     
     sprite.imageSet.xSize *= 0.5;
 
