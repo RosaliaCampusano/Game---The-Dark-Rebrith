@@ -159,7 +159,7 @@ function renderMap()
 
 function renderHUD()
 {
-    const score = 1500;
+    const score = globals.score;
     const highScore = 130000;
 
     //Draw score

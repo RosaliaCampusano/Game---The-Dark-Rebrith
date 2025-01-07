@@ -44,4 +44,8 @@ export default
     level: {},
 
     action: {},
+
+    life: 0,
+
+    score: 0
 }
