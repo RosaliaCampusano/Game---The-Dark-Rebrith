@@ -128,6 +128,18 @@ function drawHitBox(sprite)
     globals.ctx.strokeRect(x1, y1, w1, h1);
 }
 
+function moveCamera()
+{
+    const xTranslation = globals.camera.x;
+    const yTranslation = globals.camera.y;
+
+    globals.ctx.translate(xTranslation, yTranslation);
+}
+
+function restoreCamera()
+{
+    globals.ctx.setTransform(1, 0, 0, 1, 0, 0);
+}
 
 function renderMap()
 {
