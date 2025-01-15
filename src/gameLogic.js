@@ -57,8 +57,12 @@ function updateStory()
 
 function playGame()
 {
+    updateHighScore();
     updateHUD();
     updateSprites();
+    updateCamera();
+    detectCollisions();
+
 }
 
 function updateControls()
