@@ -34,6 +34,17 @@ export default function update()
     }
 }
 
+function updateHighScore()
+{
+    globals.highScore = localStorage.getItem("highScore");
+
+    if(globals.score > globals.highScore)
+    {
+        localStorage.setItem("highScore", globals.score);
+    }
+}
+
+
 function updateGameOver()
 {
     updateScreenGameOver();
