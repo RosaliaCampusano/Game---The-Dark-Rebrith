@@ -46,6 +46,8 @@ function drawGame()
     globals.ctxHUD.clearRect(0, 0, globals.canvasHUD.width, globals.canvasHUD.height);
     renderMap();
 
+    globals.ctx.scale(globals.camera.zoom, globals.camera.zoom);
+    moveCamera();
     renderHUD();
     renderSprites();
 
