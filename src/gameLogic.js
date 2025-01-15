@@ -1,5 +1,7 @@
 import globals from "./globals.js";
 import {Game, State, SpriteID, GRAVITY} from "./constants.js";
+import detectCollisions from "./collisiona.js";
+import { updateCamera } from "./Camera.js";
 
 
 
