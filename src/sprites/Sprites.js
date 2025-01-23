@@ -71,31 +71,18 @@ export default class Sprite
     {
         let isCollision = false;
     
-        // Check if the sprite is colliding with the bottom border of the canvas
         if (this.yPos + this.imageSet.ySize > globals.canvas.height) 
         {
             isCollision = true;
         }
-        // Check if the sprite is colliding with the top border of the canvas
         else if (this.yPos < 0) 
         {
             isCollision = true;
         }
-        /* if (this.xPos + this.imageSet.xSize > globals.canvas.width + 16) {
-            // Teleport the sprite to the left side
-            this.xPos = -this.imageSet.xSize;
-        } else if (this.xPos < -this.imageSet.xSize) {
-            // Teleport the sprite to the right side
-            this.xPos = globals.canvas.width + 16;
-        } */
-    
-        // return isCollision;
-        // Check if the sprite is colliding with the right border of the canvas
         else if (this.xPos + this.imageSet.xSize > globals.canvas.width * 2) 
         {
             isCollision = true;
         }
-        // Check if the sprite is colliding with the left border of the canvas
         else if (this.xPos < 0) 
         {
             isCollision = true;
@@ -107,25 +94,18 @@ export default class Sprite
 
     adjustPositionAfterCollision() 
     {
-        // Check if the sprite is out of bounds horizontally
         if (this.xPos < 0) 
         {
-            // Move the sprite to the left edge of the canvas
             this.xPos = 0;
         } else if (this.xPos + this.imageSet.xSize > globals.canvas.width * 2) 
         {
-            // Move the sprite to the right edge of the canvas
             this.xPos = globals.canvas.width * 2 - this.imageSet.xSize - 1;
         }
-    
-        // Check if the this is out of bounds vertically
         if (this.yPos < 0) 
         {
-            // Move the this to the top edge of the canvas
             this.yPos = 0;
         } else if (this.yPos > globals.canvas.height - this.imageSet.ySize) 
         {
-            // Move the this to the bottom edge of the canvas
             this.yPos = globals.canvas.height - this.imageSet.ySize - 1;
         }
     }
@@ -157,17 +137,11 @@ export default class Sprite
     
         let xPos;
         let yPos;
-        // left-top
         let isCollidingOnPos1;
-        // right-top
         let isCollidingOnPos2;
-        // left-middle
         let isCollidingOnPos3;
-        // right-middle
         let isCollidingOnPos4;
-        // left-bottom
         let isCollidingOnPos5;
-        // right-bottom
         let isCollidingOnPos6;
     
         const brickSize = globals.level.imageSet.xGridSize;
@@ -182,9 +156,8 @@ export default class Sprite
         let overlapX;
         let overlapY;
     
-        if (this.physics.vx > 0) // Movement to the right
+        if (this.physics.vx > 0) 
         {
-            // Check for collision at the right-top corner
             xPos = this.xPos + this.hitBox.xOffset + this.hitBox.xSize;
             yPos = this.yPos + this.hitBox.yOffset;
     
@@ -193,7 +166,6 @@ export default class Sprite
                 isCollidingOnPos2 = this.isCollidingWithObstacleAt(xPos, yPos, obstaclesIds[i]);
                 if (isCollidingOnPos2)
                 {
-                    // Calculate overlap and adjust position
                     overlapX = Math.floor(xPos) % brickSize + 1;
         
                     this.xPos -= overlapX;
@@ -211,7 +183,6 @@ export default class Sprite
                 isCollidingOnPos4 = this.isCollidingWithObstacleAt(xPos, yPos, obstaclesIds[i]);
                 if (isCollidingOnPos4)
                 {
-                    // Calculate overlap and adjust position
                     overlapX = Math.floor(xPos) % brickSize + 1;
         
                     this.xPos -= overlapX;
@@ -229,7 +200,6 @@ export default class Sprite
                 isCollidingOnPos6 = this.isCollidingWithObstacleAt(xPos, yPos, obstaclesIds[i]);
                 if (isCollidingOnPos6)
                 {
-                    // Calculate overlap and adjust position
                     overlapX = Math.floor(xPos) % brickSize + 1;
         
                     this.xPos -= overlapX;
@@ -239,7 +209,7 @@ export default class Sprite
             }
         }
     
-        if (this.physics.vx < 0) // Movement to the left
+        if (this.physics.vx < 0)
         {
             // Check for collision on the left-top corner
             xPos = this.xPos + this.hitBox.xOffset - 1;
