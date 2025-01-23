@@ -330,7 +330,7 @@ function renderMainMenu()
     if (!renderMainMenu.eventListenerAdded) 
     {
         document.addEventListener("keydown", handlerKeyDownMainMenu);
-        renderMainMenu.eventListenerAdded = true;
+        renderMainMenu.eventListenerAdded = false;
     }
 
     for (let j = 0; j < globals.spriteMenu.length; j++) 
@@ -348,7 +348,7 @@ function renderMainMenu()
             sprite.imageSet.xSize, sprite.imageSet.ySize,
             xPos, yPos,
             sprite.imageSet.xSize, sprite.imageSet.ySize
-        );
+        );  
     }
 
     function handleMenuSelection(selectedIndex) {
