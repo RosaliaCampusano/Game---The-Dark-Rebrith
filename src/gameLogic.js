@@ -1,9 +1,8 @@
 import globals from "./globals.js";
-import {Game, State, SpriteID, GRAVITY} from "./constants.js";
-import detectCollisions from "./collisiona.js";
-import { updateCamera } from "./Camera.js";
-
-
+import { Game, State, SpriteID, ParticleState } from "./constants.js";
+import detectCollisions from "./collisions.js";
+import {updateCamera} from "./Camera.js";
+import Time from "./Time.js";
 
 export default function update()
 {
@@ -11,6 +10,7 @@ export default function update()
     {
         case Game.LOADING:
             console.log("Loading assets...")
+            updateLoad();
             break;
         
         case Game.PLAYING:
@@ -28,6 +28,9 @@ export default function update()
         case Game.CONTROLS:
             updateControls();
             break;
+        case Game.HIGHSCORE:
+            // updateHighScore();
+            break;
         default:
             console.error("Error: Game State invalid");
 
@@ -44,6 +47,10 @@ function updateHighScore()
     }
 }
 
+function updateUpdateTime()
+{
+    Time.update();
+}
 
 function updateGameOver()
 {
@@ -58,55 +65,34 @@ function updateStory()
 function playGame()
 {
     updateHighScore();
+    updateUpdateTime();
     updateHUD();
     updateSprites();
     updateCamera();
+    updatePaticles();
     detectCollisions();
+    updateSaturate()
+}
 
+function updateSaturate() 
+{
+    //Not life, just time
+    globals.saturate = (globals.maxLife + globals.life) / globals.maxLife;
+    globals.saturate--;
+}
+
+function updatePaticles()
+{
+    for (let i = 0; i < globals.particles.length; i++)
+    {
+        const particle = globals.particles[i];
+        particle.update()
+    }
 }
 
 function updateControls()
 {
     updateKeyboardControls();
-}
-
-
-function updateAnimationFrames(sprite)
-{
-    switch(sprite.state)
-    {
-        case State.STILL_UP:
-        case State.STILL_LEFT:
-        case State.STILL_DOWN:
-        case State.STILL_RIGHT:
-            sprite.frames.frameCounter = 0;
-            sprite.frames.framesChangeCounter = 0;
-            break;
-        default:
-            sprite.frames.framesChangeCounter++;
-            
-        if (sprite.frames.framesChangeCounter === sprite.frames.speed)
-        {
-            sprite.frames.frameCounter++;
-            sprite.frames.framesChangeCounter = 0;
-        }
-
-        if (sprite.frames.frameCounter === sprite.frames.framesPerState)
-        {
-            sprite.frames.frameCounter = 0;
-        }
-    }
-} 
-
-
-function updateThroneHUB(sprite)
-{
-    sprite.xPos = 220;
-    sprite.yPos = 21;
-
-    sprite.frames.frameCounter = 2;
-
-    sprite.state = State.MADNESS_0;
 }
 
 function updateStages(sprite)
@@ -119,7 +105,6 @@ function updateStages(sprite)
     sprite.state = State.SUN;
 
 }
-
 
 function updateHealthBar(sprite)
 {
@@ -142,7 +127,6 @@ function updateEmptybar(sprite)
     sprite.state = State.BE;
 }
 
-
 function updateSprite(sprite)
 {
     const type = sprite.id;
@@ -157,45 +141,43 @@ function updateSprite(sprite)
             break;
 
         case SpriteID.THRONEHUB:
-            updateThroneHUB(sprite);
+            // updateThroneHUB(sprite);
+            sprite.update()
             break;
 
         case SpriteID.PLAYER:
-            updatePlayer(sprite);
+            sprite.update();
             break;
 
         case SpriteID.GOBLIN:
-            updateGoblin(sprite);
+            sprite.update();
             break;
 
         case SpriteID.DEMON:
-            updateDemon(sprite);
+            sprite.update();
             break;
 
         case SpriteID.THRONE:
-            updateThrone(sprite);
+            sprite.update();
             break;
         
         case SpriteID.POTION:
-            updatePotion(sprite);
+            sprite.update();
             break;
         case SpriteID.SUN:
             updateStages(sprite);
             break;
 
         case SpriteID.BAT:
-            updateBat(sprite);
-            break;
-        
-        case SpriteID.PLAYER_WIZARD:
-            updatePlayerWizard(sprite);
+            sprite.update()
             break;
 
-        case SpriteID.ATTACK:
-            updateAttack(sprite); 
+        case SpriteID.PLAYER_WIZARD:
+            sprite.update();
             break;
+
         case SpriteID.JUMPGUY:
-            updateJumpGuy(sprite);
+            sprite.update();
             break;
         default:
 
@@ -228,6 +210,7 @@ function updateMainMenu()
 
 function updateSpriteMenu(sprite)
 {
+    
     const type = sprite.id;
     switch(type)
     {
@@ -237,42 +220,181 @@ function updateSpriteMenu(sprite)
         case SpriteID.OLD_JOSEPH2:
             updateJoseph2(sprite);
             break;
-        case SpriteID.ACTIVE:
-            updateActive(sprite);
-            break;
         default:
 
         break;
     }
 } 
 
-function updateJoseph1(sprite)
+function updateSpriteLoad(sprite)
 {
-    sprite.xPos = 55;
-    sprite.yPos = 206;
+    const type = sprite.id;
+    switch(type)
+    {
+        case SpriteID.LOAD_JOSEPH:
+            updateLoadJoseph(sprite);
+            break;
 
-    sprite.frames.frameCounter = 0;
-
-    sprite.state = State.RIGHT_JOSEPH;
+        default:
+            break;
+    }
 }
+
+function updateLoad()
+{
+    for (let i = 0; i < globals.spriteLoading.length; i++)
+    {
+        const sprite = globals.spriteLoading[i]
+        updateSpriteLoad(sprite);
+    }
+}
+
+function updateLoadJoseph(sprite)
+{
+    const state = sprite.state;
+    switch(state)
+    {
+        case State.LEFT_JOSEPH:
+            sprite.physics.vx = -sprite.physics.vLimit;
+            break;
+        
+
+        default:
+            console.error("Error, Game State invalid");
+    }
+
+    sprite.xPos += sprite.physics.vx * globals.deltaTime;
+
+    updateAnimationFrames(sprite);
+    
+}
+
+let fallTimer = 0;
+
+function  detectCollisionsBetweenSpriteAndSprite(sprite)
+{   
+    const rightJoseph = globals.spriteMenu[0];
+    const x1 = sprite.xPos + sprite.hitBox.xOffset;
+    const w1 = sprite.hitBox.xSize;
+    const x2 = rightJoseph.xPos + rightJoseph.hitBox.xOffset;
+    const w2 = rightJoseph.hitBox.xSize;
+
+
+    const isOverLap = rectIntersect(x1, w1, x2, w2);
+
+    if (isOverLap)
+    {
+        rightJoseph.state = State.FALL_RIGHT_JOSEPH;
+        sprite.state = State.FALL_LEFT_JOSEPH;
+
+        sprite.frames.frameCounter = 0;
+        rightJoseph.frames.frameCounter = 0;
+        fallTimer = 1;
+    }
+    return isOverLap;
+
+}
+
+function updateFallTimer() 
+{
+    if (fallTimer > 0) {
+        fallTimer -= globals.deltaTime; 
+        if (fallTimer <= 0) {
+            const rightJoseph = globals.spriteMenu[0];
+            const leftJoseph = globals.spriteMenu[1]; 
+            leftJoseph.state = State.LEFT_JOSEPH;
+            rightJoseph.state = State.RIGHT_JOSEPH;
+            rightJoseph.frames.frameCounter = 0;
+            leftJoseph.frames.frameCounter = 0;
+        }
+
+    }
+
+}
+function  rectIntersect(x1, w1, x2, w2,)
+{
+    let isOverlap;
+    
+    // check x and y for overlap
+    if(x2 > w1 + x1 || x1 > w2 + x2)
+    {
+        // if any of the conditions are true, it means the rectangles don't overlap
+        isOverlap = false;
+    }
+    else 
+        // if none of the conditions are true, it means the rectangles do overlap
+        isOverlap = true;
+
+    return isOverlap;
+
+    
+}
+
+
+    function updateJoseph1(sprite)
+    {
+        const state = sprite.state;
+        switch(state)
+        {
+            case State.RIGHT_JOSEPH:
+                sprite.physics.vx = sprite.physics.vLimit;
+                break;
+    
+            case State.FALL_RIGHT_JOSEPH:
+                sprite.physics.vx = 0;
+                
+                break;
+    
+                default:
+                console.error("Error, Game State invalid");
+        }
+    
+    
+        sprite.xPos += sprite.physics.vx * globals.deltaTime;
+    
+        if(Math.abs(sprite.xPos - 195) < 1) {
+            const isCollision = detectCollisionsBetweenSpriteAndSprite(sprite);
+            if(isCollision)
+            {
+            sprite.xPos = 40;
+            sprite.state = State.RIGHT_JOSEPH;
+            console.log("entra");
+            }
+        }
+        updateAnimationFrames(sprite);
+    
+    
+}
+
 
 function updateJoseph2(sprite)
 {
-    sprite.xPos = 300;
-    sprite.yPos = 208;
+    const state = sprite.state;
+    switch(state)
+    {
+        case State.LEFT_JOSEPH:
+            sprite.physics.vx = -sprite.physics.vLimit;
+            break;
+        
+        case State.FALL_LEFT_JOSEPH:
+            sprite.physics.vx = 0;
+            break;
 
-    sprite.frames.frameCounter = 2;
+        default:
+            console.error("Error, Game State invalid");
+    }
 
-    sprite.state = State.LEFT_JOSEPH;
-}
-
-function updateActive(sprite)
-{
-    sprite.xPos = 135;
-    sprite.yPos = 119;
-
-    sprite.frames.frameCounter = 0;
-
+    sprite.xPos += sprite.physics.vx * globals.deltaTime;
+    
+    updateAnimationFrames(sprite);
+    const isCollision = detectCollisionsBetweenSpriteAndSprite(sprite);
+    if(isCollision)
+    {
+        console.log("entra por favor");
+        sprite.xPos = 340;
+        sprite.state = State.LEFT_JOSEPH;
+    }
+    
 }
 
 function updateJosephs()
@@ -281,8 +403,10 @@ function updateJosephs()
     {
         const sprite = globals.spriteMenu[i];
         updateSpriteMenu(sprite);
+        updateFallTimer();
     }
 }
+
 
 function updateRIP(sprite)
 {
@@ -297,7 +421,6 @@ function updateBackgroundStory(sprite)
     sprite.yPos = 0;
 
 }
-
 
 function updateSpriteGameOver(sprite)
 {
@@ -333,87 +456,38 @@ function updateScreenGameOver()
 function updateTheStory()
 {
     for ( let i = 0; i < globals.spriteStory.length; i++)
-        {
-            const sprite = globals.spriteStory[i];
-            updateSpriteStory(sprite);
-        }
+    {
+        const sprite = globals.spriteStory[i];
+        updateSpriteStory(sprite);
+    }
 } 
 
-function updatekeyboard(sprite)
+function updateAnimationFrames(sprite)
 {
-    const type = sprite.id;
-    switch(type)
-    {
-        case SpriteID.KEYBOARD_A:
-            updateA(sprite);
-            break;
-        case SpriteID.KEYBOARD_D:
-            updateD(sprite);
-            break;
-        case SpriteID.KEYBOARD_L:
-            updateL(sprite);
-            break;
-        case SpriteID.KEYBOARD_M:
-            updateM(sprite);
-            break;
-        case SpriteID.KEYBOARD_S:
-            updateS(sprite);
-            break;
-        case SpriteID.KEYBOARD_W:
-            updateW(sprite);
-        default:
+            // Reset the animation frames to the first frame
+            /* sprite.frames.frameCounter; */
+            sprite.frames.framesChangeCounter++;
+            
+            // If the counter has reached the speed, increment the frame counter and reset the counter
+            if (sprite.frames.framesChangeCounter === sprite.frames.speed)
+            {
+                sprite.frames.frameCounter++;
+                sprite.frames.framesChangeCounter = 0;
+            }
 
-        break;
-    }
+            // If the frame counter has reached the number of frames per state, reset it to 0
+            if (sprite.frames.frameCounter === sprite.frames.framesPerState)
+            {
+                sprite.frames.frameCounter = 0;
+            }
 }
 
-function updateA(sprite)
-{
-    sprite.xPos = 33;
-    sprite.yPos = 135;
-
-}
-
-function updateS(sprite)
-{
-    sprite.xPos = 33;
-    sprite.yPos = 167;
-    
-}
-
-function updateD(sprite)
-{
-    sprite.xPos = 33;
-    sprite.yPos = 197;
-    
-}
-
-function updateW(sprite)
-{
-    sprite.xPos = 33;
-    sprite.yPos = 107;
-    
-}
-
-function updateL(sprite)
-{
-    sprite.xPos = 255;
-    sprite.yPos = 105;
-    
-}
-
-function updateM(sprite)
-{
-    sprite.xPos = 255;
-    sprite.yPos = 190;
-    
-}
 
 function updateKeyboardControls()
 {
     for ( let i = 0; i < globals.spriteControls.length; i++)
-        {
-            const sprite = globals.spriteControls[i];
-            updatekeyboard(sprite);
-        }
-} 
+    {
+        const sprite = globals.spriteControls[i];
+        updateAnimationFrames(sprite);
+    }
+}
