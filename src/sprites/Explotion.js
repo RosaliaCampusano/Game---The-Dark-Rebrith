@@ -46,7 +46,7 @@ export class BlueExplotion extends Explotion
     {
         super(
             SpriteID.BLUE_EXPLOTION, 
-            new ImageSet(15, 956, 82, 85, 82, 85, 0, 0), 
+            new ImageSet(0, 940, 82, 85, 82, 85, 0, 0), 
             new Frames(8)
         )
     }
@@ -58,7 +58,7 @@ export class RedExplotion extends Explotion
     {
         super(
             SpriteID.RED_EXPLOTION, 
-            new ImageSet(5, 1043, 82, 86, 82, 86, 0, 0), 
+            new ImageSet(4, 1025, 82, 86, 82, 86, 0, 0), 
             new Frames(9, 15)
         )
     }
