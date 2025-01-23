@@ -30,14 +30,17 @@ export class ThroneHUD extends Sprite
     }
 
     updateAnimationFrames(){
+        // Increment the animation frame counter
         this.frames.framesChangeCounter++;
-    
+                
+        // If the counter has reached the speed, increment the frame counter and reset the counter
         if (this.frames.framesChangeCounter === this.frames.speed)
         {
             this.frames.frameCounter++;
             this.frames.framesChangeCounter = 0;
         }
 
+        // If the frame counter has reached the number of frames per state, reset it to 0
         if (this.frames.frameCounter === this.frames.framesPerState)
         {
             this.frames.frameCounter = 0;
