@@ -5,7 +5,7 @@ class Time
 {
     internalTimer = 0;
     maxInternalTimer = 1;
-    defaultTime = 1000;
+    defaultTime = 180;
     time;
 
     constructor()
