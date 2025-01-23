@@ -12,6 +12,8 @@ export default function detectCollisions()
 
     const player = globals.activedPlayer;
 
+    // Loop through all the sprites in the game, starting from the second
+    // one (index 1), since the first one is the player
     for (let i = 1; i < globals.sprites.length; i++)
     {
         const sprite = globals.sprites[i];
@@ -22,8 +24,11 @@ export default function detectCollisions()
             sprite.detectCollisionsBetweenSpriteAndSprite(otherSprite)
         }
 
+        // Check for collisions between the sprite and the player
         sprite.detectCollisionsBetweenPlayerAndSprite(player);
 
+        // Check for collisions between the sprite and the map obstacles if
+        // the sprite is an enemy and is not a bat
         if (sprite.__proto__.__proto__.constructor.name === "Enemies" && sprite.id !== SpriteID.BAT) {
             sprite.detectCollisionBetweenSpriteAndMapObstacles(obstaclesIds);
         }
@@ -34,6 +39,7 @@ export default function detectCollisions()
         }
     }
 
+    // Check for collisions between the player and the map obstacles
     player.detectCollisionBetweenSpriteAndMapObstacles(obstaclesIds);
 }
 
