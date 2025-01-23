@@ -38,9 +38,9 @@ export class Potion extends Sprite
     
             if (this.frames.frameCounter === State.POTION_RED)
             {
-                if (globals.life > 5)
+                if (globals.life > 20)
                 {
-                    globals.life = 5;
+                    globals.life = 20;
                 }
             }
     
