@@ -271,112 +271,65 @@ function updateLoadJoseph(sprite)
 
 let fallTimer = 0;
 
-function  detectCollisionsBetweenSpriteAndSprite(sprite)
-{   
+function detectCollisionsBetweenSpriteAndSprite(sprite) {
+
     const rightJoseph = globals.spriteMenu[0];
     const x1 = sprite.xPos + sprite.hitBox.xOffset;
-    const w1 = sprite.hitBox.xSize;
-    const x2 = rightJoseph.xPos + rightJoseph.hitBox.xOffset;
     const w2 = rightJoseph.hitBox.xSize;
+    const x2 = rightJoseph.xPos + rightJoseph.hitBox.xOffset + w2;
 
+    const isOverLap = rectIntersect(x1, x2);
 
-    const isOverLap = rectIntersect(x1, w1, x2, w2);
-
-    if (isOverLap)
+    if (isOverLap && rightJoseph.state !== State.FALL_RIGHT_JOSEPH) 
     {
         rightJoseph.state = State.FALL_RIGHT_JOSEPH;
         sprite.state = State.FALL_LEFT_JOSEPH;
-
-        sprite.frames.frameCounter = 0;
-        rightJoseph.frames.frameCounter = 0;
-        fallTimer = 1;
+        fallTimer = 1; 
     }
     return isOverLap;
-
 }
 
-function updateFallTimer() 
-{
+function updateFallTimer() {
     if (fallTimer > 0) {
         fallTimer -= globals.deltaTime; 
-        if (fallTimer <= 0) {
+    
+        if (fallTimer <= 0) 
+        {
             const rightJoseph = globals.spriteMenu[0];
-            const leftJoseph = globals.spriteMenu[1]; 
+            const leftJoseph = globals.spriteMenu[1];
             leftJoseph.state = State.LEFT_JOSEPH;
             rightJoseph.state = State.RIGHT_JOSEPH;
             rightJoseph.frames.frameCounter = 0;
             leftJoseph.frames.frameCounter = 0;
+            rightJoseph.xPos = 40;
+            leftJoseph.xPos = 340;
         }
-
     }
-
 }
-function  rectIntersect(x1, w1, x2, w2,)
-{
+
+function rectIntersect(x1, x2) {
     let isOverlap;
     
-    // check x and y for overlap
-    if(x2 > w1 + x1 || x1 > w2 + x2)
+    if((x2 > x1) || (x1 < x2))
     {
-        // if any of the conditions are true, it means the rectangles don't overlap
-        isOverlap = false;
+        isOverlap = true;
     }
     else 
-        // if none of the conditions are true, it means the rectangles do overlap
-        isOverlap = true;
-
+    {
+        isOverlap = false;
+    }
     return isOverlap;
-
-    
 }
 
-
-    function updateJoseph1(sprite)
-    {
-        const state = sprite.state;
-        switch(state)
-        {
-            case State.RIGHT_JOSEPH:
-                sprite.physics.vx = sprite.physics.vLimit;
-                break;
-    
-            case State.FALL_RIGHT_JOSEPH:
-                sprite.physics.vx = 0;
-                
-                break;
-    
-                default:
-                console.error("Error, Game State invalid");
-        }
-    
-    
-        sprite.xPos += sprite.physics.vx * globals.deltaTime;
-    
-        if(Math.abs(sprite.xPos - 195) < 1) {
-            const isCollision = detectCollisionsBetweenSpriteAndSprite(sprite);
-            if(isCollision)
-            {
-            sprite.xPos = 40;
-            sprite.state = State.RIGHT_JOSEPH;
-            console.log("entra");
-            }
-        }
-        updateAnimationFrames(sprite);
-    
-    
-}
-
-
-function updateJoseph2(sprite)
+function updateJoseph1(sprite) 
 {
-    const state = sprite.state;
-    switch(state)
+    switch (sprite.state) 
     {
-        case State.LEFT_JOSEPH:
-            sprite.physics.vx = -sprite.physics.vLimit;
+        case State.RIGHT_JOSEPH:
+            sprite.physics.vx = sprite.physics.vLimit;
             break;
-        
-        case State.FALL_LEFT_JOSEPH:
+
+        case State.FALL_RIGHT_JOSEPH:
             sprite.physics.vx = 0;
             break;
 
@@ -387,26 +340,39 @@ function updateJoseph2(sprite)
     sprite.xPos += sprite.physics.vx * globals.deltaTime;
     
     updateAnimationFrames(sprite);
-    const isCollision = detectCollisionsBetweenSpriteAndSprite(sprite);
-    if(isCollision)
-    {
-        console.log("entra por favor");
-        sprite.xPos = 340;
-        sprite.state = State.LEFT_JOSEPH;
-    }
-    
+
 }
 
-function updateJosephs()
+function updateJoseph2(sprite) 
 {
-    for ( let i = 0; i < globals.spriteMenu.length; i++)
+    switch (sprite.state) 
     {
+        case State.LEFT_JOSEPH:
+            sprite.physics.vx = -sprite.physics.vLimit;
+            break;
+
+        case State.FALL_LEFT_JOSEPH:
+            sprite.physics.vx = 0;
+            break;
+
+        default:
+            console.error("Error, Game State invalid");
+    }
+
+    sprite.xPos += sprite.physics.vx * globals.deltaTime;
+
+    detectCollisionsBetweenSpriteAndSprite(sprite);
+    updateAnimationFrames(sprite);
+}
+
+function updateJosephs() 
+{
+    for (let i = 0; i < globals.spriteMenu.length; i++) {
         const sprite = globals.spriteMenu[i];
         updateSpriteMenu(sprite);
-        updateFallTimer();
     }
+    updateFallTimer();
 }
-
 
 function updateRIP(sprite)
 {
@@ -464,22 +430,32 @@ function updateTheStory()
 
 function updateAnimationFrames(sprite)
 {
-            // Reset the animation frames to the first frame
-            /* sprite.frames.frameCounter; */
-            sprite.frames.framesChangeCounter++;
-            
-            // If the counter has reached the speed, increment the frame counter and reset the counter
-            if (sprite.frames.framesChangeCounter === sprite.frames.speed)
-            {
-                sprite.frames.frameCounter++;
-                sprite.frames.framesChangeCounter = 0;
-            }
-
-            // If the frame counter has reached the number of frames per state, reset it to 0
-            if (sprite.frames.frameCounter === sprite.frames.framesPerState)
-            {
+        
+    switch (sprite.state)
+        {
+            case State.FALL_LEFT_JOSEPH:
+            case State.FALL_RIGHT_JOSEPH:
+                // Reset the animation frames to the first frame
                 sprite.frames.frameCounter = 0;
-            }
+                sprite.frames.framesChangeCounter = 0;
+                break;
+            default:
+                // Increment the animation frame counter
+                sprite.frames.framesChangeCounter++;
+                
+                // If the counter has reached the speed, increment the frame counter and reset the counter
+                if (sprite.frames.framesChangeCounter === sprite.frames.speed)
+                {
+                    sprite.frames.frameCounter++;
+                    sprite.frames.framesChangeCounter = 0;
+                }
+
+                // If the frame counter has reached the number of frames per state, reset it to 0
+                if (sprite.frames.frameCounter === sprite.frames.framesPerState)
+                {
+                    sprite.frames.frameCounter = 0;
+                }
+        }
 }
 
 
