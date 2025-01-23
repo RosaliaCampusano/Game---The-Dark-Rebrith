@@ -26,7 +26,7 @@ export class Player extends Sprite
     {
         super.update();
 
-        if (globals.life <= 0)
+        if (globals.life <= 15)
         {
             globals.gameState = Game.OVER
         }
