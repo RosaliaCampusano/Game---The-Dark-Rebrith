@@ -10,6 +10,5 @@ export default class Physics {
         this.friction =      friction;
         this.jumpForce =    jumpForce;
         this.isOnGroup =        false;
-
     }
 }
