@@ -26,8 +26,14 @@ export default
 
     sprites: [],
 
+    spritesPlayers: [],
+
+    activedPlayer: null,
+
+    spriteLoading: [],
+
     spriteMenu: [],
-    
+
     spriteBackground: [],
 
     spriteStory: [],
@@ -43,9 +49,21 @@ export default
 
     level: {},
 
-    action: {},
+    action: {},  
 
     life: 0,
 
-    score: 0
+    maxLife: 125,
+
+    score: 0,
+
+    highScore: 0,
+
+    time: 0,
+
+    camera: {},
+
+    saturate: 1,
+
+    particles: []
 }
