@@ -3,7 +3,7 @@ import Frames from "../Frames.js";
 import globals from "../globals.js";
 import ImageSet from "../ImageSet.js";
 
-class Particle
+export class Particle
 {
     constructor(id, state, xPos, yPos, radius, alpha, physics)
     {
@@ -14,20 +14,21 @@ class Particle
         this.radius =  radius;
         this.alpha =    alpha;
         this.physics = physics;
+        this.growth = Math.random() * 0.1 + 0.05;
     }
 }
 
 
-export class RedLight extends Particle
+export class ParticleLight extends Particle
 {
     timeToFade  = 1 * Math.random() + 1;
     fadeCounter = 0;
-    imageSet = new ImageSet(0, 816, 44, 44, 22, 22, 0, 0);
+    imageSet = new ImageSet(0, 800, 19, 19, 19, 19, 0, 0);
     frames = new Frames(1);
 
     constructor (xPos, yPos, radius, alpha, physics)
     {
-        super(ParticleID.RED, 
+        super(ParticleID.SUN, 
             ParticleState.ON, 
             xPos, yPos, radius, 
             alpha, physics);
