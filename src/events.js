@@ -28,6 +28,14 @@ export function keydownHandler(event)
         case Key.MERGE_THRONE:
             globals.action.merge = true;
             break;
+        
+        case Key.ESC:
+            globals.action.esc = true;
+            break;
+        
+        case Key.ENTER:
+            globals.action.enter = true;
+            break;
     }
 }
 
@@ -52,11 +60,19 @@ export function keyupHandler(event)
             break;
         
         case Key.ATTACK:
-            globals.action.attack = false;
+            globals.action.moveAttack = false;
             break;
-            
+        
         case Key.MERGE_THRONE:
             globals.action.merge = false;
             break;
+
+            case Key.ESC:
+                globals.action.esc = false;
+                break;
+            
+            case Key.ENTER:
+                globals.action.enter = false;
+                break;
     }
 }
