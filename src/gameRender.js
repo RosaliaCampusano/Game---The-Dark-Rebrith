@@ -1,6 +1,7 @@
 import globals from "./globals.js";
-import {Game, SpriteID, MainMenuTexts, WayOut} from "./constants.js";
+import {Game, SpriteID, MainMenuTexts, WayOut, State, ParticleState} from "./constants.js";
 import { Tile } from "./constants.js";
+import detectCollisions from "./collisions.js";
 
 export default function render()
 {
@@ -8,6 +9,7 @@ export default function render()
     {
         case Game.LOADING:
             //Draw loading spinner
+            renderLoading();
             break;
 
         case Game.MAIN_MENU: 
@@ -23,7 +25,7 @@ export default function render()
             break;
 
         case Game.HIGHSCORE:
-            renderHihgscore();
+            renderHighscore();
             break;
         
         case Game.STORY:
@@ -35,22 +37,29 @@ export default function render()
             break;
 
         default: 
-        console.error("Error: Game State invalid");
-
+            console.error("Error: Game State invalid");
     }
 }
 
 function drawGame()
 {
+
+    displayHUD();
     globals.ctx.clearRect(0, 0, globals.canvas.width, globals.canvas.height);
     globals.ctxHUD.clearRect(0, 0, globals.canvasHUD.width, globals.canvasHUD.height);
+    
+    // zoom the canvas
+    globals.ctx.scale(globals.camera.zoom, globals.camera.zoom);
+    globals.canvas.style.filter = `saturate(${globals.saturate})`
+    moveCamera();
     renderMap();
 
-    globals.ctx.scale(globals.camera.zoom, globals.camera.zoom);
-    moveCamera();
     renderHUD();
     renderSprites();
 
+    renderParticles();
+
+    restoreCamera();
 }
 
 function drawMainMenu()
@@ -65,73 +74,76 @@ function drawControls()
     renderControls();
 }
 
-
-    function renderSpritesHUD()
+function renderSpritesHUD()
+{
+    for ( let i = 0; i < globals.spritesHUD.length; i++)
     {
-        for ( let i = 0; i < globals.spritesHUD.length; i++)
-        {
 
-            const sprite = globals.spritesHUD[i];
-            //Calculate the position in the TileMap to draw
-            const xTile = sprite.imageSet.xInit + sprite.frames.frameCounter * sprite.imageSet.xGridSize + sprite.imageSet.xOffset;
-            const yTile = sprite.imageSet.yInit + sprite.state * sprite.imageSet.yGridSize + sprite.imageSet.yOffset;
+        const sprite = globals.spritesHUD[i];
+        //Calculate the position in the TileMap to draw
+        const xTile = sprite.imageSet.xInit + sprite.frames.frameCounter * sprite.imageSet.xGridSize + sprite.imageSet.xOffset;
+        const yTile = sprite.imageSet.yInit + sprite.state * sprite.imageSet.yGridSize + sprite.imageSet.yOffset;
 
-            const xPos = Math.floor(sprite.xPos);
-            const yPos = Math.floor(sprite.yPos);
+        const xPos = Math.floor(sprite.xPos);
+        const yPos = Math.floor(sprite.yPos);
 
-            //Draw the new frame of sprite in the right position
-            globals.ctxHUD.drawImage(
-                globals.tileSets[Tile.SIZE_SPRITE],
-                xTile, yTile,
-                sprite.imageSet.xSize, sprite.imageSet.ySize,
-                xPos, yPos,
-                sprite.imageSet.xSize, sprite.imageSet.ySize
-            );
-        }
+        //Draw the new frame of sprite in the right position
+        globals.ctxHUD.drawImage(
+            globals.tileSets[Tile.SIZE_SPRITE],
+            xTile, yTile,
+            sprite.imageSet.xSize, sprite.imageSet.ySize,
+            xPos, yPos,
+            sprite.imageSet.xSize, sprite.imageSet.ySize 
+        );
     }
+}
     
-    function renderSprites()
+function renderSprites()
+{
+    for ( let i = 0; i < globals.sprites.length; i++)
     {
-        for ( let i = 0; i < globals.sprites.length; i++)
-        {
 
-            const sprite = globals.sprites[i];
-            //Calculate the position in the TileMap to draw
-            const xTile = sprite.imageSet.xInit + sprite.frames.frameCounter * sprite.imageSet.xGridSize + sprite.imageSet.xOffset;
-            const yTile = sprite.imageSet.yInit + sprite.state * sprite.imageSet.yGridSize + sprite.imageSet.yOffset;
+        const sprite = globals.sprites[i];
+        //Calculate the position in the TileMap to draw
+        const xTile = sprite.imageSet.xInit + sprite.frames.frameCounter * sprite.imageSet.xGridSize + sprite.imageSet.xOffset;
+        const yTile = sprite.imageSet.yInit + sprite.state * sprite.imageSet.yGridSize + sprite.imageSet.yOffset;
 
-            const xPos = Math.floor(sprite.xPos);
-            const yPos = Math.floor(sprite.yPos);
-            
-            //Draw the new frame of sprite in the right position
-            globals.ctx.drawImage(
-                globals.tileSets[Tile.SIZE_SPRITE],
-                xTile, yTile,
-                sprite.imageSet.xSize, sprite.imageSet.ySize,
-                xPos, yPos,
-                sprite.imageSet.xSize * 0.6, sprite.imageSet.ySize * 0.6
-            );
-
-            drawHitBox(sprite);
-        }
+        const xPos = Math.floor(sprite.xPos);
+        const yPos = Math.floor(sprite.yPos);
+        
+        //Draw the new frame of sprite in the right position
+        globals.ctx.drawImage(
+            globals.tileSets[Tile.SIZE_SPRITE],
+            xTile, yTile,
+            sprite.imageSet.xSize, sprite.imageSet.ySize,
+            xPos, yPos,
+            sprite.imageSet.xSize * 0.6, sprite.imageSet.ySize * 0.6
+        );
+        
+     /*    drawHitBox(sprite); */
+    }
 }
 
 function drawHitBox(sprite)
 {
-   
+    if (!sprite.hitBox) {
+        console.log(`Sprite no tiene una hitBox:`, sprite);
+        return; // Salir de la función si no tiene hitBox
+    }
+
     const x1 = Math.floor(sprite.xPos) + Math.floor(sprite.hitBox.xOffset);
     const y1 = Math.floor(sprite.yPos) + Math.floor(sprite.hitBox.yOffset);
     const w1 = sprite.hitBox.xSize;
     const h1 = sprite.hitBox.ySize;
 
-    globals.ctx.strokeStyle = "red" /* "transparent" */;
+    globals.ctx.strokeStyle = sprite.hitBox.color;
     globals.ctx.strokeRect(x1, y1, w1, h1);
 }
 
 function moveCamera()
 {
-    const xTranslation = globals.camera.x;
-    const yTranslation = globals.camera.y;
+    const xTranslation = -globals.camera.x; 
+    const yTranslation = -globals.camera.y;
 
     globals.ctx.translate(xTranslation, yTranslation);
 }
@@ -143,7 +155,7 @@ function restoreCamera()
 
 function renderMap()
 {
-    const COL_NUM = 16;
+
     const brickSize = globals.level.imageSet.xGridSize;
     const levelData = globals.level.data;
 
@@ -154,8 +166,8 @@ function renderMap()
     {
         for(let j = 0; j < num_col; j++)
         {
-            const xTile = Math.floor((levelData[i][j] - 1) % COL_NUM) * brickSize;
-            const yTile = Math.floor((levelData[i][j] - 1) / COL_NUM) * brickSize;
+            const xTile = (levelData[i][j] - 1) * brickSize;
+            const yTile = 0;
             const xPos = j * brickSize;
             const yPos = i * brickSize;
 
@@ -170,25 +182,24 @@ function renderMap()
     }
 }
 
-
 function renderHUD()
 {
     const score = globals.score;
-    const highScore = 130000;
+    const highScore = globals.highScore;
+    const time = globals.time;
 
     //Draw score
     globals.ctxHUD.font = '8px emulogic';
     globals.ctxHUD.fillStyle = 'red';
-    globals.ctxHUD.fillText("SCORE", 58, 70);
+    globals.ctxHUD.fillText("SCORE", 58, 15);
     globals.ctxHUD.fillStyle = 'white';
-    globals.ctxHUD.fillText(" " + score, 55, 85);
+    globals.ctxHUD.fillText(" " + score, 55, 33);
 
     //Draw High Score
     globals.ctxHUD.fillStyle = 'red';
-    globals.ctxHUD.fillText("HIGH SCORE", 95, 32);
+    globals.ctxHUD.fillText("HIGH SCORE", 130, 15);
     globals.ctxHUD.fillStyle = 'white';
-    globals.ctxHUD.fillText(" " + highScore, 97, 50);
-
+    globals.ctxHUD.fillText(" " + highScore, 145, 33);
 
     //Draw Life
     globals.ctxHUD.fillStyle = 'red';
@@ -200,19 +211,23 @@ function renderHUD()
 
     //Draw Level
     globals.ctxHUD.fillStyle = 'red';
-    globals.ctxHUD.fillText("Level", 5, 32);
+    globals.ctxHUD.fillText("Level", 5, 15);
 
+    // Draw Time
+    globals.ctxHUD.fillStyle = 'red';
+    globals.ctxHUD.fillText("TIME", 58, 70);
+    globals.ctxHUD.fillStyle = 'white';
+    globals.ctxHUD.fillText("" + time, 60, 88);
 
     renderSpritesHUD();
 
 }
 
-function deleteHUDAndClearScreen()
+function deleteHUD()
 {
-    
     globals.ctx.clearRect(0, 0, globals.canvas.width, globals.canvas.height);
 
-    const canvasHeight = 200;
+    const canvasHeight = 220;
     const canvasHUDHeight = 80;
 
     globals.canvasHUD.style.display = 'none';
@@ -220,62 +235,217 @@ function deleteHUDAndClearScreen()
     globals.canvas.height = canvasHeight + canvasHUDHeight;
 }
 
-function renderMainMenu()
+function displayHUD()
 {
-    deleteHUDAndClearScreen();
+    const canvasHeight = 240;
+    const canvasHUDHeight = 100;
+
+    globals.canvasHUD.style.display = '';
+    globals.canvas.style.height = '';
+    globals.canvas.height = canvasHeight;
+}
+
+function renderLoading()
+{
+    deleteHUD();
 
     const canvasDividedBy2 = globals.canvas.width / 2;
     globals.ctx.textAlign = 'center';
 
     //Title
-    let title = "THE DARK REBIRTH";
+    let title = "LOADING";
 
     globals.ctx.font = '20px emulogic';
-    globals.ctx.fillStyle ='darkred';
-    globals.ctx.fillText("" + title, canvasDividedBy2, 85);
-
-    //Design
-    globals.ctx.font = '12px emulogic';
     globals.ctx.fillStyle ='white';
+    globals.ctx.fillText("" + title, canvasDividedBy2 - 5, 120);
+
+    for (let i = 0; i < globals.spriteLoading.length; i++)
+    {
+        const sprite = globals.spriteLoading[i];
+
+        const xTile = sprite.imageSet.xInit + sprite.frames.frameCounter * sprite.imageSet.xGridSize + sprite.imageSet.xOffset;
+        const yTile = sprite.imageSet.yInit + sprite.state * sprite.imageSet.yGridSize + sprite.imageSet.yOffset;
+
+        const xPos = Math.floor(sprite.xPos);
+        const yPos = Math.floor(sprite.yPos);
+
+        globals.ctx.drawImage(
+            globals.tileSets[Tile.SIZE_SPRITE],
+            xTile, yTile,
+            sprite.imageSet.xSize, sprite.imageSet.ySize,
+            xPos, yPos,
+            sprite.imageSet.xSize, sprite.imageSet.ySize
+        );
+
+    }
+}
+
+function renderMainMenu() 
+{
+    if (!renderMainMenu.state) {
+        renderMainMenu.state = {
+            selectedOption: 0,
+        };
+    }
+
+    const state = renderMainMenu.state;
+    const options = MainMenuTexts; 
+    deleteHUD();
+
+    const canvasDividedBy2 = globals.canvas.width / 2;
+    globals.ctx.textAlign = 'center';
+
+    // Title
+    let title = "THE DARK REBIRTH";
+    globals.ctx.font = '20px emulogic';
+    globals.ctx.fillStyle = 'darkred';
+    globals.ctx.fillText(title, canvasDividedBy2, 85);
+
+    // Design
+    globals.ctx.font = '12px emulogic';
+    globals.ctx.fillStyle = 'white';
     globals.ctx.fillText("-----------------------------", canvasDividedBy2, 45);
     globals.ctx.fillText("-----------------------------", canvasDividedBy2, 250);
 
     let yCoordinate = 130;
-    
 
-    for (let i = 0; i < MainMenuTexts.length; i++)
-    {
-        globals.ctx.fillText(MainMenuTexts[i], canvasDividedBy2, yCoordinate);
-
+    // Draw menu options
+    for (let i = 0; i < options.length; i++) {
+        globals.ctx.fillStyle = i === state.selectedOption ? "white" : "grey"; 
+        globals.ctx.fillText(options[i][0], canvasDividedBy2, yCoordinate);
         yCoordinate += 25;
     }
 
-    for ( let j = 0; j < globals.spriteMenu.length; j++)
-        {
-
-            const sprite = globals.spriteMenu[j];
-            //Calculate the position in the TileMap to draw
-            const xTile = sprite.imageSet.xInit + sprite.frames.frameCounter * sprite.imageSet.xGridSize + sprite.imageSet.xOffset;
-            const yTile = sprite.imageSet.yInit + sprite.state * sprite.imageSet.yGridSize + sprite.imageSet.yOffset;
-
-            const xPos = Math.floor(sprite.xPos);
-            const yPos = Math.floor(sprite.yPos);
-
-            //Draw the new frame of sprite in the right position
-            globals.ctx.drawImage(
-                globals.tileSets[Tile.SIZE_SPRITE],
-                xTile, yTile,
-                sprite.imageSet.xSize, sprite.imageSet.ySize,
-                xPos, yPos,
-                sprite.imageSet.xSize, sprite.imageSet.ySize
-            );
+    function handlerKeyDownMainMenu(event) {
+        if (event.key === "s") {
+            state.selectedOption = (state.selectedOption + 1) % options.length;
+        } else if (event.key === "w") {
+            state.selectedOption = (state.selectedOption - 1 + options.length) % options.length;
+        } else if (event.key === "Enter") {
+            handleMenuSelection(state.selectedOption);
+            removeKeyListener();
         }
+    }
 
+    if (!renderMainMenu.eventListenerAdded) 
+    {
+        document.addEventListener("keydown", handlerKeyDownMainMenu);
+        renderMainMenu.eventListenerAdded = true;
+    }
+
+    for (let j = 0; j < globals.spriteMenu.length; j++) 
+    {
+        const sprite = globals.spriteMenu[j];
+        const xTile = sprite.imageSet.xInit + sprite.frames.frameCounter * sprite.imageSet.xGridSize + sprite.imageSet.xOffset;
+        const yTile = sprite.imageSet.yInit + sprite.state * sprite.imageSet.yGridSize + sprite.imageSet.yOffset;
+
+        const xPos = Math.floor(sprite.xPos);
+        const yPos = Math.floor(sprite.yPos);
+
+        globals.ctx.drawImage(
+            globals.tileSets[Tile.SIZE_SPRITE],
+            xTile, yTile,
+            sprite.imageSet.xSize, sprite.imageSet.ySize,
+            xPos, yPos,
+            sprite.imageSet.xSize, sprite.imageSet.ySize
+        );
+    }
+
+    function handleMenuSelection(selectedIndex) {
+        const selectedOption = MainMenuTexts[selectedIndex][0];
+
+        switch (selectedOption) {
+            case "NEW GAME":
+                console.log("Starting a new game...");
+                globals.gameState = Game.PLAYING;
+                drawGame();
+                break;
+            case "CONTROLS":
+                console.log("Showing controls...");
+                globals.gameState = Game.CONTROLS;
+                renderControls();
+                break;
+            case "STORY":
+                console.log("Showing story...");
+                globals.gameState = Game.STORY;
+                renderStory();
+                break;
+            case "HIGHSCORE":
+                console.log("Showing highscore...");
+                globals.gameState = Game.HIGHSCORE;
+                renderHighscore();
+                break;
+            default:
+                console.log("Unknown option selected");
+                break;
+        }
+    }
+
+    function removeKeyListener() {
+        document.removeEventListener("keydown", handlerKeyDownMainMenu);
+        renderMainMenu.eventListenerAdded = false;
+    }
+
+    function addKeyListener() {
+        if (!renderMainMenu.eventListenerAdded) {
+            document.addEventListener("keydown", handlerKeyDownMainMenu);
+            renderMainMenu.eventListenerAdded = true;
+        }
+    }
+
+    if (globals.gameState === Game.MAIN_MENU) {
+        addKeyListener(); 
+    }
 }
 
-function renderHihgscore()
+function renderParticles()
 {
-    deleteHUDAndClearScreen();
+    for ( let i = 0; i < globals.particles.length; i++)
+        {
+    
+                const particle = globals.particles[i];
+                //Calculate the position in the TileMap to draw
+                const xTile = particle.imageSet.xInit + particle.frames.frameCounter * particle.imageSet.xGridSize + particle.imageSet.xOffset;
+                const yTile = particle.imageSet.yInit + particle.state * particle.imageSet.yGridSize + particle.imageSet.yOffset;
+    
+                const xPos = Math.floor(particle.xPos);
+                const yPos = Math.floor(particle.yPos);
+            
+                //Draw the new frame of sprite in the right position
+                globals.ctxHUD.drawImage(
+                    globals.tileSets[Tile.SIZE_SPRITE],
+                    xTile, yTile,
+                    particle.imageSet.xSize, particle.imageSet.ySize,
+                    xPos, yPos,
+                    particle.imageSet.xSize * 0.6, particle.imageSet.ySize * 0.6
+                );
+            }
+}
+
+function renderParticlesForGameOver() {
+    globals.particles.forEach((particle) => 
+    {
+        const ctx = globals.ctx;
+
+        ctx.fillStyle = `rgba(215, 0, 0, ${particle.alpha})`; 
+        ctx.fillRect(particle.xPos - particle.radius / 2, particle.yPos - particle.radius / 2, particle.radius, particle.radius);
+
+        particle.physics.velocity += 0.1; 
+
+        particle.yPos += particle.physics.velocity;
+
+        if (particle.yPos > globals.canvas.height) 
+        {
+            particle.yPos = -particle.radius; 
+            particle.xPos = Math.random() * globals.canvas.width; 
+            particle.physics.velocity = Math.random() * 2 + 1; 
+        }
+    });
+}
+
+function renderHighscore()
+{
+    deleteHUD();
     const canvasDividedBy2 = globals.canvas.width / 2;
     globals.ctx.textAlign = 'center';
     //Title
@@ -368,26 +538,50 @@ function renderHihgscore()
     globals.ctx.font = '10px emulogic';
     globals.ctx.fillStyle = 'lightgray';
     globals.ctx.fillText(WayOut, canvasDividedBy2, 260);
+
+    function handlerKeyDownhighscore(event)
+    {
+        if (event.key === 'Escape') {
+            globals.gameState = Game.MAIN_MENU;
+            document.removeEventListener('keydown', handlerKeyDownhighscore);
+        }
+    }
+
+    document.addEventListener('keydown', handlerKeyDownhighscore);
+}
+
+function renderParticleControl() 
+{
+    globals.particles.forEach(particle => 
+    {
+        particle.radius += particle.growth;
+        if (particle.radius > 3 || particle.radius < 1) {
+            particle.growth *= -1; 
+        }
+        globals.ctx.beginPath();
+        globals.ctx.arc(particle.xPos, particle.yPos, particle.radius, 0, Math.PI * 2);
+        globals.ctx.fillStyle = `rgba(225, 215, 250, ${particle.alpha})`; 
+        globals.ctx.fill();
+    });
 }
 
 function renderControls()
 {
 
-    deleteHUDAndClearScreen();
+    deleteHUD();
+    renderParticleControl();
 
 
     for (let i = 0; i < globals.spriteControls.length; i ++)
     {
         const sprite = globals.spriteControls[i];
 
-        //Calculate the position in the TileMap to draw
         const xTile = sprite.imageSet.xInit + sprite.frames.frameCounter * sprite.imageSet.xGridSize + sprite.imageSet.xOffset;
         const yTile = sprite.imageSet.yInit + sprite.state * sprite.imageSet.yGridSize + sprite.imageSet.yOffset;
 
         const xPos = Math.floor(sprite.xPos);
         const yPos = Math.floor(sprite.yPos);
 
-        //Draw the new frame of sprite in the right position
         globals.ctx.drawImage(
             globals.tileSets[Tile.SIZE_SPRITE],
             xTile, yTile,
@@ -413,12 +607,10 @@ function renderControls()
     globals.ctx.strokeStyle = 'gray';
     globals.ctx.strokeText("-----------", canvasDividedBy2, 250);
 
-
     let movement = "MOVEMENT";
     globals.ctx.font = '10px emulogic';
     globals.ctx.fillStyle = 'white';
     globals.ctx.fillText("" + movement, canvasDividedBy2 * 0.4, 90);
-
 
     const keyboardDefinitionControls = 
     [
@@ -427,7 +619,6 @@ function renderControls()
         "DOWN",
         "RIGHT"
     ]
-
 
     globals.ctx.font = '10px emulogic';
     globals.ctx.fillStyle = 'gray';
@@ -456,142 +647,216 @@ function renderControls()
         globals.ctx.font = '10px emulogic';
         globals.ctx.fillStyle = 'lightgray';
         globals.ctx.fillText(WayOut, canvasDividedBy2, 265);
-}
 
-function renderStory()
-{
-    deleteHUDAndClearScreen();
-
-    for ( let i = 0; i < globals.spriteStory.length; i++)
-        {
-
-            const sprite = globals.spriteStory[i];
-
-            //Calculate the position in the TileMap to draw
-            const xTile = sprite.imageSet.xInit + sprite.frames.frameCounter * sprite.imageSet.xGridSize + sprite.imageSet.xOffset;
-            const yTile = sprite.imageSet.yInit + sprite.state * sprite.imageSet.yGridSize + sprite.imageSet.yOffset;
-
-            const xPos = Math.floor(sprite.xPos);
-            const yPos = Math.floor(sprite.yPos);
-
-            //Draw the new frame of sprite in the right position
-            globals.ctx.drawImage(
-                globals.tileSets[Tile.SIZE_SPRITE],
-                xTile, yTile,
-                sprite.imageSet.xSize, sprite.imageSet.ySize,
-                xPos, yPos,
-                sprite.imageSet.xSize * 1.5 , sprite.imageSet.ySize 
-            );
+        function handlerKeyDownControls(event) {
+            if (event.key === 'Escape') 
+            {  
+            
+                globals.gameState = Game.MAIN_MENU; 
+                renderMainMenu();  
+                document.removeEventListener('keydown', handlerKeyDownControls); 
+            }
         }
-
-    const canvasDividedBy2 = globals.canvas.width / 2;
-    globals.ctx.textAlign = 'center';
-    
-    //Title
-    let title = "STORY";
-    globals.ctx.font = '25px emulogic';
-    globals.ctx.strokeStyle = "white";
-    globals.ctx.strokeText("" + title, canvasDividedBy2, 40);
-    globals.ctx.fillStyle = "black"; 
-    globals.ctx.fillText("" + title, canvasDividedBy2, 40);
-
-    //Chapter
-    let chapter = "CHAPTER 1";
-    globals.ctx.font = '12px emulogic';
-    globals.ctx.fillStyle = 'white';
-    globals.ctx.fillText("" + chapter, canvasDividedBy2, 65);
-
-    //The story
-    globals.ctx.font = '7px emulogic';
-    globals.ctx.fillStyle = 'white';
-    
-    const story = 
-    [
-        "Joseph's delusions have only been increasing,",
-        "his obsession with the cursed throne",
-        "is consuming his soul.",
-        "He swears that every evening goblins are after",
-        "the throne and he has to stop them",
-        "and the strange shadows that appear",
-        "to mug him in the course of the night.",
-        " His only salvation is the dawn",
-        "where it seems to be the only moment of calm."
-    ]
-
-
-    let yCoordinate = 85;
-
-    for (let i = 0; i < story.length; i++)
-    {
-        globals.ctx.fillText(story[i], canvasDividedBy2, yCoordinate);
-
-        yCoordinate += 20;
-    }
-
-    globals.ctx.fillStyle = 'gray';
-    globals.ctx.fillText("-----------------------------------------------", canvasDividedBy2, 49);
-    globals.ctx.fillText("-----------------------------------------------", canvasDividedBy2, 260);
-
-    //Press ESC to exit
-    globals.ctx.font = '8px emulogic';
-    globals.ctx.fillStyle = 'lightgray';
-    globals.ctx.fillText(WayOut, canvasDividedBy2, 270);
-}
-
-function renderGameOver()
-{
-    deleteHUDAndClearScreen();
-
-
-    for ( let i = 0; i < globals.spriteBackground.length; i++)
-        {
-
-            const sprite = globals.spriteBackground[i];
-            //Calculate the position in the TileMap to draw
-            const xTile = sprite.imageSet.xInit + sprite.frames.frameCounter * sprite.imageSet.xGridSize + sprite.imageSet.xOffset;
-            const yTile = sprite.imageSet.yInit + sprite.state * sprite.imageSet.yGridSize + sprite.imageSet.yOffset;
-
-            const xPos = Math.floor(sprite.xPos);
-            const yPos = Math.floor(sprite.yPos);
-
-            //Draw the new frame of sprite in the right position
-            globals.ctx.drawImage(
-                globals.tileSets[Tile.SIZE_SPRITE],
-                xTile, yTile,
-                sprite.imageSet.xSize, sprite.imageSet.ySize,
-                xPos, yPos,
-                sprite.imageSet.xSize , sprite.imageSet.ySize * 1.1
-            );
-        }
-
-    
-    const canvasDividedBy2 = globals.canvas.width / 2;
-    globals.ctx.textAlign = 'center';
-
-    //Title
-    let title = "GAME OVER";
-    globals.ctx.font = '32px emulogic';
-    globals.ctx.strokeStyle = "white";
-    globals.ctx.strokeText("" + title, canvasDividedBy2, 45);
-    globals.ctx.fillStyle = "black"; 
-    globals.ctx.fillText("" + title, canvasDividedBy2, 45);
-
-    globals.ctx.font = '7px emulogic';
-    globals.ctx.fillStyle = 'white';
-    const options =
-    [
-        "CONTINUE",
-        "HIGHSCORE",
-        "EXIT"
         
-    ];
+        if (!renderControls.eventListenerAdded) 
+        {
+            document.addEventListener('keydown', handlerKeyDownControls);
+            renderControls.eventListenerAdded = true;
+        }
+}
 
-    let yCoordinate = 193;
 
-    for (let i = 0; i < options.length; i++)
-    {
-        globals.ctx.fillText(options[i], canvasDividedBy2, yCoordinate);
+function renderStory() {
+    
+        if (!renderStory.state) {
+            renderStory.state = {
+                currentLine: -1, 
+                story: [
+                    "Joseph's delusions have only been increasing,",
+                    "his obsession with the cursed throne",
+                    "is consuming his soul.",
+                    "He swears that every evening goblins are after",
+                    "the throne and he has to stop them",
+                    "and the strange shadows that appear",
+                    "to mug him in the course of the night.",
+                    "His only salvation is the dawn",
+                    "where it seems to be the only moment of calm."
+                ],
+                lineSpacing: 15, 
+                baseY: 85,
+                timer: 0, 
+                delayBetweenLines: 70, 
+                maxLinesVisible: 9,
+            };
+        }
+    
+        const state = renderStory.state;
+    
+        globals.ctx.clearRect(0, 0, globals.canvas.width, globals.canvas.height);
 
-        yCoordinate += 20;
+        for (let i = 0; i < globals.spriteStory.length; i++) {
+            const sprite = globals.spriteStory[i];
+    
+            const xTile = sprite.imageSet.xInit + sprite.frames.frameCounter * sprite.imageSet.xGridSize + sprite.imageSet.xOffset;
+            const yTile = sprite.imageSet.yInit + sprite.state * sprite.imageSet.yGridSize + sprite.imageSet.yOffset;
+    
+            const xPos = Math.floor(sprite.xPos);
+            const yPos = Math.floor(sprite.yPos);
+    
+            globals.ctx.drawImage(
+                globals.tileSets[Tile.SIZE_SPRITE],
+                xTile, yTile,
+                sprite.imageSet.xSize, sprite.imageSet.ySize,
+                xPos, yPos,
+                sprite.imageSet.xSize * 1.5, sprite.imageSet.ySize
+            );
+        }
+    
+        const canvasDividedBy2 = globals.canvas.width / 2;
+    
+        const title = "STORY";
+        globals.ctx.font = '25px emulogic';
+        globals.ctx.strokeStyle = "white";
+        globals.ctx.strokeText(title, canvasDividedBy2, 40);
+        globals.ctx.fillStyle = "black";
+        globals.ctx.fillText(title, canvasDividedBy2, 40);
+    
+        const chapter = "CHAPTER 1";
+        globals.ctx.font = '12px emulogic';
+        globals.ctx.fillStyle = 'white';
+        globals.ctx.fillText(chapter, canvasDividedBy2, 65);
+    
+        globals.ctx.textAlign = 'center';
+        globals.ctx.font = '7px emulogic';
+        globals.ctx.fillStyle = 'white';
+    
+        const visibleStart = Math.max(0, state.currentLine - state.maxLinesVisible + 1);
+
+        for (let i = visibleStart; i <= state.currentLine; i++) 
+            {
+            const yPosition = state.baseY + (i - visibleStart) * state.lineSpacing;
+            globals.ctx.fillText(state.story[i], canvasDividedBy2, yPosition);
+        }
+        state.timer += globals.deltaTime;
+
+        if (state.timer >= state.delayBetweenLines && state.currentLine < state.story.length - 1) 
+        {
+            state.timer = 0; 
+            state.currentLine++;
+        }
+    
+        globals.ctx.fillStyle = 'gray';
+        globals.ctx.fillText("-----------------------------------------------", canvasDividedBy2, 49);
+        globals.ctx.fillText("-----------------------------------------------", canvasDividedBy2, 260);
+
+        globals.ctx.font = '8px emulogic';
+        globals.ctx.fillStyle = 'lightgray';
+        globals.ctx.fillText("Press ESC to exit", canvasDividedBy2, 280);
+
+        function handlerKeyDownStory(event) {
+            if (event.key === 'Escape') {  
+                globals.gameState = Game.MAIN_MENU;  
+                renderMainMenu(); 
+                document.removeEventListener('keydown', handlerKeyDownStory); 
+            }
+        }
+    
+        if (!renderStory.eventListenerAdded) {
+            document.addEventListener('keydown', handlerKeyDownStory);
+            renderStory.eventListenerAdded = true;
+        }
+    
+        if (globals.gameState !== Game.MAIN_MENU) {
+            requestAnimationFrame(renderStory); 
     }
 }
+
+    function renderGameOver() {
+
+        globals.canvas.style.filter = 'none';
+        deleteHUD();
+
+        if (!renderGameOver.state) 
+        {
+            renderGameOver.state = 
+            {
+                selectedOption: 0,
+                options:
+                [
+                    { text: "CONTINUE", state: Game.PLAYING },
+                    { text: "HIGHSCORE", state: Game.HIGHSCORE },
+                    { text: "EXIT", state: Game.MAIN_MENU },
+                ],
+            };
+        }
+    
+        const state = renderGameOver.state;
+        const options = state.options;
+    
+    
+        for (let i = 0; i < globals.spriteBackground.length; i++) {
+            const sprite = globals.spriteBackground[i];
+            const xTile = sprite.imageSet.xInit + sprite.frames.frameCounter * sprite.imageSet.xGridSize + sprite.imageSet.xOffset;
+            const yTile = sprite.imageSet.yInit + sprite.state * sprite.imageSet.yGridSize + sprite.imageSet.yOffset;
+    
+            const xPos = Math.floor(sprite.xPos);
+            const yPos = Math.floor(sprite.yPos);
+    
+            globals.ctx.drawImage(
+                globals.tileSets[Tile.SIZE_SPRITE],
+                xTile, yTile,
+                sprite.imageSet.xSize, sprite.imageSet.ySize,
+                xPos, yPos,
+                sprite.imageSet.xSize, sprite.imageSet.ySize * 1.1
+            );
+        }
+
+        renderParticlesForGameOver();
+    
+        const canvasDividedBy2 = globals.canvas.width / 2;
+        globals.ctx.textAlign = 'center';
+    
+        const title = "GAME OVER";
+        globals.ctx.font = '32px emulogic';
+        globals.ctx.strokeStyle = "white";
+        globals.ctx.strokeText(title, canvasDividedBy2, 45);
+        globals.ctx.fillStyle = "black";
+        globals.ctx.fillText(title, canvasDividedBy2, 45);
+    
+        const yStart = 150;
+        const yStep = 30;
+        globals.ctx.font = '10px emulogic';
+        globals.ctx.fillStyle = 'lightgray';
+    
+        options.forEach((option, index) => {
+            globals.ctx.fillStyle = index === state.selectedOption ? "grey" : "white"; // Resaltar la opción seleccionada
+            globals.ctx.fillText(option.text, canvasDividedBy2, yStart + index * yStep);
+        });
+
+        function handlerKeyDownGameOver(event) {
+            if (event.key === "s") 
+                {
+                state.selectedOption = (state.selectedOption + 1) % options.length;
+            } else if (event.key === "w") 
+                { 
+                state.selectedOption = (state.selectedOption - 1 + options.length) % options.length;
+            } else if (event.key === "Enter") 
+                { 
+                globals.gameState = options[state.selectedOption].state;
+                document.removeEventListener("keydown", handlerKeyDownGameOver);
+                if (globals.gameState === Game.PLAYING) 
+                    {
+                    drawGame();
+                }
+            }
+        }
+        
+        if (!renderGameOver.eventListenerAdded) {
+            document.addEventListener("keydown", handlerKeyDownGameOver);
+            renderGameOver.eventListenerAdded = true;
+        }
+        
+        if (globals.gameState === Game.GAME_OVER) {
+            renderGameOver();
+        }
+    }
