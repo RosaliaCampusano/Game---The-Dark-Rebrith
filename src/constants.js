@@ -50,9 +50,19 @@ export const SpriteID = {
     KEYBOARD_L:             20,
     KEYBOARD_M:             21,
     PLAYER_WIZARD:          22,
-    ATTACK:                 23,
+    CAST_A_SPELL:           23,
     JUMPGUY:                24,
-    ATTACK:                 25
+    ATTACK:                 25,
+    LOAD_JOSEPH:            26,
+    BLUE_EXPLOTION:         27,
+    RED_EXPLOTION:          28
+}
+
+export const ParticleID = 
+{
+    SUN:                    0,
+    RED:                    1,
+    SHINE:                  2
 }
 
 export const State = {
@@ -62,10 +72,18 @@ export const State = {
     LEFT:                   1,
     DOWN:                   2,
     RIGHT:                  3,
+    STILL_UP:               4,
+    STILL_LEFT:             5,
+    STILL_DOWN:             6,
+    STILL_RIGHT:            7,
 
     //ThroneHUB state
     MADNESS_0:              0,
     MADNESS_1:              1,
+    MADNESS_2:              2,
+    MADNESS_3:              3,
+    MADNESS_4:              4,
+    MADNESS_5:              5,
 
     //Goblin state
     DOWN_2:                 0,
@@ -77,7 +95,6 @@ export const State = {
     //Demon state
     DOWN_3:                 0,
     UP_3:                   1,
-    RIGTH_3:                2,
 
     //Throne state
     BE:                     0,
@@ -91,6 +108,12 @@ export const State = {
 
     //Potion state
     ACTIVATED_SKILL:        0,
+    POTION_YELLOW:             0,
+    POTION_GREEN:              1,
+    POTION_RED:                2,
+    POTION_PURPLE:             3,
+    POTION_BLUE:               4,
+
 
     //Level state
     //Level 1 = SUN
@@ -100,11 +123,13 @@ export const State = {
 
     //Old Joseph  1 State 
     RIGHT_JOSEPH:           0,
+    FALL_RIGHT_JOSEPH:      1,
     
     //Old Joseph 2 State 
     LEFT_JOSEPH:            0,
-    
-       //Player Wizard 
+    FALL_LEFT_JOSEPH:       1,
+
+    //Player Wizard 
     DOWN_WIZARD:            0,
     UP_WIZARD:              1,
     RIGHT_WIZARD:           2,
@@ -114,20 +139,26 @@ export const State = {
     DOWN_ATTACK_WIZARD:     6,
     LEFT_ATTACK_WIZARD:     7,
     PUNCH_WIZARD:           8,
-    STILL_DOWN:             9,
-    STILL_UP:               10,
-    STILL_RIGHT:            11,
-    STILL_LEFT:             12,
+    STILL_DOWN_WIZARD:      9,
+    STILL_UP_WIZARD:        10,
+    STILL_RIGHT_WIZARD:     11,
+    STILL_LEFT_WIZARD:      12,
     
 
     //Attack
     ACTIVE:                 0,
-
     //Jump Guy State
     JUMP:                   0,
 
-    OFF:                    0
+    OFF:                    0       
 
+}
+
+export const ParticleState = 
+{
+    ON:                     0,
+    FADE:                   1,
+    OFF:                    2
 }
 
 export const GRAVITY = 80;
@@ -139,12 +170,14 @@ export const Key = {
     RIGHT:              68,         //D
     LEFT:               65,         //A
     ATTACK:             76,         //L
-    MERGE_THRONE:       77          //M   
+    MERGE_THRONE:       77,         //M   
+    ESC:                32,
+    ENTER:              13,     
 }
 
 export const Tile = {
-    SIZE_SPRITE:            0,     //For Sprites 
-    SIZE_16:                1          //For tileSets
+    SIZE_SPRITE:            0,     //For Sprites
+    SIZE_16:                1      //For tileSets
 }
 
 export const Block = 
