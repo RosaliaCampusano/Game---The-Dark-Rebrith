@@ -1,5 +1,5 @@
 import globals from "./globals.js";
-import { initHTMLelements, loadAssets, initEvents, initSprites, initSpritesHUD, initSpritesMenu, initSpriteBackground,initLoadSprite, initStory, initControls, initVars, initLevel, initLocalStorage, initCamera, initParticles} from "./initialize.js";
+import { initHTMLelements, loadAssets, initEvents, initSprites, initSpritesHUD, initSpritesMenu, initSpriteBackground,initLoadSprite, initStory, initControls, initVars, initLevel, initCamera, initParticles} from "./initialize.js";
 import update from "./gameLogic.js";
 import render from "./gameRender.js";
 
@@ -10,8 +10,6 @@ import render from "./gameRender.js";
 window.onload = init;
 
 function init() {
-
-  initLocalStorage();
   
   initCamera();
 
