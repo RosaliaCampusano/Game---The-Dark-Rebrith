@@ -11,22 +11,21 @@ class Time
     constructor()
     {
         this.time = this.defaultTime;
+        globals.defaultTime = this.defaultTime;
     }
 
     update()
     {
-        globals.time = this.time;
 
-        if (this.time <= 0)
+        if (globals.time <= 0)
         {
-            this.time = this.defaultTime;
             globals.gameState = Game.OVER;
         }
 
         if (this.internalTimer >= this.maxInternalTimer)
         {
             this.internalTimer = 0;
-            this.time--;
+            globals.time--;
         }
         else
         {
