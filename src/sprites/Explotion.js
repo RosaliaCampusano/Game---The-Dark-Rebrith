@@ -50,6 +50,13 @@ export class BlueExplotion extends Explotion
             new Frames(8)
         )
     }
+
+    getPosition(xPos, yPos)
+    {
+        super.getPosition(xPos, yPos)
+        this.yPos -= 20;
+        this.xPos -= 20;
+    }
 }
 
 export class RedExplotion extends Explotion
