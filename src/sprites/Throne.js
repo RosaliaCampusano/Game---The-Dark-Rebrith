@@ -21,8 +21,6 @@ export class Throne extends Sprite
         { xPos: 599, yPos: 160 },
     ];
 
-    throneHUB;
-
     changePosition = false;
     
     maxInternalTimer = 7;
@@ -32,8 +30,6 @@ export class Throne extends Sprite
     update()
     {
         super.update();
-
-        this.getThroneHUB();
         
         if (this.internalTimer >= this.maxInternalTimer || this.changePosition) 
         {
@@ -44,18 +40,6 @@ export class Throne extends Sprite
             this.yPos = newPosition.yPos;
 
             this.changePosition = false;
-        }
-    }
-
-    getThroneHUB()
-    {
-        for (let index = 0; index < globals.spritesHUD.length; index++) 
-        {
-            const sprite = globals.spritesHUD[index];
-            if (sprite.id == SpriteID.THRONEHUB) 
-            {
-                this.throneHUB = sprite;
-            }
         }
     }
 
@@ -85,8 +69,6 @@ export class Throne extends Sprite
                     newActivedPlayer.yPos = yPos;
                     globals.activedPlayer = newActivedPlayer;
                     this.changePosition = true;
-                    console.log(this.throneHUB)
-                    this.throneHUB.animate = true;
                     break;
                 }
             }
