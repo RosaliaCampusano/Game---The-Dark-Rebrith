@@ -461,9 +461,20 @@ export default class Sprite
 export class Enemies extends Sprite
 {
     redExplotion;
+    isRangeActivationRunning = false;
+    rangeActivation = 50;
+
+    default = {
+        imageSet: {x: 0, y: 0},
+    }
+
+    flicker = false;
+
     constructor(id, state, xPos, yPos, imageSet, frames, physics, maxTimeToChangeDirection, hitBox, life = 1)
     {
         super(id, state, xPos, yPos, imageSet, frames, physics, hitBox);
+        this.default.imageSet.x = imageSet.xInit;
+        this.default.imageSet.y = imageSet.yInit;
 
         this.defaultImageSetXSize = imageSet.xSize;
         this.defaultImageSetYSize = imageSet.ySize;
@@ -492,6 +503,27 @@ export class Enemies extends Sprite
             }
         }
 
+        if (this.isCollidingWithAttack)
+        {
+            this.imageSet.xInit = this.default.imageSet.x + 1000;
+            this.imageSet.yInit = this.default.imageSet.x + 1000;
+
+            if (this.flicker)
+            {
+                this.imageSet.xInit = this.default.imageSet.x;
+                this.imageSet.yInit = this.default.imageSet.y;
+                this.isCollidingWithAttack = false;
+            }
+
+            setInterval(() => {
+                this.flicker = !this.flicker;
+            }, 500);
+        }else
+        {
+            this.imageSet.xInit = this.default.imageSet.x;
+            this.imageSet.yInit = this.default.imageSet.y;
+        }
+
         for (let index = 0; index < globals.sprites.length; index++) 
         {
             const sprite = globals.sprites[index];
@@ -514,22 +546,75 @@ export class Enemies extends Sprite
         if (this.life === 0)
         {
             this.isDead = true;
+            this.internalTimer = 0;
             globals.score += this.scorePerKill;
             this.redExplotion.getPosition(this.xPos, this.yPos);
         }
 
         // random movement speed
-        if (this.internalTimer >= this.maxInternalTimer)
+        if (this.internalTimer >= this.maxInternalTimer && !this.isRangeActivationRunning)
         {
             let randomNumber = Math.floor(Math.random() * this.life) + 1;
 
-            if (randomNumber > this.life / 2) return;
+            if (randomNumber / globals.levelCrazy > this.life / 2) return;
 
-            this.moveSpeed += randomNumber;
+            this.moveSpeed += randomNumber + globals.levelCrazy;
 
             setTimeout(() => {
-                this.moveSpeed -= randomNumber
+                this.moveSpeed -= randomNumber + globals.levelCrazy;
             }, randomNumber * 1000);
+        }
+    }
+
+    detectRangeActivationBetweenEnemiesAndPlayer(player)
+    {
+        // Check if the player is overlapping with the player
+        const x1 = player.xPos + player.hitBox.xOffset;
+        const y1 = player.yPos + player.hitBox.yOffset;
+        const w1 = player.hitBox.xSize;
+        const h1 = player.hitBox.ySize;
+
+        const x2 = this.xPos + this.hitBox.xOffset - this.rangeActivation;
+        const y2 = this.yPos + this.hitBox.yOffset - this.rangeActivation;
+        const w2 = this.hitBox.xSize + this.rangeActivation;
+        const h2 = this.hitBox.ySize + this.rangeActivation;
+
+        // const isOverLap = rectIntersect(x1, y1, w1, h1, x2, y2, w2, h2);
+        this.isRangeActivationRunning = this.rectIntersect(x1, y1, w1, h1, x2, y2, w2, h2);
+
+        if (this.isRangeActivationRunning)
+        {
+            let randomNumber = Math.floor(Math.random() * this.life) + 1;
+
+            // if (randomNumber / globals.levelCrazy > this.life / 2) return;
+
+            this.moveSpeed += randomNumber //+ globals.levelCrazy;
+
+            setTimeout(() => {
+                this.moveSpeed -= randomNumber //+ globals.levelCrazy;
+            }, randomNumber * 10);
+        }
+
+        return this.isRangeActivationRunning
+    }
+
+    detectCollisionsBetweenPlayerAndSprite(player)
+    {
+
+        const isOverLap = this.detectCollisionsBetweenSpriteAndSprite(player);
+
+        if (isOverLap)
+        {
+            this.isCollidingWithPlayer = true;
+
+            player.isCollidingWithEnemies = true;
+
+            player.interaction()
+        }
+        else
+        {
+            this.isCollidingWithPlayer = false;
+            // player.isCollidingWithSprite = false;
         }
     }
 
