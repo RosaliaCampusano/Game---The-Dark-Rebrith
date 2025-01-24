@@ -5,10 +5,8 @@ import ImageSet from "../ImageSet.js";
 
 export class Particle
 {
-    constructor(id, state, xPos, yPos, radius, alpha, physics)
+    constructor( xPos, yPos, radius, alpha, physics)
     {
-        this.id =          id;
-        this.state =    state;
         this.xPos =      xPos;
         this.yPos =      yPos;
         this.radius =  radius;
@@ -28,9 +26,7 @@ export class ParticleLight extends Particle
 
     constructor (xPos, yPos, radius, alpha, physics)
     {
-        super(ParticleID.SUN, 
-            ParticleState.ON, 
-            xPos, yPos, radius, 
+        super(xPos, yPos, radius, 
             alpha, physics);
     }
 
