@@ -43,7 +43,6 @@ export default function render()
 
 function drawGame()
 {
-
     displayHUD();
     globals.ctx.clearRect(0, 0, globals.canvas.width, globals.canvas.height);
     globals.ctxHUD.clearRect(0, 0, globals.canvasHUD.width, globals.canvasHUD.height);
@@ -120,7 +119,7 @@ function renderSprites()
             sprite.imageSet.xSize * 0.6, sprite.imageSet.ySize * 0.6
         );
         
-     /*    drawHitBox(sprite); */
+        // drawHitBox(sprite);
     }
 }
 
@@ -280,6 +279,35 @@ function renderLoading()
     }
 }
 
+function renderParticlesForMainMenu() 
+{
+    const ctx = globals.ctx;
+    globals.particles.forEach((particle) =>
+    {
+        particle.xPos += particle.physics.velocityX;
+        particle.yPos += particle.physics.velocityY;
+
+        if (particle.xPos < 0 || particle.xPos > globals.canvas.width) 
+        {
+            particle.physics.velocityX *= -1;  
+        }
+        if (particle.yPos < 0 || particle.yPos > globals.canvas.height) 
+        {
+            particle.physics.velocityY *= -1;  
+        }
+
+        ctx.fillStyle = particle.color;
+        ctx.beginPath();
+        ctx.arc(particle.xPos, particle.yPos, particle.radius, 0, Math.PI * 2, false);
+        ctx.fill();
+
+        particle.alpha += (Math.random() - 0.5) * 0.01; 
+        particle.alpha = Math.max(0.3, Math.min(0.8, particle.alpha)); 
+    });
+    
+}
+
+
 function renderMainMenu() 
 {
     if (!renderMainMenu.state) {
@@ -330,7 +358,7 @@ function renderMainMenu()
     if (!renderMainMenu.eventListenerAdded) 
     {
         document.addEventListener("keydown", handlerKeyDownMainMenu);
-        renderMainMenu.eventListenerAdded = false;
+        renderMainMenu.eventListenerAdded = true;
     }
 
     for (let j = 0; j < globals.spriteMenu.length; j++) 
@@ -350,6 +378,8 @@ function renderMainMenu()
             sprite.imageSet.xSize, sprite.imageSet.ySize
         );  
     }
+
+    renderParticlesForMainMenu();
 
     function handleMenuSelection(selectedIndex) {
         const selectedOption = MainMenuTexts[selectedIndex][0];
@@ -400,46 +430,60 @@ function renderMainMenu()
 
 function renderParticles()
 {
-    for ( let i = 0; i < globals.particles.length; i++)
+    const ctx = globals.ctxHUD;
+    globals.particles.forEach((particle) => {
+        if (particle.xPos >= 50) particle.xPos = 5;
+        if (particle.yPos <= 50) particle.yPos = 35 + Math.random() * 10;
+
+        particle.xPos += particle.physics.velocityX;
+        particle.yPos += particle.physics.velocityY;
+
+        if (particle.xPos < 0 || particle.xPos > 45) 
         {
-    
-                const particle = globals.particles[i];
-                //Calculate the position in the TileMap to draw
-                const xTile = particle.imageSet.xInit + particle.frames.frameCounter * particle.imageSet.xGridSize + particle.imageSet.xOffset;
-                const yTile = particle.imageSet.yInit + particle.state * particle.imageSet.yGridSize + particle.imageSet.yOffset;
-    
-                const xPos = Math.floor(particle.xPos);
-                const yPos = Math.floor(particle.yPos);
-            
-                //Draw the new frame of sprite in the right position
-                globals.ctxHUD.drawImage(
-                    globals.tileSets[Tile.SIZE_SPRITE],
-                    xTile, yTile,
-                    particle.imageSet.xSize, particle.imageSet.ySize,
-                    xPos, yPos,
-                    particle.imageSet.xSize * 0.6, particle.imageSet.ySize * 0.6
-                );
-            }
+            particle.physics.velocityX *= -1;  
+        }
+        if (particle.yPos < 0 || particle.yPos > 10) 
+        {
+            particle.physics.velocityY *= -1;  
+        }
+
+        let colors = ["rgba(200, 0, 0, 0.6)", "rgba(200, 153, 0, 0.6)", "rgba(200, 63, 0, 0.6)"];
+
+        let color = colors[Math.floor(Math.random() * colors.length)];
+
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(particle.xPos, particle.yPos, particle.radius, 0, Math.PI * 2, false);
+        ctx.fill();
+
+        particle.alpha += (Math.random() - 0.5) * 0.01; 
+        particle.alpha = Math.max(0.3, Math.min(0.8, particle.alpha)); 
+    });
 }
 
-function renderParticlesForGameOver() {
-    globals.particles.forEach((particle) => 
+function renderParticlesForHighScore() {
+
+    const ctx = globals.ctx;
+    globals.particles.forEach((particle) =>
     {
-        const ctx = globals.ctx;
-
-        ctx.fillStyle = `rgba(215, 0, 0, ${particle.alpha})`; 
-        ctx.fillRect(particle.xPos - particle.radius / 2, particle.yPos - particle.radius / 2, particle.radius, particle.radius);
-
         particle.physics.velocity += 0.1; 
 
-        particle.yPos += particle.physics.velocity;
-
-        if (particle.yPos > globals.canvas.height) 
+        particle.yPos += particle.physics.velocityY;
+        
+        if (particle.yPos < 0 || particle.yPos > globals.canvas.height) 
         {
-            particle.yPos = -particle.radius; 
-            particle.xPos = Math.random() * globals.canvas.width; 
+            particle.xPos = Math.random() * globals.canvas.width
+            particle.physics.velocityY *= -1;
             particle.physics.velocity = Math.random() * 2 + 1; 
         }
+
+        ctx.fillStyle = `rgba(215, 0, 0, ${particle.alpha})`;
+        ctx.beginPath();
+        ctx.arc(particle.xPos, particle.yPos, particle.radius, 0, Math.PI * 2, false);
+        ctx.fill();
+
+        particle.alpha += (Math.random() - 0.5) * 0.01; 
+        particle.alpha = Math.max(0.3, Math.min(0.8, particle.alpha)); 
     });
 }
 
@@ -497,21 +541,12 @@ function renderHighscore()
         "3RD"
     ];
 
-    const name = 
-    [ 
-        "AAA",
-        "BBB",
-        "CCC"
-    ];
-
-    const score = 
-    [
-        "012000",
-        "009000",
-        "007000"
-    ];
+    let scoreTemplate = "000000";
 
     for (let i = 0; i < position.length; i++) {
+
+        // var score = globals.historyScore[i][1].toString(); 
+        let score = scoreTemplate.substr(0, scoreTemplate.length - globals.historyScore[i][1].toString().length) + globals.historyScore[i][1];
 
         globals.ctx.textAlign = 'right';
         globals.ctx.fillStyle = 'white';
@@ -519,16 +554,15 @@ function renderHighscore()
 
         globals.ctx.textAlign = 'center';
         globals.ctx.fillStyle = 'white';
-        globals.ctx.fillText(name[i], xName, yCoordinate);
+        globals.ctx.fillText(globals.historyScore[i][0], xName, yCoordinate);
 
         globals.ctx.textAlign = 'auto';
         globals.ctx.fillStyle = 'white';
-        globals.ctx.fillText(score[i], xScore, yCoordinate);
+        globals.ctx.fillText(score, xScore, yCoordinate);
 
         yCoordinate += spaceLine;
     
     }
-
     ////////////
     globals.ctx.fillStyle = 'white';
     globals.ctx.textAlign = 'center'
@@ -538,6 +572,8 @@ function renderHighscore()
     globals.ctx.font = '10px emulogic';
     globals.ctx.fillStyle = 'lightgray';
     globals.ctx.fillText(WayOut, canvasDividedBy2, 260);
+
+    renderParticlesForHighScore();
 
     function handlerKeyDownhighscore(event)
     {
@@ -552,16 +588,30 @@ function renderHighscore()
 
 function renderParticleControl() 
 {
-    globals.particles.forEach(particle => 
+    const ctx = globals.ctx;
+    globals.particles.forEach((particle) =>
     {
-        particle.radius += particle.growth;
-        if (particle.radius > 3 || particle.radius < 1) {
+        particle.xPos += particle.physics.velocityX;
+
+        if (particle.xPos < 0 || particle.xPos > globals.canvas.width) 
+        {
+            particle.physics.velocityX *= -1;  
+        }
+
+        if (particle.radius > 5 || particle.radius < 1) 
+        {
             particle.growth *= -1; 
         }
-        globals.ctx.beginPath();
-        globals.ctx.arc(particle.xPos, particle.yPos, particle.radius, 0, Math.PI * 2);
-        globals.ctx.fillStyle = `rgba(225, 215, 250, ${particle.alpha})`; 
-        globals.ctx.fill();
+        
+        particle.radius += particle.growth * 0.1;
+
+        ctx.fillStyle = `rgba(225, 215, 250, ${particle.alpha})`;
+        ctx.beginPath();
+        ctx.arc(particle.xPos, particle.yPos, particle.radius, 0, Math.PI * 2, false);
+        ctx.fill();
+
+        particle.alpha += (Math.random() - 0.5) * 0.01; 
+        particle.alpha = Math.max(0.3, Math.min(0.8, particle.alpha)); 
     });
 }
 
@@ -569,8 +619,6 @@ function renderControls()
 {
 
     deleteHUD();
-    renderParticleControl();
-
 
     for (let i = 0; i < globals.spriteControls.length; i ++)
     {
@@ -648,13 +696,15 @@ function renderControls()
         globals.ctx.fillStyle = 'lightgray';
         globals.ctx.fillText(WayOut, canvasDividedBy2, 265);
 
+        renderParticleControl();
+        
         function handlerKeyDownControls(event) {
             if (event.key === 'Escape') 
             {  
-            
-                globals.gameState = Game.MAIN_MENU; 
-                renderMainMenu();  
                 document.removeEventListener('keydown', handlerKeyDownControls); 
+                globals.gameState = Game.MAIN_MENU;  
+                renderMainMenu();  
+                renderControls.eventListenerAdded = false;
             }
         }
         
@@ -664,7 +714,6 @@ function renderControls()
             renderControls.eventListenerAdded = true;
         }
 }
-
 
 function renderStory() {
     
@@ -755,9 +804,10 @@ function renderStory() {
 
         function handlerKeyDownStory(event) {
             if (event.key === 'Escape') {  
+                document.removeEventListener('keydown', handlerKeyDownStory); 
                 globals.gameState = Game.MAIN_MENU;  
                 renderMainMenu(); 
-                document.removeEventListener('keydown', handlerKeyDownStory); 
+                renderStory.eventListenerAdded = false;
             }
         }
     
@@ -771,9 +821,40 @@ function renderStory() {
     }
 }
 
-    function renderGameOver() {
+function renderParticlesForGameOver()
+{
+
+    const ctx = globals.ctx;
+    globals.particles.forEach((particle) =>
+    {
+        if (particle.color != "rgba(100, 100, 100, 0.6)") return
+        particle.yPos += particle.physics.velocityY;
+        particle.xPos += particle.physics.velocityX;
+
+        if (particle.yPos < 0 || particle.yPos > globals.canvas.height) 
+        {
+            particle.physics.velocityY *= -1;  
+        }
+        if (particle.xPos < 0 || particle.xPos > globals.canvas.width) 
+        {
+            particle.physics.velocityX *= -1;
+        }
+
+        ctx.fillStyle = particle.color;
+        ctx.beginPath();
+        ctx.arc(particle.xPos, particle.yPos, particle.radius, 0, Math.PI * 2, false);
+        ctx.fill();
+
+        particle.alpha += (Math.random() - 0.5) * 0.01; 
+        particle.alpha = Math.max(0.3, Math.min(0.8, particle.alpha)); 
+    });
+}
+
+function renderGameOver() {
 
         globals.canvas.style.filter = 'none';
+        globals.time = globals.defaultTime;
+        globals.life = globals.maxLife;
         deleteHUD();
 
         if (!renderGameOver.state) 
@@ -810,8 +891,6 @@ function renderStory() {
                 sprite.imageSet.xSize, sprite.imageSet.ySize * 1.1
             );
         }
-
-        renderParticlesForGameOver();
     
         const canvasDividedBy2 = globals.canvas.width / 2;
         globals.ctx.textAlign = 'center';
@@ -833,6 +912,8 @@ function renderStory() {
             globals.ctx.fillText(option.text, canvasDividedBy2, yStart + index * yStep);
         });
 
+        renderParticlesForGameOver();
+
         function handlerKeyDownGameOver(event) {
             if (event.key === "s") 
                 {
@@ -845,9 +926,12 @@ function renderStory() {
                 globals.gameState = options[state.selectedOption].state;
                 document.removeEventListener("keydown", handlerKeyDownGameOver);
                 if (globals.gameState === Game.PLAYING) 
-                    {
+                {
                     drawGame();
                 }
+
+                renderGameOver.state = undefined;
+                renderGameOver.eventListenerAdded = false;
             }
         }
         
@@ -858,5 +942,6 @@ function renderStory() {
         
         if (globals.gameState === Game.GAME_OVER) {
             renderGameOver();
+            requestAnimationFrame(renderGameOver); 
         }
     }
