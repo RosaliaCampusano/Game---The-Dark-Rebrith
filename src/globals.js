@@ -26,6 +26,8 @@ export default
 
     sprites: [],
 
+    spritesAttack: [],
+
     spritesPlayers: [],
 
     activedPlayer: null,
@@ -59,11 +61,17 @@ export default
 
     highScore: 0,
 
+    historyScore: [],
+
     time: 0,
+
+    levelCrazy: 1,
+    
+    defaultTime: 0,
 
     camera: {},
 
     saturate: 1,
 
-    particles: []
+    particles: [],
 }
