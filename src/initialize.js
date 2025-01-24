@@ -55,14 +55,13 @@ function initVars()
 
     globals.life = 125;
     globals.time = Time.time;
-}
-
-function initLocalStorage()
-{
-    if (!localStorage.getItem("highScore"))
-    {
-        localStorage.setItem("highScore", 0);
-    }
+    globals.score = 0;
+    globals.historyScore = [
+        ["AAA", 12000], 
+        ["BBB", 9000], 
+        ["CCC", 2000]
+    ];
+    globals.highScore = globals.historyScore[0][1];
 }
 
 function initEvents()
@@ -122,6 +121,8 @@ function initParticles()
 {
         initParticlesControls();
         initParticlesForHighscore();
+        initParticlesForMainMenu();
+        initParticlesForGameOver();
 }
 function initSpritesHUD()
 {
@@ -256,17 +257,14 @@ function initJumpGuy()
 
 function initAttack()
 {
-    const imageSet = new ImageSet(287, 258, 19, 22, 17, 19, 0, 0);
-    const frames =  new Frames(1);
+    const attack = new Attack();
+    /* const attack1 = new Attack();
+    const attack2 = new Attack();
+    const attack3 = new Attack();
+    const attack4 = new Attack(); */
 
-    const physics = new Physics(40, 40, 0.98);
-
-    const hitBox = new HitBox(6, 6, 3, 3);
-
-    const attack = new Attack(SpriteID.ATTACK, State.ACTIVE, -10, -10, imageSet, frames, physics, hitBox);
-
+    // globals.sprites.push(attack, attack1, attack2, attack3, attack4);
     globals.sprites.push(attack);
-
 } 
 
 function initOldJosephs()
@@ -466,20 +464,25 @@ function initSunLight()
 
 function initParticlesControls()
 {
-    const numParticles = 50;    
-    globals.particles = [];     
+    const numParticles = 50;
+    const radius = 2;
+    const alpha = 1;
 
-    for (let i = 0; i < numParticles; i++) {
-        const xPos = Math.random() * globals.canvas.width + 2;  
-        const yPos = Math.random() * globals.canvas.height + 5; 
-        const radius = Math.random() * 2 + 1;              
-        const alpha = 0.5 + Math.random() * 0.5;           
+    for (let i = 0; i < numParticles; i++) 
+    {
+        const xPos = Math.random() * globals.canvas.width;  
+        const yPos = Math.random() * globals.canvas.height; 
 
-        const particle = new ParticleLight(xPos, yPos, radius, alpha);
-        globals.particles.push(particle);
+        const velocityX = (Math.random() * 2 + 1) * (Math.random() < 0.5 ? -1 : 1); 
+        const velocityY = (Math.random() * 2 + 1) * (Math.random() < 0.5 ? -1 : 1);
 
-}
+        const growth = Math.random() * 0.1 + 0.05;
 
+        const particle = new ParticleLight(xPos, yPos, radius, alpha, { velocityX, velocityY });
+        particle.growth = growth;
+
+        globals.particles.push(particle); 
+    }
 }
 
 function initParticlesForHighscore() 
@@ -499,6 +502,64 @@ function initParticlesForHighscore()
         const particleHighScore = new ParticleLight(xPos, yPos, radius, alpha, { velocity, acceleration: 0 });
         globals.particles.push(particleHighScore);
     }
+}
+
+function initParticlesForMainMenu() 
+{
+    const numParticles = 80;  
+    const minRadius = 2;
+    const maxRadius = 5;  
+    const alpha = 0.6; 
+
+    globals.particles = []; 
+
+    const centerX = globals.canvas.width / 2;  
+    const centerY = globals.canvas.height / 2;
+
+    for (let i = 0; i < numParticles; i++) {
+        const angle = Math.random() * Math.PI * 2; 
+        const speed = Math.random() * 2 + 1; 
+        const radius = Math.random() * (maxRadius - minRadius) + minRadius;  
+
+        const colors = [
+            `rgba(200, 0, 0, ${alpha})`,  
+            `rgba(100, 100, 100, ${alpha})`,  
+            `rgba(50, 50, 50, ${alpha})` 
+        ];
+        const color = colors[Math.floor(Math.random() * colors.length)];
+
+        globals.particles.push({xPos: centerX, yPos: centerY,radius,alpha,color,physics: {velocityX: Math.cos(angle) * speed,velocityY: Math.sin(angle) * speed,decay: 0.02  }});
+    }
+}
+
+function initParticlesForGameOver()
+{
+    const numParticles = 50;
+    const radius = 2;
+    const alpha = 1;
+    const explosionCenterX = globals.canvas.width / 2;  
+    const explosionCenterY = globals.canvas.height / 2; 
+    
+    for (let i = 0; i < numParticles; i++) {
+    
+        const angle = Math.random() * Math.PI * 2;  
+        const distance = Math.random() * 50 + 10; 
+        
+        const xPos = explosionCenterX + Math.cos(angle) * distance;
+        const yPos = explosionCenterY + Math.sin(angle) * distance;
+
+        const velocityX = (Math.random() * 2 + 1) * (Math.random() < 0.5 ? -1 : 1); 
+        const velocityY = (Math.random() * 2 + 1) * (Math.random() < 0.5 ? -1 : 1);
+    
+        const growth = Math.random() * 0.1 + 0.05;
+    
+        const particle = new ParticleLight(xPos, yPos, radius, alpha, { velocityX, velocityY });
+        particle.growth = growth;
+        particle.life = 100; 
+    
+        globals.particles.push(particle); 
+    }
+    
 }
 
 
@@ -557,6 +618,5 @@ export
     initLevel,
     initLoadSprite,
     initCamera,
-    initLocalStorage,
     initParticles
 }
