@@ -164,7 +164,7 @@ function initPlayer()
 
     const hitBox = new HitBox(10, 10, 6, 8);
 
-    const player = new Player(SpriteID.PLAYER, State.STILL_UP, 100, 10, imageSet, frames, physics, hitBox);
+    const player = new Player(SpriteID.PLAYER, State.STILL_DOWN, 92, 0, imageSet, frames, physics, hitBox);
 
     globals.sprites.push(player);
 }
