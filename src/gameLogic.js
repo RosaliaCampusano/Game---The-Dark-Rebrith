@@ -29,7 +29,7 @@ export default function update()
             updateControls();
             break;
         case Game.HIGHSCORE:
-            // updateHighScore();
+            updateHighScore();
             break;
         default:
             console.error("Error: Game State invalid");
@@ -39,12 +39,15 @@ export default function update()
 
 function updateHighScore()
 {
-    globals.highScore = localStorage.getItem("highScore");
+    
+    globals.historyScore.forEach((score, index, arr) => {
+        if (globals.score > score[1])
+        {
+            arr.splice(index, 0, ["XXX", globals.score]);
+        }  
+    });
 
-    if(globals.score > globals.highScore)
-    {
-        localStorage.setItem("highScore", globals.score);
-    }
+    globals.highScore = globals.historyScore[0][1];
 }
 
 function updateUpdateTime()
@@ -69,16 +72,8 @@ function playGame()
     updateHUD();
     updateSprites();
     updateCamera();
-    updatePaticles();
+    // updatePaticles();
     detectCollisions();
-    updateSaturate()
-}
-
-function updateSaturate() 
-{
-    //Not life, just time
-    globals.saturate = (globals.maxLife + globals.life) / globals.maxLife;
-    globals.saturate--;
 }
 
 function updatePaticles()
