@@ -1,12 +1,12 @@
 import { SpriteID, State } from "../constants.js";
 import Frames from "../Frames.js";
+import globals from "../globals.js";
 import HitBox from "../HitBox.js";
 import ImageSet from "../ImageSet.js";
 import Sprite from "./Sprites.js";
 
 export class ThroneHUD extends Sprite
 {
-    animate = false;
     constructor()
     {
         super(
@@ -23,28 +23,12 @@ export class ThroneHUD extends Sprite
         this.xPos = 223;
         this.yPos = 20;
 
-        if (this.animate)
-        {
-            this.updateAnimationFrames()
-        }
+        this.updateAnimationFrames()
     }
 
     updateAnimationFrames(){
-        // Increment the animation frame counter
-        this.frames.framesChangeCounter++;
-                
-        // If the counter has reached the speed, increment the frame counter and reset the counter
-        if (this.frames.framesChangeCounter === this.frames.speed)
-        {
-            this.frames.frameCounter++;
-            this.frames.framesChangeCounter = 0;
-        }
-
-        // If the frame counter has reached the number of frames per state, reset it to 0
-        if (this.frames.frameCounter === this.frames.framesPerState)
-        {
-            this.frames.frameCounter = 0;
-            this.animate = false;
-        }
+        this.frames.frameCounter = Math.floor(globals.defaultTime / globals.time) <= this.frames.framesPerState ? Math.floor(globals.defaultTime / globals.time) : this.frames.framesPerState;
+        globals.saturate = 2 - (this.frames.framesPerState + this.frames.frameCounter) / this.frames.framesPerState;
+        globals.levelCrazy = (this.frames.framesPerState + this.frames.frameCounter) / this.frames.framesPerState;;
     }
 }
