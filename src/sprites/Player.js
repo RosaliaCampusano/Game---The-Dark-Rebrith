@@ -10,9 +10,28 @@ export class Player extends Sprite
         isPoisoned: false
     };
 
+    defaultPos ={
+        xPos: 0,
+        yPos: 0
+    }
+
+    default = {
+        imageSet: {x: 0, y: 0},
+    }
+
+    isCollidingWithEnemies = false;
+
     constructor(id, state, xPos, yPos, imageSet, frames, physics, hitBox)
     {
         super(id, state, xPos, yPos, imageSet, frames, physics, hitBox)
+
+        this.defaultPos = {
+            xPos: this.xPos,
+            yPos: this.yPos
+        }
+
+        this.default.imageSet.x = imageSet.xInit;
+        this.default.imageSet.y = imageSet.yInit;
 
         if (globals.activedPlayer == null) {
             globals.activedPlayer = this
@@ -21,14 +40,41 @@ export class Player extends Sprite
         globals.spritesPlayers.push(this)
         
     }
+
+    flicker = false;
     
     update()
     {
         super.update();
 
+        if (this.isCollidingWithEnemies)
+        {
+            this.imageSet.xInit = this.default.imageSet.x + 1000;
+            this.imageSet.yInit = this.default.imageSet.x + 1000;
+
+            if (this.flicker)
+            {
+                this.imageSet.xInit = this.default.imageSet.x;
+                this.imageSet.yInit = this.default.imageSet.y;
+                this.isCollidingWithEnemies = false;
+            }
+
+            setInterval(() => {
+                this.flicker = !this.flicker;
+            }, 100);
+        }else
+        {
+            this.imageSet.xInit = this.default.imageSet.x;
+            this.imageSet.yInit = this.default.imageSet.y;
+        }
+
         if (globals.life <= 15)
         {
             globals.gameState = Game.OVER
+            globals.life = globals.maxLife;
+            this.xPos = this.defaultPos.xPos;
+            this.yPos = this.defaultPos.yPos;
+            globals.activedPlayer = globals.spritesPlayers[0]
         }
 
         this.handlerPoisoned()
