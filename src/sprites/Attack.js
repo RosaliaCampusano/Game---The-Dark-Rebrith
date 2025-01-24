@@ -1,5 +1,9 @@
 import { SpriteID, State } from "../constants.js";
+import Frames from "../Frames.js";
 import globals from "../globals.js";
+import HitBox from "../HitBox.js";
+import ImageSet from "../ImageSet.js";
+import Physics from "../Physics.js";
 import Sprite from "./Sprites.js";
 
 export class Attack extends Sprite
@@ -7,6 +11,23 @@ export class Attack extends Sprite
     countFrameAttack = 0;
     moveSpeed = 1.8;
     blueExplotion = {};
+    left = false;
+    right = false;
+    top = false;
+    bottom = false;
+
+    constructor()
+    {
+        super(
+            SpriteID.ATTACK, 
+            State.ACTIVE, 
+            -10, -10, 
+            new ImageSet(287, 258, 19, 22, 17, 19, 0, 0), 
+            new Frames(1), 
+            new Physics(40, 40, 0.98), 
+            new HitBox(6, 6, 3, 3)
+        )
+    }
 
     update()
     {
@@ -20,6 +41,26 @@ export class Attack extends Sprite
                 this.blueExplotion = sprite
                 this.blueExplotion.update();
             }
+        }
+
+        if (this.left)
+        {
+            this.leftAttack(globals.activedPlayer)
+        }
+
+        if (this.right)
+        {
+            this.rightAttack(globals.activedPlayer)
+        }
+
+        if (this.top)
+        {
+            this.upAttack(globals.activedPlayer)
+        }
+
+        if (this.bottom)
+        {
+            this.downAttack(globals.activedPlayer)
         }
     }
 
@@ -75,6 +116,7 @@ export class Attack extends Sprite
             player.state = State.STILL_LEFT_WIZARD
             this.blueExplotion.getPosition(this.xPos, this.yPos)
             this.defaultPositionAndFrame()
+            this.left = false;
         }
     }
 
