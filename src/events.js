@@ -1,4 +1,4 @@
-import { Key } from "./constants.js";
+import { Key, Sound } from "./constants.js";
 import globals from "./globals.js";
 
 export function keydownHandler(event)
@@ -35,6 +35,7 @@ export function keydownHandler(event)
         
         case Key.ENTER:
             globals.action.enter = true;
+            
             break;
     }
 }
@@ -74,5 +75,17 @@ export function keyupHandler(event)
             case Key.ENTER:
                 globals.action.enter = false;
                 break;
+    }
+}
+
+export function updateMusic()
+{
+    const buffer = 0.28;
+    const music = globals.sounds[Sound.GAME_MUSIC];
+    
+    if( music.currentTime > music.duration - buffer)
+    {
+        music.currentTime = 0;
+        music.play();
     }
 }
