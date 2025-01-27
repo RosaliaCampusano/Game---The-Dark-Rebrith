@@ -9,11 +9,19 @@ export const Game =
     MAIN_MENU:               3,
     STORY:                   4,
     CONTROLS:                5,
-    HIGHSCORE:               6                  
+    HIGHSCORE:               6,
+    WIN:                     7                  
 };
 
 //Game Speed
 export const FPS = 30;
+
+export const Sound = {
+
+    NO_SOUND:   -1,
+    GAME_MUSIC:  0,
+    EXPLOTION:   1,
+}
 
 export const MainMenuTexts = 
 [
@@ -55,7 +63,8 @@ export const SpriteID = {
     ATTACK:                 25,
     LOAD_JOSEPH:            26,
     BLUE_EXPLOTION:         27,
-    RED_EXPLOTION:          28
+    RED_EXPLOTION:          28,
+    WIN_SCREEN:             29  
 }
 
 export const ParticleID = 
