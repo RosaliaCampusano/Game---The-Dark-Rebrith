@@ -36,6 +36,10 @@ export default function render()
             renderGameOver();
             break;
 
+        case Game.WIN:
+            renderWinScreen();
+            break;
+
         default: 
             console.error("Error: Game State invalid");
     }
@@ -52,6 +56,7 @@ function drawGame()
     globals.canvas.style.filter = `saturate(${globals.saturate})`
     moveCamera();
     renderMap();
+  /*   renderMapLevelTwo(); */
 
     renderHUD();
     renderSprites();
@@ -154,7 +159,6 @@ function restoreCamera()
 
 function renderMap()
 {
-
     const brickSize = globals.level.imageSet.xGridSize;
     const levelData = globals.level.data;
 
@@ -164,6 +168,34 @@ function renderMap()
     for(let i = 0; i < num_fil; i++)
     {
         for(let j = 0; j < num_col; j++)
+        {
+            const xTile = (levelData[i][j] - 1) * brickSize;
+            const yTile = 0;
+            const xPos = j * brickSize;
+            const yPos = i * brickSize;
+
+            globals.ctx.drawImage(
+                globals.tileSets[Tile.SIZE_16],
+                xTile, yTile,
+                brickSize, brickSize,
+                xPos, yPos,
+                brickSize, brickSize
+            );
+        }
+    }
+}
+
+function renderMapLevelTwo()
+{
+    const brickSize = globals.level.imageSet.xGridSize;
+    const levelData = globals.level[1].data;
+
+    const num_fil = levelData.length;
+    const num_col = levelData[0].length;
+
+    for(i = 0; i < num_fil; i++)
+    {
+        for( let j = 0; j < num_col; j++)
         {
             const xTile = (levelData[i][j] - 1) * brickSize;
             const yTile = 0;
@@ -413,7 +445,7 @@ function renderMainMenu()
 
     function removeKeyListener() {
         document.removeEventListener("keydown", handlerKeyDownMainMenu);
-        renderMainMenu.eventListenerAdded = false;
+        renderMainMenu.eventListenerAdded = true;
     }
 
     function addKeyListener() {
@@ -715,110 +747,121 @@ function renderControls()
         }
 }
 
-function renderStory() {
-    
-        if (!renderStory.state) {
-            renderStory.state = {
-                currentLine: -1, 
-                story: [
-                    "Joseph's delusions have only been increasing,",
-                    "his obsession with the cursed throne",
-                    "is consuming his soul.",
-                    "He swears that every evening goblins are after",
-                    "the throne and he has to stop them",
-                    "and the strange shadows that appear",
-                    "to mug him in the course of the night.",
-                    "His only salvation is the dawn",
-                    "where it seems to be the only moment of calm."
-                ],
-                lineSpacing: 15, 
-                baseY: 85,
-                timer: 0, 
-                delayBetweenLines: 70, 
-                maxLinesVisible: 9,
-            };
-        }
-    
-        const state = renderStory.state;
-    
-        globals.ctx.clearRect(0, 0, globals.canvas.width, globals.canvas.height);
+function renderStory() 
+{
 
-        for (let i = 0; i < globals.spriteStory.length; i++) {
-            const sprite = globals.spriteStory[i];
-    
-            const xTile = sprite.imageSet.xInit + sprite.frames.frameCounter * sprite.imageSet.xGridSize + sprite.imageSet.xOffset;
-            const yTile = sprite.imageSet.yInit + sprite.state * sprite.imageSet.yGridSize + sprite.imageSet.yOffset;
-    
-            const xPos = Math.floor(sprite.xPos);
-            const yPos = Math.floor(sprite.yPos);
-    
-            globals.ctx.drawImage(
-                globals.tileSets[Tile.SIZE_SPRITE],
-                xTile, yTile,
-                sprite.imageSet.xSize, sprite.imageSet.ySize,
-                xPos, yPos,
-                sprite.imageSet.xSize * 1.5, sprite.imageSet.ySize
-            );
-        }
-    
-        const canvasDividedBy2 = globals.canvas.width / 2;
-    
-        const title = "STORY";
-        globals.ctx.font = '25px emulogic';
-        globals.ctx.strokeStyle = "white";
-        globals.ctx.strokeText(title, canvasDividedBy2, 40);
-        globals.ctx.fillStyle = "black";
-        globals.ctx.fillText(title, canvasDividedBy2, 40);
-    
-        const chapter = "CHAPTER 1";
-        globals.ctx.font = '12px emulogic';
-        globals.ctx.fillStyle = 'white';
-        globals.ctx.fillText(chapter, canvasDividedBy2, 65);
-    
-        globals.ctx.textAlign = 'center';
-        globals.ctx.font = '7px emulogic';
-        globals.ctx.fillStyle = 'white';
-    
-        const visibleStart = Math.max(0, state.currentLine - state.maxLinesVisible + 1);
-
-        for (let i = visibleStart; i <= state.currentLine; i++) 
-            {
-            const yPosition = state.baseY + (i - visibleStart) * state.lineSpacing;
-            globals.ctx.fillText(state.story[i], canvasDividedBy2, yPosition);
-        }
-        state.timer += globals.deltaTime;
-
-        if (state.timer >= state.delayBetweenLines && state.currentLine < state.story.length - 1) 
-        {
-            state.timer = 0; 
-            state.currentLine++;
-        }
-    
-        globals.ctx.fillStyle = 'gray';
-        globals.ctx.fillText("-----------------------------------------------", canvasDividedBy2, 49);
-        globals.ctx.fillText("-----------------------------------------------", canvasDividedBy2, 260);
-
-        globals.ctx.font = '8px emulogic';
-        globals.ctx.fillStyle = 'lightgray';
-        globals.ctx.fillText("Press ESC to exit", canvasDividedBy2, 280);
-
-        function handlerKeyDownStory(event) {
-            if (event.key === 'Escape') {  
-                document.removeEventListener('keydown', handlerKeyDownStory); 
-                globals.gameState = Game.MAIN_MENU;  
-                renderMainMenu(); 
-                renderStory.eventListenerAdded = false;
-            }
-        }
-    
-        if (!renderStory.eventListenerAdded) {
-            document.addEventListener('keydown', handlerKeyDownStory);
-            renderStory.eventListenerAdded = true;
-        }
-    
-        if (globals.gameState !== Game.MAIN_MENU) {
-            requestAnimationFrame(renderStory); 
+    if (!renderStory.state) {
+        renderStory.state = {
+            currentLine: 0,  
+            currentChar: 0, 
+            story: [
+                "Joseph's delusions have only been increasing,",
+                "his obsession with the cursed throne",
+                "is consuming his soul.",
+                "He swears that every evening goblins are after",
+                "the throne and he has to stop them",
+                "and the strange shadows that appear",
+                "to mug him in the course of the night.",
+                "His only salvation is the dawn",
+                "where it seems to be the only moment of calm."
+            ],
+            lineSpacing: 15,
+            baseY: 85,
+            timer: 0,  
+            delayBetweenLines: 3,  
+            delayBetweenChars: 3,  
+            maxLinesVisible: 9, 
+        };
     }
+
+    const state = renderStory.state;
+
+    globals.ctx.clearRect(0, 0, globals.canvas.width, globals.canvas.height);
+
+
+    for (let i = 0; i < globals.spriteStory.length; i++) {
+        const sprite = globals.spriteStory[i];
+        const xTile = sprite.imageSet.xInit + sprite.frames.frameCounter * sprite.imageSet.xGridSize + sprite.imageSet.xOffset;
+        const yTile = sprite.imageSet.yInit + sprite.state * sprite.imageSet.yGridSize + sprite.imageSet.yOffset;
+        const xPos = Math.floor(sprite.xPos);
+        const yPos = Math.floor(sprite.yPos);
+
+        globals.ctx.drawImage(
+            globals.tileSets[Tile.SIZE_SPRITE],
+            xTile, yTile,
+            sprite.imageSet.xSize, sprite.imageSet.ySize,
+            xPos, yPos,
+            sprite.imageSet.xSize * 1.5, sprite.imageSet.ySize
+        );
+    }
+
+    const canvasDividedBy2 = globals.canvas.width / 2;
+
+    const title = "STORY";
+    globals.ctx.font = '25px emulogic';
+    globals.ctx.strokeStyle = "white";
+    globals.ctx.strokeText(title, canvasDividedBy2, 40);
+    globals.ctx.fillStyle = "black";
+    globals.ctx.fillText(title, canvasDividedBy2, 40);
+
+    const chapter = "CHAPTER 1";
+    globals.ctx.font = '12px emulogic';
+    globals.ctx.fillStyle = 'white';
+    globals.ctx.fillText(chapter, canvasDividedBy2, 65);
+
+    globals.ctx.textAlign = 'center';
+    globals.ctx.font = '7px emulogic';
+    globals.ctx.fillStyle = 'white';
+
+    const visibleStart = Math.max(0, state.currentLine - state.maxLinesVisible + 1);
+
+    for (let i = visibleStart; i <= state.currentLine; i++) {
+        if (state.story[i]) { 
+            const yPosition = state.baseY + (i - visibleStart) * state.lineSpacing;
+            const lineText = state.story[i];
+
+            const visibleText = (i < state.currentLine) ? lineText : lineText.substring(0, state.currentChar);
+            globals.ctx.fillText(visibleText, canvasDividedBy2, yPosition);
+        }
+    }
+
+    state.timer++; 
+
+    if (state.timer >= state.delayBetweenChars && state.currentChar < state.story[state.currentLine]?.length) {
+        state.currentChar++;  
+        state.timer = 0; 
+    }
+
+    if (state.currentChar >= state.story[state.currentLine]?.length && state.currentLine < state.story.length - 1) {
+        if (state.timer >= state.delayBetweenLines) {
+            state.timer = 0; 
+            state.currentLine++; 
+            state.currentChar = 0; 
+        }
+    }
+
+    globals.ctx.fillStyle = 'gray';
+    globals.ctx.fillText("-----------------------------------------------", canvasDividedBy2, 49);
+    globals.ctx.fillText("-----------------------------------------------", canvasDividedBy2, 260);
+
+    globals.ctx.font = '8px emulogic';
+    globals.ctx.fillStyle = 'lightgray';
+    globals.ctx.fillText("Press ESC to exit", canvasDividedBy2, 280);
+
+    function handlerKeyDownStory(event) {
+        if (event.key === 'Escape') {
+            document.removeEventListener('keydown', handlerKeyDownStory);
+            globals.gameState = Game.MAIN_MENU;
+            renderMainMenu();
+            renderStory.eventListenerAdded = false;
+        }
+    }
+
+if (!renderStory.eventListenerAdded) {
+    document.addEventListener('keydown', handlerKeyDownStory);
+    renderStory.eventListenerAdded = true;
+}
+
 }
 
 function renderParticlesForGameOver()
@@ -852,96 +895,154 @@ function renderParticlesForGameOver()
 
 function renderGameOver() {
 
-        globals.canvas.style.filter = 'none';
-        globals.time = globals.defaultTime;
-        globals.life = globals.maxLife;
-        deleteHUD();
+    globals.canvas.style.filter = 'none';
+    globals.time = globals.defaultTime;
+    globals.life = globals.maxLife;
+    deleteHUD();
 
-        if (!renderGameOver.state) 
+    if (!renderGameOver.state) 
+    {
+        renderGameOver.state = 
         {
-            renderGameOver.state = 
+            selectedOption: 0,
+            options:
+            [
+                { text: "CONTINUE", state: Game.PLAYING },
+                { text: "HIGHSCORE", state: Game.HIGHSCORE },
+                { text: "EXIT", state: Game.MAIN_MENU },
+            ],
+        };
+    }
+
+    const state = renderGameOver.state;
+    const options = state.options;
+
+
+    for (let i = 0; i < globals.spriteBackground.length; i++) {
+        const sprite = globals.spriteBackground[i];
+        const xTile = sprite.imageSet.xInit + sprite.frames.frameCounter * sprite.imageSet.xGridSize + sprite.imageSet.xOffset;
+        const yTile = sprite.imageSet.yInit + sprite.state * sprite.imageSet.yGridSize + sprite.imageSet.yOffset;
+
+        const xPos = Math.floor(sprite.xPos);
+        const yPos = Math.floor(sprite.yPos);
+
+        globals.ctx.drawImage(
+            globals.tileSets[Tile.SIZE_SPRITE],
+            xTile, yTile,
+            sprite.imageSet.xSize, sprite.imageSet.ySize,
+            xPos, yPos,
+            sprite.imageSet.xSize, sprite.imageSet.ySize * 1.1
+        );
+    }
+
+    const canvasDividedBy2 = globals.canvas.width / 2;
+    globals.ctx.textAlign = 'center';
+
+    const title = "GAME OVER";
+    globals.ctx.font = '32px emulogic';
+    globals.ctx.strokeStyle = "white";
+    globals.ctx.strokeText(title, canvasDividedBy2, 45);
+    globals.ctx.fillStyle = "black";
+    globals.ctx.fillText(title, canvasDividedBy2, 45);
+
+    const yStart = 150;
+    const yStep = 30;
+    globals.ctx.font = '10px emulogic';
+    globals.ctx.fillStyle = 'lightgray';
+
+    options.forEach((option, index) => {
+        globals.ctx.fillStyle = index === state.selectedOption ? "grey" : "white"; // Resaltar la opción seleccionada
+        globals.ctx.fillText(option.text, canvasDividedBy2, yStart + index * yStep);
+    });
+
+    renderParticlesForGameOver();
+
+    function handlerKeyDownGameOver(event) {
+        if (event.key === "s") 
             {
-                selectedOption: 0,
-                options:
-                [
-                    { text: "CONTINUE", state: Game.PLAYING },
-                    { text: "HIGHSCORE", state: Game.HIGHSCORE },
-                    { text: "EXIT", state: Game.MAIN_MENU },
-                ],
-            };
-        }
-    
-        const state = renderGameOver.state;
-        const options = state.options;
-    
-    
-        for (let i = 0; i < globals.spriteBackground.length; i++) {
-            const sprite = globals.spriteBackground[i];
-            const xTile = sprite.imageSet.xInit + sprite.frames.frameCounter * sprite.imageSet.xGridSize + sprite.imageSet.xOffset;
-            const yTile = sprite.imageSet.yInit + sprite.state * sprite.imageSet.yGridSize + sprite.imageSet.yOffset;
-    
-            const xPos = Math.floor(sprite.xPos);
-            const yPos = Math.floor(sprite.yPos);
-    
-            globals.ctx.drawImage(
-                globals.tileSets[Tile.SIZE_SPRITE],
-                xTile, yTile,
-                sprite.imageSet.xSize, sprite.imageSet.ySize,
-                xPos, yPos,
-                sprite.imageSet.xSize, sprite.imageSet.ySize * 1.1
-            );
-        }
-    
-        const canvasDividedBy2 = globals.canvas.width / 2;
-        globals.ctx.textAlign = 'center';
-    
-        const title = "GAME OVER";
-        globals.ctx.font = '32px emulogic';
-        globals.ctx.strokeStyle = "white";
-        globals.ctx.strokeText(title, canvasDividedBy2, 45);
-        globals.ctx.fillStyle = "black";
-        globals.ctx.fillText(title, canvasDividedBy2, 45);
-    
-        const yStart = 150;
-        const yStep = 30;
-        globals.ctx.font = '10px emulogic';
-        globals.ctx.fillStyle = 'lightgray';
-    
-        options.forEach((option, index) => {
-            globals.ctx.fillStyle = index === state.selectedOption ? "grey" : "white"; // Resaltar la opción seleccionada
-            globals.ctx.fillText(option.text, canvasDividedBy2, yStart + index * yStep);
-        });
-
-        renderParticlesForGameOver();
-
-        function handlerKeyDownGameOver(event) {
-            if (event.key === "s") 
-                {
-                state.selectedOption = (state.selectedOption + 1) % options.length;
-            } else if (event.key === "w") 
-                { 
-                state.selectedOption = (state.selectedOption - 1 + options.length) % options.length;
-            } else if (event.key === "Enter") 
-                { 
-                globals.gameState = options[state.selectedOption].state;
-                document.removeEventListener("keydown", handlerKeyDownGameOver);
-                if (globals.gameState === Game.PLAYING) 
-                {
-                    drawGame();
-                }
-
-                renderGameOver.state = undefined;
-                renderGameOver.eventListenerAdded = false;
+            state.selectedOption = (state.selectedOption + 1) % options.length;
+        } else if (event.key === "w") 
+            { 
+            state.selectedOption = (state.selectedOption - 1 + options.length) % options.length;
+        } else if (event.key === "Enter") 
+            { 
+            globals.gameState = options[state.selectedOption].state;
+            document.removeEventListener("keydown", handlerKeyDownGameOver);
+            if (globals.gameState === Game.PLAYING) 
+            {
+                drawGame();
             }
-        }
-        
-        if (!renderGameOver.eventListenerAdded) {
-            document.addEventListener("keydown", handlerKeyDownGameOver);
-            renderGameOver.eventListenerAdded = true;
-        }
-        
-        if (globals.gameState === Game.GAME_OVER) {
-            renderGameOver();
-            requestAnimationFrame(renderGameOver); 
+
+            renderGameOver.state = undefined;
+            renderGameOver.eventListenerAdded = false;
         }
     }
+    
+    if (!renderGameOver.eventListenerAdded) {
+        document.addEventListener("keydown", handlerKeyDownGameOver);
+        renderGameOver.eventListenerAdded = true;
+    }
+    
+    if (globals.gameState === Game.GAME_OVER) {
+        renderGameOver();
+        requestAnimationFrame(renderGameOver); 
+    }
+}
+
+function renderWinScreen()
+{
+    deleteHUD();
+
+    for (let i = 0; i < globals.spriteWinScreen.length; i++) {
+        const sprite = globals.spriteWinScreen[i];
+
+        const xTile = sprite.imageSet.xInit + sprite.frames.frameCounter * sprite.imageSet.xGridSize + sprite.imageSet.xOffset;
+        const yTile = sprite.imageSet.yInit + sprite.state * sprite.imageSet.yGridSize + sprite.imageSet.yOffset;
+
+        const xPos = Math.floor(sprite.xPos);
+        const yPos = Math.floor(sprite.yPos);
+
+        globals.ctx.drawImage(
+            globals.tileSets[Tile.SIZE_SPRITE],
+            xTile, yTile,
+            sprite.imageSet.xSize, sprite.imageSet.ySize,
+            xPos, yPos,
+            sprite.imageSet.xSize, sprite.imageSet.ySize
+        );
+    }
+
+    const canvasDividedBy2 = globals.canvas.width / 2;
+
+    const title = "YOU WIN";
+    globals.ctx.font = '30px emulogic';
+    globals.ctx.strokeStyle = "red";
+    globals.ctx.strokeText(title, 90, 60);
+    globals.ctx.fillStyle = "black";
+    globals.ctx.fillText(title, 91, 60);
+
+    globals.ctx.textAlign = 'center';
+    globals.ctx.font = '7px emulogic';
+    globals.ctx.fillStyle = 'white';
+
+    const message = 
+    [
+        "Joseph awakens from his nightmare",
+        "disoriented but with the feeling",
+        "that something has changed.",
+        "The curse of the throne has been destroyed",
+        "for now.",
+        "Dawn begins to break, but a new challenge",
+        "lurks in the shadows.",
+        " Will he finally escape his own illusions,",
+        " or Will the cycle start again?",
+    ]
+
+    let yCoordinate = 90;
+
+    for (let i = 0; i < message.length; i++)
+    {
+        globals.ctx.fillText(message[i], canvasDividedBy2, yCoordinate);
+
+        yCoordinate += 22;
+    }
+}
