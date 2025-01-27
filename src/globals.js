@@ -38,6 +38,8 @@ export default
 
     spriteBackground: [],
 
+    spriteWinScreen: [],
+
     spriteStory: [],
     
     spriteControls: [],
@@ -74,4 +76,8 @@ export default
     saturate: 1,
 
     particles: [],
+
+    sounds: [],
+
+    currentSound: -1
 }
