@@ -1,5 +1,5 @@
 import globals from "./globals.js";
-import { initHTMLelements, loadAssets, initEvents, initSprites, initSpritesHUD, initSpritesMenu, initSpriteBackground,initLoadSprite, initStory, initControls, initVars, initLevel, initCamera, initParticles} from "./initialize.js";
+import { initHTMLelements, loadAssets, initEvents, initSprites, initSpritesHUD, initSpritesMenu, initSpriteBackground,initLoadSprite, initStory, initControls, initVars, initLevel, initLevel2, initCamera, initParticles} from "./initialize.js";
 import update from "./gameLogic.js";
 import render from "./gameRender.js";
 
@@ -38,6 +38,8 @@ function init() {
   initVars();
 
   initLevel();
+
+ /*  initLevel2(); */
 
   //Start the first frame request
   window.requestAnimationFrame(gameLoop);
