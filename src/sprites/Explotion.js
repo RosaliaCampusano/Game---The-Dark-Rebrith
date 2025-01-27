@@ -1,5 +1,6 @@
-import { SpriteID, State } from "../constants.js";
+import { Sound, SpriteID, State } from "../constants.js";
 import Frames from "../Frames.js";
+import globals from "../globals.js";
 import HitBox from "../HitBox.js";
 import ImageSet from "../ImageSet.js";
 import Sprite from "./Sprites.js";
@@ -56,6 +57,7 @@ export class BlueExplotion extends Explotion
         super.getPosition(xPos, yPos)
         this.yPos -= 20;
         this.xPos -= 20;
+        globals.currentSound = Sound.EXPLOTION;
     }
 }
 
