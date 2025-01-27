@@ -1,10 +1,10 @@
 import globals from "./globals.js";
-import {Game, SpriteID,State, FPS, ParticleID, ParticleState} from "./constants.js";
+import {Game, SpriteID,State, FPS, Sound, ParticleState} from "./constants.js";
 import Sprite, { Enemies} from "./sprites/Sprites.js";
 import ImageSet from "./ImageSet.js";
 import Frames from "./Frames.js";
-import { Level, level } from "./Level.js";
-import { keydownHandler, keyupHandler } from "./events.js";
+import { Level, level, level2 } from "./Level.js";
+import { keydownHandler, keyupHandler, updateMusic } from "./events.js";
 import Physics from "./Physics.js";
 import HitBox from "./HitBox.js";
 import { Bat } from "./sprites/Bat.js";
@@ -62,6 +62,8 @@ function initVars()
         ["CCC", 2000]
     ];
     globals.highScore = globals.historyScore[0][1];
+
+    globals.currentSound = Sound.NO_SOUND;
 }
 
 function initEvents()
@@ -99,7 +101,7 @@ function initLoadSprite()
 function initSpriteBackground()
 {
     GameOverScreen();
-    
+    initWinScreen();
 }
 
 function initStory()
@@ -258,12 +260,6 @@ function initJumpGuy()
 function initAttack()
 {
     const attack = new Attack();
-    /* const attack1 = new Attack();
-    const attack2 = new Attack();
-    const attack3 = new Attack();
-    const attack4 = new Attack(); */
-
-    // globals.sprites.push(attack, attack1, attack2, attack3, attack4);
     globals.sprites.push(attack);
 } 
 
@@ -310,12 +306,15 @@ function initHealthBarHUD()
 
 function initStages()
 {
-    const imageSet = new ImageSet(1008, 0, 59, 55, 59, 55, 0, 0);
+    const imageSet = new ImageSet(1008, 54, 59, 55, 59, 55, 0, 0);
+    const imageSet1 = new ImageSet(1006, 0, 59, 53, 0, 0);
     const frames = new Frames(1);
 
-    const stages = new Sprite(SpriteID.SUN, State.SUN, 100, 10, imageSet, frames);
+    const moon = new Sprite(SpriteID.MOON, State.MOON, 0, 40, imageSet1, frames);
+    const sun = new Sprite(SpriteID.SUN, State.SUN, 0, 40, imageSet, frames);
 
-    globals.spritesHUD.push(stages);
+    globals.spritesHUD.push(moon);
+    globals.spritesHUD.push(sun);
 
 }
 
@@ -562,6 +561,16 @@ function initParticlesForGameOver()
     
 }
 
+function initWinScreen()
+{
+    const imageSet = new ImageSet(0, 1163, 407, 385, 407, 385, 0, 0);
+    const frames = new Frames(1);
+
+    const winScreen = new Sprite(SpriteID.WIN_SCREEN, State.BE, 0, 0, imageSet, frames);
+
+    globals.spriteWinScreen.push(winScreen);
+}
+
 
 function loadAssets()
 {
@@ -577,6 +586,21 @@ function loadAssets()
     tileSet.src = "./images/tileset.png";
     globals.tileSets.push(tileSet);
     globals.assetsToLoad.push(tileSet);
+
+    //Load Sounds
+    let gameMusic = document.querySelector("#gameMusic");
+    gameMusic.addEventListener("canplaythrough", loadHandler, false);
+    gameMusic.addEventListener("timeupdate", updateMusic, false);
+    gameMusic.load();
+    globals.sounds.push(gameMusic);
+    globals.assetsToLoad.push(gameMusic);
+    
+
+    let explotionSound = document.querySelector("#explotionSound");
+    explotionSound.addEventListener("canplaythrough", loadHandler, false);
+    explotionSound.load();
+    globals.sounds.push(explotionSound);
+    globals.assetsToLoad.push(explotionSound);
 }
 
 function loadHandler()
@@ -590,6 +614,11 @@ function loadHandler()
             globals.tileSets[i].removeEventListener("load", loadHandler, false);
         }
 
+        for( let i = 0; i < globals.sounds.length; i++)
+        {
+            globals.sounds[i].removeEventListener("canplaythrough", loadHandler, false);
+        }
+
         console.log("Assets finished loading");
 
         globals.gameState = Game.MAIN_MENU;
@@ -601,6 +630,14 @@ function initLevel()
     const imageSet = new ImageSet(0, 0, 16, 16, 16, 16, 0, 0);
 
     globals.level = new Level(level, imageSet);
+}
+
+function initLevel2()
+{
+    const imageSet = new ImageSet(0, 0, 16, 16, 16, 16, 0, 0);
+
+    globals.level = new Level(level2, imageSet);
+
 }
 
 export 
@@ -618,5 +655,6 @@ export
     initLevel,
     initLoadSprite,
     initCamera,
-    initParticles
+    initParticles,
+    initLevel2
 }
