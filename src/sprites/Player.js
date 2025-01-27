@@ -1,4 +1,4 @@
-import { Game, SpriteID, State } from "../constants.js";
+import { Game, Sound, SpriteID, State } from "../constants.js";
 import globals from "../globals.js";
 import Sprite from "./Sprites.js";
 
@@ -177,6 +177,7 @@ export class Player extends Sprite
                 this.physics.vx = 0;
                 this.physics.vy = -this.physics.vLimit * this.moveSpeed;
                 attack.defaultPositionAndFrame();
+
                 break;
 
             case State.DOWN_WIZARD:
@@ -229,9 +230,8 @@ export class Player extends Sprite
                 this.physics.vy = 0;
                 this.frames.frameCounter = 0;
                 this.frames.framesChangeCounter = 0;
+                attack.defaultPositionAndFrame();
 
-                attack.defaultPositionAndFrame()
-                
         }
     }
 
