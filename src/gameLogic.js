@@ -1,5 +1,5 @@
 import globals from "./globals.js";
-import { Game, State, SpriteID, ParticleState } from "./constants.js";
+import { Game, State, SpriteID, ParticleState, Sound } from "./constants.js";
 import detectCollisions from "./collisions.js";
 import {updateCamera} from "./Camera.js";
 import Time from "./Time.js";
@@ -74,6 +74,28 @@ function playGame()
     updateCamera();
     // updatePaticles();
     detectCollisions();
+    playMusic();
+    playSound();
+}
+
+function playSound()
+{
+    if( globals.currentSound != Sound.NO_SOUND)
+    {
+        globals.sounds[globals.currentSound].currentTime = 0;
+        globals.sounds[globals.currentSound].play();
+    }
+
+    globals.currentSound = Sound.NO_SOUND;
+}
+
+function playMusic()
+{
+    if( globals.gameState === Game.PLAYING)
+    {
+        globals.sounds[Sound.GAME_MUSIC].play();
+        globals.sounds[Sound.GAME_MUSIC].volume = 1;
+    }
 }
 
 function updatePaticles()
@@ -90,16 +112,7 @@ function updateControls()
     updateKeyboardControls();
 }
 
-function updateStages(sprite)
-{
-    sprite.xPos = 0;
-    sprite.yPos = 40;
 
-    sprite.frames.frameCounter = 0;
-
-    sprite.state = State.SUN;
-
-}
 
 function updateHealthBar(sprite)
 {
@@ -119,6 +132,25 @@ function updateEmptybar(sprite)
 
     sprite.imageSet.xSize = 55;
 
+    sprite.state = State.BE;
+}
+
+function updateMoon(sprite)
+{
+    sprite.xPos = 0;
+    sprite.yPos = 70;
+    
+    sprite.imageSet.ySize = 100;
+
+    sprite.state = State.BE;
+}
+
+function updateSun(sprite)
+{
+    sprite.xPos = 0;
+    sprite.yPos = 40;
+    sprite.imageSet.ySize = 45;
+    sprite.imageSet.ySize *= 0.5;
     sprite.state = State.BE;
 }
 
@@ -159,10 +191,15 @@ function updateSprite(sprite)
         case SpriteID.POTION:
             sprite.update();
             break;
+
         case SpriteID.SUN:
-            updateStages(sprite);
+            updateSun(sprite);
             break;
 
+        case SpriteID.MOON:
+            updateMoon(sprite);
+            break;
+        
         case SpriteID.BAT:
             sprite.update()
             break;
