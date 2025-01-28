@@ -2,6 +2,7 @@ import globals from "./globals.js";
 import {Game, SpriteID, MainMenuTexts, WayOut, State, ParticleState} from "./constants.js";
 import { Tile } from "./constants.js";
 import detectCollisions from "./collisions.js";
+import { Player } from "./sprites/Player.js";
 
 export default function render()
 {
@@ -45,25 +46,58 @@ export default function render()
     }
 }
 
-function drawGame()
+function drawGame() 
 {
     displayHUD();
     globals.ctx.clearRect(0, 0, globals.canvas.width, globals.canvas.height);
     globals.ctxHUD.clearRect(0, 0, globals.canvasHUD.width, globals.canvasHUD.height);
-    
-    // zoom the canvas
-    globals.ctx.scale(globals.camera.zoom, globals.camera.zoom);
-    globals.canvas.style.filter = `saturate(${globals.saturate})`
-    moveCamera();
-    renderMap();
-  /*   renderMapLevelTwo(); */
 
-    renderHUD();
+    // Aplicar zoom y mover la cámara
+    globals.ctx.scale(globals.camera.zoom, globals.camera.zoom);
+    globals.canvas.style.filter = `saturate(${globals.saturate})`;
+    moveCamera();
+
+    drawFullBlackBackground();
+    createVisibilityMask();
+
+    renderMap();
     renderSprites();
 
+    globals.ctx.restore(); 
+
+    renderHUD();
     renderParticles();
 
     restoreCamera();
+}
+    
+function createVisibilityMask() 
+{
+    const ctx = globals.ctx;
+    const player = globals.activedPlayer;
+
+    if (!player || (player.id !== SpriteID.PLAYER && player.id !== SpriteID.PLAYER_WIZARD)) return;
+
+    const radius = 50; 
+    const circleX = player.xPos + player.imageSet.xSize * 0.3; 
+    const circleY = player.yPos + player.imageSet.ySize * 0.3;
+
+    ctx.save();
+
+    ctx.beginPath();
+    ctx.arc(circleX, circleY, radius, 0, Math.PI * 2);
+    ctx.clip();
+
+}
+
+function drawFullBlackBackground() 
+{
+    const ctx = globals.ctx;
+    const canvasWidth = globals.canvas.width;
+    const canvasHeight = globals.canvas.height;
+
+    ctx.fillStyle = "rgba(0, 0, 0, 1)"; 
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 }
 
 function drawMainMenu()
@@ -104,6 +138,7 @@ function renderSpritesHUD()
     
 function renderSprites()
 {
+
     for ( let i = 0; i < globals.sprites.length; i++)
     {
 
@@ -123,9 +158,9 @@ function renderSprites()
             xPos, yPos,
             sprite.imageSet.xSize * 0.6, sprite.imageSet.ySize * 0.6
         );
-        
         // drawHitBox(sprite);
     }
+
 }
 
 function drawHitBox(sprite)
