@@ -621,7 +621,7 @@ function loadHandler()
 
         console.log("Assets finished loading");
 
-        globals.gameState = Game.MAIN_MENU;
+        globals.gameState = Game.PLAYING;
     }
 }
 
