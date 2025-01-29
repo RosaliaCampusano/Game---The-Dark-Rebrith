@@ -18,9 +18,10 @@ export const FPS = 30;
 
 export const Sound = {
 
-    NO_SOUND:   -1,
-    GAME_MUSIC:  0,
-    EXPLOTION:   1,
+    NO_SOUND:          -1,
+    GAME_MUSIC:         0,
+    EXPLOTION:          1,
+    GAME_MUSIC_NIGHT:   2,
 }
 
 export const MainMenuTexts = 
