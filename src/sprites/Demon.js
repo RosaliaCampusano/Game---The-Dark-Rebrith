@@ -17,7 +17,7 @@ export class Demon extends Enemies
             new ImageSet(0, 650, 64, 63, 64, 65, 0, 0), 
             new Frames(4, 5), new Physics(40), 
             Math.floor(Math.random() * 2) + 1, 
-            new HitBox(20, 30, 10, 9),
+            new HitBox(30, 30, 5, 9),
             5
         );
 
