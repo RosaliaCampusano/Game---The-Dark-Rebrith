@@ -307,7 +307,7 @@ function initHealthBarHUD()
 function initStages()
 {
     const imageSet = new ImageSet(1008, 54, 59, 55, 59, 55, 0, 0);
-    const imageSet1 = new ImageSet(1006, 0, 59, 53, 0, 0);
+    const imageSet1 = new ImageSet(1006, 5, 59, 53, 0, 0);
     const frames = new Frames(1);
 
     const moon = new Sprite(SpriteID.MOON, State.MOON, 0, 40, imageSet1, frames);
@@ -421,7 +421,7 @@ function initLoadJoseph()
 
 function initCamera()
 {
-    globals.camera = new Camera(0, 0, 1);
+    globals.camera = new Camera(0, 0, 1.25);
 }
 
 
@@ -595,6 +595,12 @@ function loadAssets()
     globals.sounds.push(gameMusic);
     globals.assetsToLoad.push(gameMusic);
     
+    let gameMusicNight = document.querySelector("#gameMusicNight");
+    gameMusicNight.addEventListener("canplaythrough", loadHandler, false);
+    gameMusicNight.load();
+    globals.sounds.push(gameMusicNight);
+    globals.assetsToLoad.push(gameMusicNight);
+
 
     let explotionSound = document.querySelector("#explotionSound");
     explotionSound.addEventListener("canplaythrough", loadHandler, false);
