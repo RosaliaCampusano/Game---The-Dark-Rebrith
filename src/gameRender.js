@@ -57,13 +57,13 @@ function drawGame()
     globals.canvas.style.filter = `saturate(${globals.saturate})`;
     moveCamera();
 
-    drawFullBlackBackground();
-    createVisibilityMask();
+/*  drawFullBlackBackground();
+    createVisibilityMask(); */
 
     renderMap();
     renderSprites();
 
-    globals.ctx.restore(); 
+   /*  globals.ctx.restore();  */
 
     renderHUD();
     renderParticles();
@@ -158,7 +158,7 @@ function renderSprites()
             xPos, yPos,
             sprite.imageSet.xSize * 0.6, sprite.imageSet.ySize * 0.6
         );
-        // drawHitBox(sprite);
+        //drawHitBox(sprite);
     }
 
 }
@@ -247,6 +247,7 @@ function renderMapLevelTwo()
         }
     }
 }
+
 
 function renderHUD()
 {
@@ -942,7 +943,6 @@ function renderGameOver() {
             selectedOption: 0,
             options:
             [
-                { text: "CONTINUE", state: Game.PLAYING },
                 { text: "HIGHSCORE", state: Game.HIGHSCORE },
                 { text: "EXIT", state: Game.MAIN_MENU },
             ],
@@ -980,14 +980,14 @@ function renderGameOver() {
     globals.ctx.fillStyle = "black";
     globals.ctx.fillText(title, canvasDividedBy2, 45);
 
-    const yStart = 150;
+    const yStart = 185;
     const yStep = 30;
     globals.ctx.font = '10px emulogic';
     globals.ctx.fillStyle = 'lightgray';
 
     options.forEach((option, index) => {
         globals.ctx.fillStyle = index === state.selectedOption ? "grey" : "white"; // Resaltar la opción seleccionada
-        globals.ctx.fillText(option.text, canvasDividedBy2, yStart + index * yStep);
+        globals.ctx.fillText(option.text, canvasDividedBy2, yStart + index  * yStep);
     });
 
     renderParticlesForGameOver();
@@ -1003,10 +1003,6 @@ function renderGameOver() {
             { 
             globals.gameState = options[state.selectedOption].state;
             document.removeEventListener("keydown", handlerKeyDownGameOver);
-            if (globals.gameState === Game.PLAYING) 
-            {
-                drawGame();
-            }
 
             renderGameOver.state = undefined;
             renderGameOver.eventListenerAdded = false;
