@@ -139,9 +139,7 @@ function updateMoon(sprite)
 {
     sprite.xPos = 0;
     sprite.yPos = 70;
-    
     sprite.imageSet.ySize = 100;
-
     sprite.state = State.BE;
 }
 
@@ -168,7 +166,6 @@ function updateSprite(sprite)
             break;
 
         case SpriteID.THRONEHUB:
-            // updateThroneHUB(sprite);
             sprite.update()
             break;
 
@@ -192,12 +189,12 @@ function updateSprite(sprite)
             sprite.update();
             break;
 
-        case SpriteID.SUN:
-            updateSun(sprite);
-            break;
-
         case SpriteID.MOON:
             updateMoon(sprite);
+            break;
+
+        case SpriteID.SUN:
+            updateSun(sprite);
             break;
         
         case SpriteID.BAT:
