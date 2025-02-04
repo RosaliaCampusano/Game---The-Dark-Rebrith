@@ -56,14 +56,14 @@ function drawGame()
     globals.ctx.scale(globals.camera.zoom, globals.camera.zoom);
     globals.canvas.style.filter = `saturate(${globals.saturate})`;
     moveCamera();
-
-/*  drawFullBlackBackground();
+/* 
+    drawFullBlackBackground();
     createVisibilityMask(); */
 
     renderMap();
     renderSprites();
 
-   /*  globals.ctx.restore();  */
+/*     globals.ctx.restore();  */
 
     renderHUD();
     renderParticles();
