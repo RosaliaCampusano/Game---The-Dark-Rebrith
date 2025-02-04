@@ -86,6 +86,7 @@ function initSprites()
     initBlueExplotion();
     initRedExplotion();
     initSunLight();
+    initKeys();
 }
 
 function initSpritesMenu()
@@ -307,7 +308,7 @@ function initHealthBarHUD()
 function initStages()
 {
     const imageSet = new ImageSet(1008, 54, 59, 55, 59, 55, 0, 0);
-    const imageSet1 = new ImageSet(1006, 5, 59, 53, 0, 0);
+    const imageSet1 = new ImageSet(1006, 50, 59, 55, 0, 0);
     const frames = new Frames(1);
 
     const moon = new Sprite(SpriteID.MOON, State.MOON, 0, 40, imageSet1, frames);
@@ -315,7 +316,7 @@ function initStages()
 
     globals.spritesHUD.push(moon);
     globals.spritesHUD.push(sun);
-
+    console.log("Objeto moon:", moon);
 }
 
 function GameOverScreen()
@@ -421,7 +422,7 @@ function initLoadJoseph()
 
 function initCamera()
 {
-    globals.camera = new Camera(0, 0, 1.25);
+    globals.camera = new Camera(0, 0, 1);
 }
 
 
@@ -571,6 +572,25 @@ function initWinScreen()
     globals.spriteWinScreen.push(winScreen);
 }
 
+function initKeys()
+{
+    const imageSet1 = new ImageSet(882, 561, 40, 40, 40, 40, 0, 0);
+    const imageSet2 = new ImageSet(882, 603, 40, 40, 40, 40, 0, 0);
+    const imageSet3 = new ImageSet(882, 643, 40, 40, 40, 40, 0, 0);
+    const imageSet4 = new ImageSet(882, 682, 40, 40, 40, 40, 0, 0);
+
+    const frames = new Frames(1);
+
+    const key1 = new Sprite(SpriteID.KEY1, State.BE, 210, 50, imageSet1, frames);
+    const key2 = new Sprite(SpriteID.KEY2, State.BE, 180, 40, imageSet2, frames);
+    const key3  = new Sprite(SpriteID.KEY3, State.BE, 340, 75, imageSet3, frames);
+    const key4 = new Sprite(SpriteID.KEY4, State.BE, 340, 23, imageSet4, frames);
+
+    globals.sprites.push(key1);
+    globals.sprites.push(key2);
+    globals.sprites.push(key3);
+    globals.sprites.push(key4);
+}
 
 function loadAssets()
 {
