@@ -135,21 +135,21 @@ function updateEmptybar(sprite)
     sprite.state = State.BE;
 }
 
-function updateMoon(sprite)
-{
+function updateMoon(sprite) {
     sprite.xPos = 0;
-    sprite.yPos = 70;
-    sprite.imageSet.ySize = 100;
-    sprite.state = State.BE;
+    sprite.yPos = 55;
+    sprite.imageSet.ySize = 40;
+    sprite.state = State.MOON;
+    
 }
 
-function updateSun(sprite)
-{
+function updateSun(sprite) {
     sprite.xPos = 0;
     sprite.yPos = 40;
     sprite.imageSet.ySize = 45;
     sprite.imageSet.ySize *= 0.5;
     sprite.state = State.BE;
+   /*  console.log("Sun updated:", sprite); */
 }
 
 function updateSprite(sprite)
@@ -208,6 +208,7 @@ function updateSprite(sprite)
         case SpriteID.JUMPGUY:
             sprite.update();
             break;
+            
         default:
 
             break;
