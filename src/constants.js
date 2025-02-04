@@ -65,7 +65,11 @@ export const SpriteID = {
     LOAD_JOSEPH:            26,
     BLUE_EXPLOTION:         27,
     RED_EXPLOTION:          28,
-    WIN_SCREEN:             29  
+    WIN_SCREEN:             29,
+    KEY1:                   30,
+    KEY2:                   31, 
+    KEY3:                   32,
+    KEY4:                   33
 }
 
 export const ParticleID = 
