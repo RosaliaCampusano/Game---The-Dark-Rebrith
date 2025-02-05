@@ -135,21 +135,47 @@ function updateEmptybar(sprite)
     sprite.state = State.BE;
 }
 
-function updateMoon(sprite) {
-    sprite.xPos = 0;
-    sprite.yPos = 40;
-    /* sprite.imageSet.ySize = 50; */
-    sprite.state = State.MOON;
-
-}
-
-function updateSun(sprite) {
-    sprite.xPos = -1;
-    sprite.yPos = 30;
-    sprite.imageSet.ySize = 100;
-    sprite.imageSet.ySize *= 0.25;
-    sprite.state = State.BE;
-}
+    let isDay = true;  
+    let timeElapsed = 0; 
+    const timeLimit = 180; 
+    const sunShrinkRate = 1;
+    
+    function updateDayNightCycle(sprite) {
+        timeElapsed++;
+    
+        if (isDay) {
+            if (sprite.imageSet && sprite.imageSet.xSize > 0) { 
+                sprite.imageSet.xSize -= sunShrinkRate;
+            }
+    
+            if (sprite.imageSet.xSize <= 0) { 
+                sprite.imageSet.xSize = 0;
+                isDay = false; 
+                timeElapsed = 0; 
+                updateMoon(sprite); 
+            }
+        } else {
+            if (timeElapsed >= timeLimit) { 
+                isDay = true; 
+                timeElapsed = 0;
+                updateSun(sprite); 
+            }
+        }
+    }
+    
+    function updateMoon(sprite) {
+        sprite.xPos = 0;
+        sprite.yPos = 40;
+        if (sprite.imageSet) sprite.imageSet.xSize = 50;
+        sprite.state = State.MOON;
+    }
+    
+    function updateSun(sprite) {
+        sprite.yPos = 30;
+        sprite.imageSet.xSize = 70; 
+        sprite.xPos = 0; 
+        sprite.state = State.BE;
+    }
 
 function updateSprite(sprite)
 {
@@ -193,7 +219,7 @@ function updateSprite(sprite)
             break;
 
         case SpriteID.SUN:
-            updateSun(sprite);
+            updateDayNightCycle(sprite);
             break;
         
         case SpriteID.BAT:
