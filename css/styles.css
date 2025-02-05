@@ -7,6 +7,8 @@
     image-rendering: -webkit-crisp-edges;
     image-rendering: pixelated;
     image-rendering: crisp-edges;
+    display: block; 
+    margin: 0 auto;
 }
 
 #gameHUD
@@ -19,6 +21,8 @@
     image-rendering: -webkit-crisp-edges;
     image-rendering: pixelated;
     image-rendering: crisp-edges;
+    display: block; 
+    margin: 0 auto;
 }
 
 @font-face {
