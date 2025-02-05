@@ -137,19 +137,18 @@ function updateEmptybar(sprite)
 
 function updateMoon(sprite) {
     sprite.xPos = 0;
-    sprite.yPos = 55;
-    sprite.imageSet.ySize = 40;
+    sprite.yPos = 40;
+    /* sprite.imageSet.ySize = 50; */
     sprite.state = State.MOON;
-    
+
 }
 
 function updateSun(sprite) {
-    sprite.xPos = 0;
-    sprite.yPos = 40;
-    sprite.imageSet.ySize = 45;
-    sprite.imageSet.ySize *= 0.5;
+    sprite.xPos = -1;
+    sprite.yPos = 30;
+    sprite.imageSet.ySize = 100;
+    sprite.imageSet.ySize *= 0.25;
     sprite.state = State.BE;
-   /*  console.log("Sun updated:", sprite); */
 }
 
 function updateSprite(sprite)
@@ -208,11 +207,28 @@ function updateSprite(sprite)
         case SpriteID.JUMPGUY:
             sprite.update();
             break;
-            
+        
+        case SpriteID.KEY:
+            updateKey(sprite);
+            break;
+
+        case SpriteID.DOOR:
+            updateDoors(sprite);
+            break;
+        
         default:
 
             break;
     }
+}
+
+function updateDoors(sprite)
+{
+    sprite.state = State.BE;
+}
+function updateKey(sprite)
+{
+    sprite.state = State.BE;
 }
 
 function updateSprites()
