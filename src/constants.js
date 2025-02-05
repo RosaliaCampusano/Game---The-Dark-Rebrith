@@ -10,7 +10,8 @@ export const Game =
     STORY:                   4,
     CONTROLS:                5,
     HIGHSCORE:               6,
-    WIN:                     7                  
+    WIN:                     7,
+    ENTER_NAME:              8
 };
 
 //Game Speed
@@ -66,10 +67,9 @@ export const SpriteID = {
     BLUE_EXPLOTION:         27,
     RED_EXPLOTION:          28,
     WIN_SCREEN:             29,
-    KEY1:                   30,
-    KEY2:                   31, 
-    KEY3:                   32,
-    KEY4:                   33
+    KEY:                    30,
+    DOOR:                   31
+
 }
 
 export const ParticleID = 
