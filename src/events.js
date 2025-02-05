@@ -47,21 +47,13 @@ export function keydownHandler(event)
     }
 }
 
-// Función para obtener el nombre actual (para usarlo en el renderizado)
 export function getletter() {
     return letter;
 }
 
-// Función para obtener el índice actual (para resaltar la letra seleccionada)
 export function getCurrentIndex() {
     return currentIndex;
 }
-
-/* // Función para reiniciar el estado del nombre
-export function resetletter() {
-    letter = ['A', 'A', 'A'];
-    currentIndex = 0;
-} */
 
 export function keyupHandler(event)
 {
