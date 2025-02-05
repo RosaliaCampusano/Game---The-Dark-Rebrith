@@ -59,7 +59,9 @@ function initVars()
     globals.historyScore = [
         ["AAA", 12000], 
         ["BBB", 9000], 
-        ["CCC", 2000]
+        ["CCC", 2000],
+        ["DDD", 1000],
+        ["CCC", 900]
     ];
     globals.highScore = globals.historyScore[0][1];
 
@@ -87,6 +89,7 @@ function initSprites()
     initRedExplotion();
     initSunLight();
     initKeys();
+    initDoors();
 }
 
 function initSpritesMenu()
@@ -272,7 +275,7 @@ function initOldJosephs()
     const frames1 = new Frames(6);
     const frames2 = new Frames(6);
 
-    const physics = new Physics(40);
+    const physics = new Physics(20);
 
     const hitBox = new HitBox(16, 51, 5, 0);
 
@@ -308,7 +311,7 @@ function initHealthBarHUD()
 function initStages()
 {
     const imageSet = new ImageSet(1008, 54, 59, 55, 59, 55, 0, 0);
-    const imageSet1 = new ImageSet(1006, 50, 59, 55, 0, 0);
+    const imageSet1 = new ImageSet(2, 1543, 59, 55, 59, 55, 0, 0);
     const frames = new Frames(1);
 
     const moon = new Sprite(SpriteID.MOON, State.MOON, 0, 40, imageSet1, frames);
@@ -316,7 +319,18 @@ function initStages()
 
     globals.spritesHUD.push(moon);
     globals.spritesHUD.push(sun);
-    console.log("Objeto moon:", moon);
+}
+
+function initDoors()
+{
+    const imageSet = new ImageSet(409, 1126, 34, 45, 34, 45, 0, 0);
+    const frames = new Frames(1);
+    const hitBox = new HitBox(70, 95, 0, 0);
+
+    const door = new Sprite(SpriteID.DOOR, State.BE, 671, 90, imageSet, frames, null, hitBox);
+
+    globals.sprites.push(door);
+
 }
 
 function GameOverScreen()
@@ -581,10 +595,12 @@ function initKeys()
 
     const frames = new Frames(1);
 
-    const key1 = new Sprite(SpriteID.KEY1, State.BE, 210, 50, imageSet1, frames);
-    const key2 = new Sprite(SpriteID.KEY2, State.BE, 180, 40, imageSet2, frames);
-    const key3  = new Sprite(SpriteID.KEY3, State.BE, 340, 75, imageSet3, frames);
-    const key4 = new Sprite(SpriteID.KEY4, State.BE, 340, 23, imageSet4, frames);
+    const hitbox = new HitBox(40, 40, 0, 0);
+
+    const key1 = new Sprite(SpriteID.KEY, State.BE, 350, 50, imageSet1, frames, null, hitbox);
+    const key2 = new Sprite(SpriteID.KEY, State.BE, 420, 205, imageSet2, frames, null, hitbox);
+    const key3  = new Sprite(SpriteID.KEY, State.BE, 760, 85, imageSet3, frames, null, hitbox);
+    const key4 = new Sprite(SpriteID.KEY, State.BE, 730, 60, imageSet4, frames, null, hitbox);
 
     globals.sprites.push(key1);
     globals.sprites.push(key2);
@@ -647,7 +663,8 @@ function loadHandler()
 
         console.log("Assets finished loading");
 
-        globals.gameState = Game.PLAYING;
+        globals.gameState = Game.HIGHSCORE;
+
     }
 }
 
