@@ -3,6 +3,7 @@ import {Game, SpriteID, MainMenuTexts, WayOut, State, ParticleState} from "./con
 import { Tile } from "./constants.js";
 import detectCollisions from "./collisions.js";
 import { Player } from "./sprites/Player.js";
+import { getletter, getCurrentIndex } from "./events.js";
 
 export default function render()
 {
@@ -284,12 +285,12 @@ function renderHUD()
     globals.ctxHUD.fillStyle = 'red';
     globals.ctxHUD.fillText("Level", 5, 15);
 
-    // Draw Time
+ /*    // Draw Time
     globals.ctxHUD.fillStyle = 'red';
     globals.ctxHUD.fillText("TIME", 58, 70);
     globals.ctxHUD.fillStyle = 'white';
     globals.ctxHUD.fillText("" + time, 60, 88);
-
+ */
     renderSpritesHUD();
 
 }
@@ -562,92 +563,94 @@ function renderParticlesForHighScore() {
 function renderHighscore()
 {
     deleteHUD();
+
     const canvasDividedBy2 = globals.canvas.width / 2;
     globals.ctx.textAlign = 'center';
-    //Title
-    let highScore = "HIGHSCORE";
 
+    let titleHighscore = "HIGHSCORE";
     globals.ctx.font = '20px emulogic';
-    globals.ctx.fillStyle ='red';
-    globals.ctx.fillText("" + highScore, canvasDividedBy2, 35);
+    globals.ctx.fillStyle = 'red';
+    globals.ctx.fillText(titleHighscore, canvasDividedBy2, 40);
 
+    const separatorLine = "------------------";
     globals.ctx.fillStyle = 'lightgray';
-    globals.ctx.fillText("------------------", canvasDividedBy2, 58);
-    globals.ctx.fillText("------------------", canvasDividedBy2, 280);
+    globals.ctx.fillText(separatorLine, canvasDividedBy2, 60);
+    globals.ctx.fillText(separatorLine, canvasDividedBy2, 270);
 
-    //Category
-    const y = 80;
-
-    let rankCategory = "RANK";
-
-    globals.ctx.font = '15px emulogic';
-    globals.ctx.fillStyle ='darkred';
-    globals.ctx.textAlign = 'auto';
-    globals.ctx.fillText("" + rankCategory, canvasDividedBy2 * 0.3, y);
-
-    ////////////////////////////
-    let nameCategory = "NAME";
+    const startY = 90;
+    let categoryRank = "RANK";
+    let categoryName = "NAME";
+    let categoryScore = "SCORE";
 
     globals.ctx.font = '15px emulogic';
-    globals.ctx.fillStyle ='darkred';
-    globals.ctx.textAlign = 'right';
-    globals.ctx.fillText("" + nameCategory, canvasDividedBy2, y);
+    globals.ctx.fillStyle = 'darkred';
+    globals.ctx.textAlign = 'center';
+    globals.ctx.fillText(categoryRank, canvasDividedBy2 - 150, startY);
+    globals.ctx.fillText(categoryName, canvasDividedBy2 - 20, startY);
+    globals.ctx.fillText(categoryScore, canvasDividedBy2 + 110, startY);
 
-    ///////////////////////////////
-    let scoreCategory = "SCORE";
+    globals.ctx.font = '8px emulogic';
+    globals.ctx.fillStyle = 'lightgray';
+    globals.ctx.fillText("Press ESC to exit", 200, 285);
 
-    globals.ctx.font = '15px emulogic';
-    globals.ctx.fillStyle ='darkred';
-    globals.ctx.textAlign = 'left';
-    globals.ctx.fillText("" + scoreCategory, canvasDividedBy2 * 1.3, y);
-    
-    const xPosition = globals.canvas.width * 0.2; // Left
-    const xName = globals.canvas.width * 0.4;    // Center
-    const xScore = globals.canvas.width * 0.8;   // Right
+    const posRank = canvasDividedBy2 - 150; 
+    const posName = canvasDividedBy2 - 20;        
+    const posScore = canvasDividedBy2 + 90;
 
-    //Initial Y coordinate and height between rows
-    let yCoordinate = 100;
-    const spaceLine = 20;
+    const lineSpacing = 15;
+    const rankPositions = ["1.", "2.", "3.", "4.", "5.", "6.", "7.", "8.", "9.", "10."];
+    let scoreFormat = "000000";
 
-    const position = 
-    [ 
-        "1.", 
-        "2.", 
-        "3.",
-    ];
+    if (!renderHighscore.state) {
+        renderHighscore.state = {
+            activeLine: 0,
+            activeChar: 0,
+            frameTimer: 0,
+            charDelay: 3,
+            lineDelay: 30
+        };
+    }
 
-    let scoreTemplate = "000000";
+    const state = renderHighscore.state;
+    let currentY = 110; 
 
-    for (let i = 0; i < position.length; i++) {
+    for (let i = 0; i <= state.activeLine; i++) {
 
-        // var score = globals.historyScore[i][1].toString(); 
-        let score = scoreTemplate.substr(0, scoreTemplate.length - globals.historyScore[i][1].toString().length) + globals.historyScore[i][1];
+        let formattedScore = scoreFormat.substr(0, scoreFormat.length - globals.historyScore[i][1].toString().length) + globals.historyScore[i][1];
 
-        globals.ctx.font = '10px emulogic';
+        globals.ctx.font = '8px emulogic';
         globals.ctx.textAlign = 'right';
         globals.ctx.fillStyle = 'white';
-        globals.ctx.fillText(position[i], xPosition, yCoordinate);
+        globals.ctx.fillText(rankPositions[i], posRank, currentY);
 
         globals.ctx.textAlign = 'center';
         globals.ctx.fillStyle = 'white';
-        globals.ctx.fillText(globals.historyScore[i][0], xName, yCoordinate);
+        const nameDisplay = globals.historyScore[i][0]?.substring(0, i < state.activeLine ? scoreFormat.length : state.activeChar) || "";
+        globals.ctx.fillText(nameDisplay, posName, currentY);
 
-        globals.ctx.textAlign = 'auto';
+        globals.ctx.textAlign = 'left';
         globals.ctx.fillStyle = 'white';
-        globals.ctx.fillText(score, xScore, yCoordinate);
+        const scoreDisplay = formattedScore.substring(0, i < state.activeLine ? scoreFormat.length : state.activeChar);
+        globals.ctx.fillText(scoreDisplay, posScore, currentY);
 
-        yCoordinate += spaceLine;
-    
+        currentY += lineSpacing;
     }
 
-    //Press ESC to exit
-    globals.ctx.font = '8px emulogic';
-    globals.ctx.fillStyle = 'lightgray';
-    globals.ctx.fillText(WayOut, canvasDividedBy2, 290);
+    state.frameTimer++;
+    if (state.frameTimer >= state.charDelay && state.activeChar < scoreFormat.length) {
+        state.activeChar++;
+        state.frameTimer = 0;
+    }
 
+    if (state.activeChar >= scoreFormat.length && state.activeLine < rankPositions.length - 1) {
+        if (state.frameTimer >= state.lineDelay) {
+            state.frameTimer = 0;
+            state.activeLine++;
+            state.activeChar = 0;
+        }
+    }
 
-
-   /*  renderParticlesForHighScore(); */
+    renderParticlesForHighScore();
 
     function handlerKeyDownhighscore(event)
     {
@@ -1091,16 +1094,32 @@ function renderEnterName()
     const x = 45;
     const y = 85;
 
-    const title = "ENTER YOUR NAME";
     globals.ctx.font = '20px emulogic';
     globals.ctx.fillStyle = 'red';
-    globals.ctx.fillText("" + title, x, y);
+    globals.ctx.fillText("ENTER YOUR NAME", x, y);
 
+    const letter = getletter();
+    const currentIndex = getCurrentIndex();
 
+    const letterSpacing = 30; 
+    const nameY = y + 90; 
+    for (let i = 0; i < letter.length; i++) {
+        if (i === currentIndex) {
+            globals.ctx.fillStyle = 'red'; 
+        } else {
+            globals.ctx.fillStyle = 'white';
+        }
 
-    const confirm = "PRESS ENTER TO CONFIRM";
+        globals.ctx.font = '20px emulogic';
+        globals.ctx.fillText(letter[i], 150 + i * letterSpacing, nameY);
+    }
+
     globals.ctx.font = '10px emulogic';
-    globals.ctx.fillText("" + confirm, 83, 250);
+    globals.ctx.fillStyle = 'red';
+    globals.ctx.fillText("PRESS ENTER TO CONFIRM", 85, 250);
 
+    globals.ctx.font = '30px emulogic';
+    globals.ctx.fillStyle = 'gray';
+    globals.ctx.fillText("---", 145, 195);
 
 }
