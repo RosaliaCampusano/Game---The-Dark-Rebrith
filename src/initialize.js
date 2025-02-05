@@ -61,7 +61,12 @@ function initVars()
         ["BBB", 9000], 
         ["CCC", 2000],
         ["DDD", 1000],
-        ["CCC", 900]
+        ["EEE", 900],
+        ["FFF", 800],
+        ["UWU", 650],
+        ["XXA", 520],
+        ["OUO", 100],
+        ["PAM", 20]
     ];
     globals.highScore = globals.historyScore[0][1];
 
@@ -310,12 +315,12 @@ function initHealthBarHUD()
 
 function initStages()
 {
-    const imageSet = new ImageSet(1008, 54, 59, 55, 59, 55, 0, 0);
+    const imageSet = new ImageSet(995, 3, 71, 78, 71, 78, 0, 0);
     const imageSet1 = new ImageSet(2, 1543, 59, 55, 59, 55, 0, 0);
     const frames = new Frames(1);
 
     const moon = new Sprite(SpriteID.MOON, State.MOON, 0, 40, imageSet1, frames);
-    const sun = new Sprite(SpriteID.SUN, State.SUN, 0, 40, imageSet, frames);
+    const sun = new Sprite(SpriteID.SUN, State.SUN, -8, 30, imageSet, frames);
 
     globals.spritesHUD.push(moon);
     globals.spritesHUD.push(sun);
@@ -663,7 +668,7 @@ function loadHandler()
 
         console.log("Assets finished loading");
 
-        globals.gameState = Game.HIGHSCORE;
+        globals.gameState = Game.PLAYING;
 
     }
 }
