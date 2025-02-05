@@ -1,23 +1,31 @@
 import { Key, Sound } from "./constants.js";
 import globals from "./globals.js";
 
-export function keydownHandler(event)
+
+let letter = ['U', 'W', 'U']; 
+let currentIndex = 1; 
+
+export function keydownHandler(event) 
 {
-    switch(event.keyCode)
+    switch(event.keyCode) 
     {
         case Key.UP:
+            letter[currentIndex] = String.fromCharCode(((letter[currentIndex].charCodeAt(0) - 65 + 25) % 26) + 65);
             globals.action.moveUp = true;
             break;
-        
-        case Key.DOWN:
+            
+            case Key.DOWN:
+            letter[currentIndex] = String.fromCharCode(((letter[currentIndex].charCodeAt(0) - 65 + 1) % 26) + 65);
             globals.action.moveDown = true;
             break;
 
         case Key.LEFT:
+            currentIndex = (currentIndex - 1 + 3) % 3;
             globals.action.moveLeft = true;
             break;
 
         case Key.RIGHT:
+            currentIndex = (currentIndex + 1) % 3;
             globals.action.moveRight = true;
             break;
         
@@ -35,10 +43,25 @@ export function keydownHandler(event)
         
         case Key.ENTER:
             globals.action.enter = true;
-            
             break;
     }
 }
+
+// Función para obtener el nombre actual (para usarlo en el renderizado)
+export function getletter() {
+    return letter;
+}
+
+// Función para obtener el índice actual (para resaltar la letra seleccionada)
+export function getCurrentIndex() {
+    return currentIndex;
+}
+
+/* // Función para reiniciar el estado del nombre
+export function resetletter() {
+    letter = ['A', 'A', 'A'];
+    currentIndex = 0;
+} */
 
 export function keyupHandler(event)
 {
