@@ -50,7 +50,7 @@ function updateHighScore()
     globals.highScore = globals.historyScore[0][1];
 }
 
-function updateUpdateTime()
+function updateTime()
 {
     Time.update();
 }
@@ -68,7 +68,7 @@ function updateStory()
 function playGame()
 {
     updateHighScore();
-    updateUpdateTime();
+    updateTime();
     updateHUD();
     updateSprites();
     updateCamera();
@@ -135,45 +135,51 @@ function updateEmptybar(sprite)
     sprite.state = State.BE;
 }
 
-    let isDay = true;  
-    let timeElapsed = 0; 
-    const timeLimit = 180; 
-    const sunShrinkRate = 1;
+
     
     function updateDayNightCycle(sprite) {
+
+        sprite.xPos = 0;
+        sprite.yPos = 30;
+
+        let isDay = true;  
+        let timeElapsed = 0; 
+        const timeLimit = 1800; 
+        const sunShrinkRate = 1;
+
+        timeElapsed = globals.deltaTime;
         timeElapsed++;
-    
+
         if (isDay) {
             if (sprite.imageSet && sprite.imageSet.xSize > 0) { 
                 sprite.imageSet.xSize -= sunShrinkRate;
             }
-    
-            if (sprite.imageSet.xSize <= 0) { 
-                sprite.imageSet.xSize = 0;
-                isDay = false; 
-                timeElapsed = 0; 
-                updateMoon(sprite); 
-            }
+        }
+        if (sprite.imageSet.xSize <= 0) { 
+            sprite.imageSet.xSize = 0;
+            isDay = false; 
+            timeElapsed = 0; 
+            updateMoon(sprite); 
         } else {
             if (timeElapsed >= timeLimit) { 
                 isDay = true; 
                 timeElapsed = 0;
-                updateSun(sprite); 
             }
         }
+    
     }
     
     function updateMoon(sprite) {
         sprite.xPos = 0;
         sprite.yPos = 40;
-        if (sprite.imageSet) sprite.imageSet.xSize = 50;
+        if (sprite.imageSet) sprite.imageSet.xSize = 70;
         sprite.state = State.MOON;
     }
     
     function updateSun(sprite) {
-        sprite.yPos = 30;
+
         sprite.imageSet.xSize = 70; 
-        sprite.xPos = 0; 
+        sprite.imageSet.xSize *= 0.5;
         sprite.state = State.BE;
     }
 
@@ -214,13 +220,13 @@ function updateSprite(sprite)
             sprite.update();
             break;
 
-        case SpriteID.MOON:
-            updateMoon(sprite);
-            break;
-
-        case SpriteID.SUN:
+            case SpriteID.SUN:
             updateDayNightCycle(sprite);
             break;
+
+        /*  case SpriteID.MOON:
+            updateDayNightCycle(sprite);
+            break; */
         
         case SpriteID.BAT:
             sprite.update()
