@@ -20,6 +20,7 @@ export class Player extends Sprite
     }
 
     isCollidingWithEnemies = false;
+    isCollidingWithKey = false;
 
     constructor(id, state, xPos, yPos, imageSet, frames, physics, hitBox)
     {
@@ -38,7 +39,6 @@ export class Player extends Sprite
         }
 
         globals.spritesPlayers.push(this)
-        
     }
 
     flicker = false;
@@ -46,6 +46,10 @@ export class Player extends Sprite
     update()
     {
         super.update();
+
+        // console.log("xPos:", this.xPos, "yPos:", this.yPos);
+
+        // globals.activedPlayer = globals.spritesPlayers[1]
 
         if (this.isCollidingWithEnemies)
         {
@@ -70,7 +74,7 @@ export class Player extends Sprite
 
         if (globals.life <= 15)
         {
-            globals.gameState = Game.OVER
+            globals.gameState = Game.LOAD_ENTER_NAME;
             globals.life = globals.maxLife;
             this.xPos = this.defaultPos.xPos;
             this.yPos = this.defaultPos.yPos;
@@ -88,6 +92,7 @@ export class Player extends Sprite
         if (this.id == SpriteID.PLAYER_WIZARD && globals.activedPlayer.id === this.id) 
         {
             this.moveSpeed = 1.2;
+            // this.isCollidingWithKey = true;
             this.readKeyboardAndAssignState();
             this.handlerStateWizard();
         } else if (this.id === SpriteID.PLAYER && globals.activedPlayer.id === this.id)
@@ -103,7 +108,7 @@ export class Player extends Sprite
         
         this.updateAnimationFrames()
 
-        this.adjustPositionAfterCollision();
+        // this.adjustPositionAfterCollision();
     }
 
     handlerPoisoned()

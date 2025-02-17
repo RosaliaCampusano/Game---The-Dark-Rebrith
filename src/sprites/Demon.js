@@ -1,4 +1,4 @@
-import { SpriteID, State } from "../constants.js";
+import { Sound, SpriteID, State } from "../constants.js";
 import Frames from "../Frames.js";
 import globals from "../globals.js";
 import HitBox from "../HitBox.js";
