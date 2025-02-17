@@ -21,6 +21,201 @@ import Time from "./Time.js";
 import { ParticleLight } from "./sprites/Particles.js";
 import { ThroneHUD } from "./sprites/ThroneHUD.js";
 import JosephMenu from "./sprites/JosephMenu.js";
+import Key from "./sprites/Key.js";
+import Door from "./sprites/Door.js";
+
+export function initFirstDisplay(){
+    initCamera();
+    initHTMLelements();
+    loadAssets();
+    initEvents();
+    initVars();
+}
+
+export function initMainMenu()
+{
+    globals.spriteMenu = [];
+    globals.particles = [];
+    globals.sounds.forEach(sound => sound.pause());
+    globals.currentSound = Sound.NO_SOUND
+
+    initSpritesMenu();
+    initParticlesForMainMenu();
+
+    globals.gameState = Game.MAIN_MENU;
+}
+
+export function initPlaying()
+{
+    globals.sprites = [];
+    globals.activedPlayer = null;
+    globals.spritesPlayers = [];
+    globals.particles = [];
+    globals.spritesHUD = [];
+    globals.sounds.forEach(sound => sound.pause());
+    globals.currentSound = Sound.NO_SOUND
+
+    initLevels();
+    initLevel();
+
+    globals.life = 125;
+    globals.time = Time.time;
+    globals.score = 0;
+
+    globals.currentSound = Sound.NO_SOUND;
+
+    initSprites();
+    initSpritesHUD();
+
+    const keydownHandler = (event) => {
+        if (event.keyCode) {
+            globals.isPlaying = true;
+            window.removeEventListener("keydown", keydownHandler, false);
+        }
+    };
+    
+    window.addEventListener("keydown", keydownHandler, false);
+
+    globals.gameState = Game.PLAYING;
+}
+
+export function initControls()
+{
+    globals.spriteControls = [];
+    globals.particles = [];
+    globals.sounds.forEach(sound => sound.pause());
+    globals.currentSound = Sound.NO_SOUND
+
+    initA();
+    initD();
+    initS();
+    initW();
+    initL();
+    initM();
+
+    initParticlesControls();
+
+    globals.gameState = Game.CONTROLS;
+}
+
+export function initStory()
+{
+    globals.spriteStory = [];
+    globals.sounds.forEach(sound => sound.pause());
+    globals.currentSound = Sound.NO_SOUND
+
+    initBackgroundStory();
+
+    globals.gameState = Game.STORY;
+}
+
+export function initHighScore()
+{
+    globals.spriteHighScore = [];
+    globals.sounds.forEach(sound => sound.pause());
+    globals.currentSound = Sound.NO_SOUND
+
+
+    globals.highScoreInit += globals.controlerHighScoreInit;
+    globals.highScoreQuantity = 10;
+
+    initParticlesForHighscore();
+
+    let positionUser = globals.historyScore.findIndex(score => score.name === globals.playerName);
+    
+    let insertIndex = globals.historyScore.findIndex(score => globals.score > score.score);
+
+    if (positionUser !== -1) {
+        if (globals.historyScore[positionUser].score === globals.score) return;
+        globals.historyScore.splice(positionUser, 1);
+    }
+
+    if (insertIndex !== -1) {
+        globals.historyScore.splice(insertIndex, 0, {
+            "position": insertIndex + 1,
+            "name": globals.playerName,
+            "score": globals.score
+        });
+    }else{
+        globals.historyScore.push({
+            "position": globals.historyScore.length + 1,
+            "name": globals.playerName,
+            "score": globals.score
+        });
+    }
+
+    globals.historyScore.forEach((score, index) => {
+        score.position = index + 1;
+    });
+
+    globals.gameState = Game.HIGHSCORE;
+}
+
+export function initGameOver()
+{
+    console.log(globals.activedPlayer, globals.spritesPlayers);
+    globals.isPlaying = false;
+    globals.particles = [];
+    // globals.spriteGameOver = [];
+    globals.spriteBackground = [];
+    globals.sounds.forEach(sound => sound.pause());
+    globals.currentSound = Sound.NO_SOUND
+
+    GameOverScreen();
+    initParticlesForGameOver();
+
+    globals.gameState = Game.OVER;
+}
+
+export function initWin()
+{
+    globals.spriteWinScreen = [];
+    globals.sounds.forEach(sound => sound.pause());
+    globals.currentSound = Sound.NO_SOUND
+
+    initWinScreen();
+
+    globals.gameState = Game.WIN;
+}
+
+export function initEnterName()
+{
+    // globals.spriteEnterName = [];
+    globals.sounds.forEach(sound => sound.pause());
+    globals.currentSound = Sound.NO_SOUND
+
+    // initEnterNameScreen();
+
+    globals.gameState = Game.ENTER_NAME;
+}
+
+function initParticlesForMainMenu() 
+{
+    const numParticles = 80;  
+    const minRadius = 2;
+    const maxRadius = 5;  
+    const alpha = 0.6; 
+
+    globals.particles = []; 
+
+    const centerX = globals.canvas.width / 2;  
+    const centerY = globals.canvas.height / 2;
+
+    for (let i = 0; i < numParticles; i++) {
+        const angle = Math.random() * Math.PI * 2; 
+        const speed = Math.random() * 2 + 1; 
+        const radius = Math.random() * (maxRadius - minRadius) + minRadius;  
+
+        const colors = [
+            `rgba(200, 0, 0, ${alpha})`,  
+            `rgba(100, 100, 100, ${alpha})`,  
+            `rgba(50, 50, 50, ${alpha})` 
+        ];
+        const color = colors[Math.floor(Math.random() * colors.length)];
+
+        globals.particles.push({xPos: centerX, yPos: centerY,radius,alpha,color,physics: {velocityX: Math.cos(angle) * speed,velocityY: Math.sin(angle) * speed,decay: 0.02  }});
+    }
+}
 
 function initHTMLelements()
 {
@@ -31,6 +226,8 @@ function initHTMLelements()
     globals.ctxHUD = globals.canvasHUD.getContext('2d');
 
     globals.ctx.imageSmoothingEnabled = false;
+
+    globals.sounds = [];
 }
 
 function initVars()
@@ -39,7 +236,12 @@ function initVars()
     globals.deltaTime = 0;
     globals.frameTimeObj = 1 / FPS;
 
-    globals.gameState = Game.LOADING;
+    
+
+    globals.gameState = Game.LOAD_PLAYING;
+
+    globals.highScore = globals.historyScore;
+    console.log(globals.highScore);
 
     globals.action = 
     {
@@ -53,24 +255,7 @@ function initVars()
         enter:          false
     }
 
-    globals.life = 125;
-    globals.time = Time.time;
     globals.score = 0;
-    globals.historyScore = [
-        ["AAA", 12000], 
-        ["BBB", 9000], 
-        ["CCC", 2000],
-        ["DDD", 1000],
-        ["EEE", 900],
-        ["FFF", 800],
-        ["UWU", 650],
-        ["XXA", 520],
-        ["OUO", 100],
-        ["PAM", 20]
-    ];
-    globals.highScore = globals.historyScore[0][1];
-
-    globals.currentSound = Sound.NO_SOUND;
 }
 
 function initEvents()
@@ -81,20 +266,27 @@ function initEvents()
 
 function initSprites()
 {
-    initPlayer();
-    initPlayerhWizard();
-    initGoblin();
-    initDemon();
+    if (globals.level == globals.levels[0]) {
+        initPlayer();
+        initPlayerhWizard();
+    }
     initThrone();
     initPotion();
-    initBat();
     initAttack();
-    initJumpGuy();
     initBlueExplotion();
     initRedExplotion();
     initSunLight();
     initKeys();
     initDoors();
+
+    initEnemies();
+}
+
+function initEnemies(){
+    initGoblin();
+    initDemon();
+    initBat();
+    initJumpGuy();
 }
 
 function initSpritesMenu()
@@ -111,21 +303,6 @@ function initSpriteBackground()
 {
     GameOverScreen();
     initWinScreen();
-}
-
-function initStory()
-{
-    initBackgroundStory();
-}
-
-function initControls()
-{
-    initA();
-    initD();
-    initS();
-    initW();
-    initL();
-    initM();
 }
 
 function initParticles()
@@ -145,13 +322,28 @@ function initSpritesHUD()
 function initGoblin()
 {
     // [xPos, yPos, moveSpeed (default 1), multiplierMovement (default true)]
-    let goblins = [
-        [55,  50, 1.0, false],
-        [524, 30, 1.5, false],
-        [593, 173, 1.4, true],
-        [593, 129, 1.0, false],
-        [682, 154, 0.9, true]
-    ];
+    let goblins = [];
+
+    if (globals.level.level === 1)
+    {
+        goblins = [
+            [55,  50, 1.0, false],
+            [524, 30, 1.5 , false],
+            [593, 173, 1.4, true],
+            [593, 127, 1.0, false],
+            [682, 154, 0.9, true]
+        ];
+    }
+    if (globals.level.level === 2)
+    {
+        goblins = [
+            [55,  50, 1.0 , false],
+            [524, 15, 1.5 , false],
+            [593, 30, 1.0 , false],
+            [400, 191, 1.4, false],
+            [682, 190, 0.9, true]
+        ];
+    }
 
     for (let i = 0; i < goblins.length; i++) 
     {
@@ -183,11 +375,28 @@ function initPlayer()
 function initDemon()
 {
     // [xPos, yPos, moveSpeed (default 1)]
-    let demos = [
-        [305, 75, 1.0], 
-        [410, 48, 1.5],
-        [505, 68, 1.4]
-    ];
+    let demos = []
+    if (globals.level.level === 1)
+    {
+        demos = [
+            [305, 75, 1.0], 
+            [412, 48, 1.5],
+            [508, 68, 1.4]
+        ];
+    }
+
+    if (globals.level.level === 2)
+    {
+        demos = [
+            [40,  55, 1.0 ],
+            [184, 75, 1.0 ], 
+            [410, 48, 1.5 ],
+            [505, 68, 1.4 ],
+            [655, 82, 1.4 ],
+            [265, 63, 1.4 ],
+            [744, 138, 1.0],
+        ];
+    }
 
     for (let i = 0; i < demos.length; i++)
     {
@@ -224,10 +433,25 @@ function initBat()
 {
 
     // [xPos, yPos, moveSpeed (default 1)]
-    let bats = [
-        [64, 64, 1.0], 
-        [602, 171, 1.0],
-    ];
+    let bats = []
+
+    if (globals.level.level === 1)
+    {
+        bats = [
+            [64, 64, 1.0], 
+            [602, 171, 1.0],
+        ];
+    }
+    
+    if (globals.level.level === 2)
+    {
+        bats = [
+            [64, 64, 1.0 ], 
+            [602, 171, 1.0],
+            [502, 81, 1.0 ],
+            [202, 51, 1.0 ],
+        ];
+    }
 
     for (let i = 0; i < bats.length; i++)
     {
@@ -252,6 +476,7 @@ function initPlayerhWizard()
 
 function initJumpGuy()
 {
+    if (globals.level.level !== 1) return;
     const imageSet = new ImageSet(287, 240, 16, 19, 16, 19, 0, 0);
     const frames = new Frames(7);
 
@@ -280,7 +505,7 @@ function initOldJosephs()
     const frames1 = new Frames(6);
     const frames2 = new Frames(6);
 
-    const physics = new Physics(20);
+    const physics = new Physics(10);
 
     const hitBox = new HitBox(16, 51, 5, 0);
 
@@ -322,20 +547,15 @@ function initStages()
     const moon = new Sprite(SpriteID.MOON, State.MOON, 0, 40, imageSet1, frames);
     const sun = new Sprite(SpriteID.SUN, State.SUN, -8, 30, imageSet, frames);
 
-    globals.spritesHUD.push(moon);
+    // globals.spritesHUD.push(moon);
     globals.spritesHUD.push(sun);
 }
 
 function initDoors()
 {
-    const imageSet = new ImageSet(409, 1126, 34, 45, 34, 45, 0, 0);
-    const frames = new Frames(1);
-    const hitBox = new HitBox(70, 95, 0, 0);
-
-    const door = new Sprite(SpriteID.DOOR, State.BE, 671, 90, imageSet, frames, null, hitBox);
+    const door = new Door(911, 410);
 
     globals.sprites.push(door);
-
 }
 
 function GameOverScreen()
@@ -510,8 +730,6 @@ function initParticlesForHighscore()
     const radius = 2; 
     const alpha = 0.8;
 
-    globals.particles = [];
-
     for (let i = 0; i < numParticles; i++) 
     {
         const xPos = Math.random() * globals.canvas.width; 
@@ -520,34 +738,6 @@ function initParticlesForHighscore()
 
         const particleHighScore = new ParticleLight(xPos, yPos, radius, alpha, { velocity, acceleration: 0 });
         globals.particles.push(particleHighScore);
-    }
-}
-
-function initParticlesForMainMenu() 
-{
-    const numParticles = 80;  
-    const minRadius = 2;
-    const maxRadius = 5;  
-    const alpha = 0.6; 
-
-    globals.particles = []; 
-
-    const centerX = globals.canvas.width / 2;  
-    const centerY = globals.canvas.height / 2;
-
-    for (let i = 0; i < numParticles; i++) {
-        const angle = Math.random() * Math.PI * 2; 
-        const speed = Math.random() * 2 + 1; 
-        const radius = Math.random() * (maxRadius - minRadius) + minRadius;  
-
-        const colors = [
-            `rgba(200, 0, 0, ${alpha})`,  
-            `rgba(100, 100, 100, ${alpha})`,  
-            `rgba(50, 50, 50, ${alpha})` 
-        ];
-        const color = colors[Math.floor(Math.random() * colors.length)];
-
-        globals.particles.push({xPos: centerX, yPos: centerY,radius,alpha,color,physics: {velocityX: Math.cos(angle) * speed,velocityY: Math.sin(angle) * speed,decay: 0.02  }});
     }
 }
 
@@ -598,19 +788,18 @@ function initKeys()
     const imageSet3 = new ImageSet(882, 643, 40, 40, 40, 40, 0, 0);
     const imageSet4 = new ImageSet(882, 682, 40, 40, 40, 40, 0, 0);
 
-    const frames = new Frames(1);
+    const key1 = new Key(350, 50, imageSet1, 0);
+    const key2 = new Key(420, 205, imageSet2, 1);
+    const key3  = new Key(760, 205, imageSet3, 2);
+    const key4 = new Key(730, 60, imageSet4, 3);
 
-    const hitbox = new HitBox(40, 40, 0, 0);
+    globals.sprites.push(key1, key2, key3, key4);
 
-    const key1 = new Sprite(SpriteID.KEY, State.BE, 350, 50, imageSet1, frames, null, hitbox);
-    const key2 = new Sprite(SpriteID.KEY, State.BE, 420, 205, imageSet2, frames, null, hitbox);
-    const key3  = new Sprite(SpriteID.KEY, State.BE, 760, 85, imageSet3, frames, null, hitbox);
-    const key4 = new Sprite(SpriteID.KEY, State.BE, 730, 60, imageSet4, frames, null, hitbox);
+    globals.spritesKeys.push(key1, key2, key3, key4);
 
-    globals.sprites.push(key1);
-    globals.sprites.push(key2);
-    globals.sprites.push(key3);
-    globals.sprites.push(key4);
+    const randomKey = Math.floor(Math.random() * globals.spritesKeys.length) + 1;
+
+    globals.activedKey = globals.spritesKeys[randomKey - 1];
 }
 
 function loadAssets()
@@ -628,6 +817,7 @@ function loadAssets()
     globals.tileSets.push(tileSet);
     globals.assetsToLoad.push(tileSet);
 
+    // TODO: Hacer que esto se cargue en el load de la pantalla de playing
     //Load Sounds
     let gameMusic = document.querySelector("#gameMusic");
     gameMusic.addEventListener("canplaythrough", loadHandler, false);
@@ -638,6 +828,7 @@ function loadAssets()
     
     let gameMusicNight = document.querySelector("#gameMusicNight");
     gameMusicNight.addEventListener("canplaythrough", loadHandler, false);
+    gameMusicNight.addEventListener("timeupdate", updateMusic, false);
     gameMusicNight.load();
     globals.sounds.push(gameMusicNight);
     globals.assetsToLoad.push(gameMusicNight);
@@ -648,6 +839,81 @@ function loadAssets()
     explotionSound.load();
     globals.sounds.push(explotionSound);
     globals.assetsToLoad.push(explotionSound);
+    
+    //Story 
+    let storyMusic = document.querySelector("#storyMusic");
+    storyMusic.addEventListener("canplaythrough", loadHandler, false);
+    storyMusic.addEventListener("timeupdate", updateMusic, false);
+    storyMusic.load();
+    globals.sounds.push(storyMusic);
+    globals.assetsToLoad.push(storyMusic);
+
+    //Main Menu 
+    let mainMenuMusic = document.querySelector("#mainMenuMusic");
+    mainMenuMusic.addEventListener("canplaythrough", loadHandler, false);
+    mainMenuMusic.addEventListener("timeupdate", updateMusic, false);
+    mainMenuMusic.load();
+    globals.sounds.push(mainMenuMusic);
+    globals.assetsToLoad.push(mainMenuMusic);
+
+    //Highscore
+    let highscoreMusic = document.querySelector("#highscoreMusic");
+    highscoreMusic.addEventListener("canplaythrough", loadHandler, false);
+    highscoreMusic.addEventListener("timeupdate", updateMusic, false);
+    highscoreMusic.load();
+    globals.sounds.push(highscoreMusic);
+    globals.assetsToLoad.push(highscoreMusic);
+
+    //Game Over
+    let gameOverMusic = document.querySelector("#gameOverMusic");
+    gameOverMusic.addEventListener("canplaythrough", loadHandler, false);
+    gameOverMusic.addEventListener("timeupdate", updateMusic, false);
+    gameOverMusic.load();
+    globals.sounds.push(gameOverMusic);
+    globals.assetsToLoad.push(gameOverMusic);
+
+    //Win
+    let winMusic = document.querySelector("#winMusic");
+    winMusic.addEventListener("canplaythrough", loadHandler, false);
+    winMusic.addEventListener("timeupdate", updateMusic, false);
+    winMusic.load();
+    globals.sounds.push(winMusic);
+    globals.assetsToLoad.push(winMusic);
+
+    //Demon hurt sound
+    let demonHurt = document.querySelector("#demonHurt");
+    demonHurt.addEventListener("canplaythrough", loadHandler, false);
+    demonHurt.load();
+    globals.sounds.push(demonHurt);
+    globals.assetsToLoad.push(demonHurt);
+
+    //Goblin hurt sound
+    let goblinHurt = document.querySelector("#goblinHurt");
+    goblinHurt.addEventListener("canplaythrough", loadHandler, false);
+    goblinHurt.load();
+    globals.sounds.push(goblinHurt);
+    globals.assetsToLoad.push(goblinHurt);
+
+    //Pick up key 
+    let pickUpKey = document.querySelector("#pickUpKey");
+    pickUpKey.addEventListener("canplaythrough", loadHandler, false);
+    pickUpKey.load();
+    globals.sounds.push(pickUpKey);
+    globals.assetsToLoad.push(pickUpKey);
+
+    //Locked door 
+    let lockedDoor = document.querySelector("#lockedDoor");
+    lockedDoor.addEventListener("canplaythrough", loadHandler, false);
+    lockedDoor.load();
+    globals.sounds.push(lockedDoor);
+    globals.assetsToLoad.push(lockedDoor);
+
+    //Scroll
+    let scroll = document.querySelector("#scroll");
+    scroll.addEventListener("canplaythrough", loadHandler, false);
+    scroll.load();
+    globals.sounds.push(scroll);
+    globals.assetsToLoad.push(scroll);
 }
 
 function loadHandler()
@@ -667,30 +933,46 @@ function loadHandler()
         }
 
         console.log("Assets finished loading");
-
-        globals.gameState = Game.PLAYING;
-
     }
+}
+
+function initLevels()
+{
+    const mapLevel1 = new Level(level, new ImageSet(0, 0, 16, 16, 16, 16, 0, 0), 1);
+
+    const mapLevel2 = new Level(level2, new ImageSet(0, 0, 16, 16, 16, 16, 0, 0), 2);
+
+    globals.levels.push(mapLevel1, mapLevel2);
 }
 
 function initLevel()
 {
-    const imageSet = new ImageSet(0, 0, 16, 16, 16, 16, 0, 0);
-
-    globals.level = new Level(level, imageSet);
+    globals.level = globals.levels[0];
 }
 
-function initLevel2()
+export async function loadDataHighScore()
 {
-    const imageSet = new ImageSet(0, 0, 16, 16, 16, 16, 0, 0);
+    const url = "http://localhost:3000/src/server/routes/getAllRecords.php";
 
-    globals.level = new Level(level2, imageSet);
+    const response =  await fetch(url);
 
+    if (response.ok)
+    {
+        const resultJSON = await response.json();
+        initHighScoreData(resultJSON);
+    }
+}
+
+function initHighScoreData(data)
+{
+    globals.historyScore = data;
+    console.log(globals.historyScore);  
 }
 
 export 
 {
     initHTMLelements,
+
     initVars,
     loadAssets,
     initEvents,
@@ -698,11 +980,11 @@ export
     initSprites,
     initSpritesMenu,
     initSpriteBackground,
-    initStory,
-    initControls,
-    initLevel,
+    // initStory,
+    // initControls,
+    initLevels,
     initLoadSprite,
     initCamera,
     initParticles,
-    initLevel2
+    initLevel
 }
