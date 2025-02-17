@@ -1,16 +1,16 @@
 import globals from "./globals.js";
-import { Game, State, SpriteID, ParticleState, Sound } from "./constants.js";
+import { Game, State, SpriteID, ParticleState, Sound, Music } from "./constants.js";
 import detectCollisions from "./collisions.js";
 import {updateCamera} from "./Camera.js";
 import Time from "./Time.js";
+import { initControls, initEnterName, initGameOver, initHighScore, initMainMenu, initPlaying, initStory, initWin } from "./initialize.js";
 
 export default function update()
 {
     switch(globals.gameState)
     {
         case Game.LOADING:
-            console.log("Loading assets...")
-            updateLoad();
+            updateLoading();
             break;
         
         case Game.PLAYING:
@@ -31,23 +31,128 @@ export default function update()
         case Game.HIGHSCORE:
             updateHighScore();
             break;
+        case Game.ENTER_NAME:
+            updateEnterName();
+            break;
+        case Game.WIN:
+            updateWin()
+            break;
+        case Game.LOAD_MAIN_MENU:
+            initMainMenu();
+            break;
+        case Game.LOAD_PLAYING:
+            initPlaying();
+            break;
+        case Game.LOAD_STORY:
+            initStory();
+            break;
+        case Game.LOAD_CONTROLS:
+            initControls();
+            break;
+        case Game.LOAD_HIGH_SCORES:
+            initHighScore();
+            break;
+        case Game.LOAD_OVER:
+            initGameOver();
+            break;
+        case Game.LOAD_ENTER_NAME:
+            initEnterName();
+            break;
+        case Game.LOAD_WIN:
+            initWin();
+            break;
         default:
             console.error("Error: Game State invalid");
 
     }
 }
 
+function updateWin()
+{
+    playWinMusic();
+    for (let index = 0; index < globals.spriteWinScreen.length; index++) {
+
+        const sprite = globals.spriteWinScreen[index];
+
+        switch (sprite.id) {
+            case SpriteID.WIN_SCREEN:
+                if (sprite.internalTimer < sprite.maxInternalTimer) sprite.internalTimer += 1 * globals.deltaTime;
+                else globals.gameState = Game.LOAD_MAIN_MENU
+                break;
+        
+            default:
+                break;
+        }
+        
+    }
+}
+
+function playWinMusic()
+{
+    globals.currentMusic = Music.WIN_MUSIC;
+    globals.sounds[globals.currentMusic].play();
+    globals.sounds[globals.currentMusic].volume = 1;
+}
+
+function updateEnterName()
+{
+    if (globals.action.enter) {
+        globals.gameState = Game.LOAD_OVER;
+    }
+
+    // globals.sounds.forEach(sound => sound.pause());
+    // globals.currentSound = Sound.NO_SOUND
+
+    if(globals.gameState === Game.ENTER_NAME)
+    {
+        globals.sounds[Music.GAME_OVER_MUSIC].play();
+        globals.sounds[Music.GAME_OVER_MUSIC].volume = 1;
+    }
+
+    globals.saturate = 0;
+}
+
+function playHighScoreMusic()
+{
+    if (globals.gameState === Game.HIGHSCORE)
+    {
+        globals.sounds[Music.HIGHSCORE_MUSIC].play();
+        globals.sounds[Music.HIGHSCORE_MUSIC].volume = 1;
+        
+    }
+}
+
 function updateHighScore()
 {
-    
-    globals.historyScore.forEach((score, index, arr) => {
-        if (globals.score > score[1])
-        {
-            arr.splice(index, 0, ["XXX", globals.score]);
-        }  
-    });
+    playHighScoreMusic();
 
-    globals.highScore = globals.historyScore[0][1];
+    function handlerKeyDownhighscore(event)
+    {
+        if (event.key === 'Escape') {
+            globals.gameState = Game.LOAD_MAIN_MENU;
+            document.removeEventListener('keydown', handlerKeyDownhighscore);
+        }
+
+        if (event.key === 'ArrowLeft') {
+            if (globals.highScoreInit > 0){
+                globals.controlerHighScoreInit = -10;
+            }else {
+                globals.highScoreInit = 0
+                globals.controlerHighScoreInit = 0;
+            }
+            globals.gameState = Game.LOAD_HIGH_SCORES;
+        }
+
+        if (event.key === 'ArrowRight') {
+            globals.controlerHighScoreInit = 10;
+            if (globals.highScoreInit + 10 >= globals.historyScore.length){
+                globals.controlerHighScoreInit = 0;
+            }
+            globals.gameState = Game.LOAD_HIGH_SCORES;
+        }
+    }
+
+    document.addEventListener('keydown', handlerKeyDownhighscore);
 }
 
 function updateUpdateTime()
@@ -55,27 +160,63 @@ function updateUpdateTime()
     Time.update();
 }
 
+function updateLoading()
+{
+    if (globals.action.enter) {
+        globals.gameState = Game.LOAD_MAIN_MENU;
+    }
+}
 function updateGameOver()
 {
     updateScreenGameOver();
+    // checkIsMusicContinue();
+    playGameOverMusic();
+}
+
+function playGameOverMusic()
+{
+    globals.currentMusic = Music.GAME_OVER_MUSIC;
+    globals.sounds[globals.currentMusic].play();
+    globals.sounds[globals.currentMusic].volume = 1;
+} 
+
+function checkIsMusicContinue()
+{
+    if (globals.currentMusic !== Music.NO_MUSIC) {
+        globals.sounds[globals.currentMusic].pause();
+        globals.sounds[globals.currentMusic].currentTime = 0;
+        // console.log("aver " + globals.currentMusic);
+    }
 }
 
 function updateStory()
 {
+    playStoryMusic();
     updateTheStory();
+}
+
+function playStoryMusic()
+{
+    if(globals.gameState === Game.STORY)
+        {
+            globals.sounds[Music.STORY_MUSIC].play();
+            globals.sounds[Music.STORY_MUSIC].volume = 1;
+        }
 }
 
 function playGame()
 {
-    updateHighScore();
+
+    globals.highScore = globals.historyScore[0].score;
     updateUpdateTime();
     updateHUD();
+    if (!globals.isPlaying) return;
     updateSprites();
     updateCamera();
     // updatePaticles();
     detectCollisions();
-    playMusic();
     playSound();
+    playMusic();
 }
 
 function playSound()
@@ -93,8 +234,8 @@ function playMusic()
 {
     if( globals.gameState === Game.PLAYING)
     {
-        globals.sounds[Sound.GAME_MUSIC].play();
-        globals.sounds[Sound.GAME_MUSIC].volume = 1;
+        globals.sounds[Music.GAME_MUSIC].play();
+        globals.sounds[Music.GAME_MUSIC].volume = 1;
     }
 }
 
@@ -135,12 +276,14 @@ function updateEmptybar(sprite)
     sprite.state = State.BE;
 }
 
+
+function updateDayNightCycle(sprite) {
     let isDay = true;  
     let timeElapsed = 0; 
-    const timeLimit = 180; 
+    const timeLimit = globals.time; 
     const sunShrinkRate = 1;
-    
-    function updateDayNightCycle(sprite) {
+    sprite.xPos = -5;
+    sprite.yPos = 30;
         timeElapsed++;
     
         if (isDay) {
@@ -171,6 +314,7 @@ function updateEmptybar(sprite)
     }
     
     function updateSun(sprite) {
+        sprite.xPos = -5;
         sprite.yPos = 30;
         sprite.imageSet.xSize = 70; 
         sprite.xPos = 0; 
@@ -219,7 +363,8 @@ function updateSprite(sprite)
             break;
 
         case SpriteID.SUN:
-            updateDayNightCycle(sprite);
+             updateDayNightCycle(sprite);
+            /* updateSun(sprite); */
             break;
         
         case SpriteID.BAT:
@@ -235,26 +380,17 @@ function updateSprite(sprite)
             break;
         
         case SpriteID.KEY:
-            updateKey(sprite);
+            sprite.update();
             break;
 
         case SpriteID.DOOR:
-            updateDoors(sprite);
+            sprite.update();
             break;
         
         default:
 
             break;
     }
-}
-
-function updateDoors(sprite)
-{
-    sprite.state = State.BE;
-}
-function updateKey(sprite)
-{
-    sprite.state = State.BE;
 }
 
 function updateSprites()
@@ -278,6 +414,14 @@ function updateHUD()
 function updateMainMenu()
 {
     updateJosephs();
+
+    if( globals.gameState === Game.MAIN_MENU)
+    {
+        globals.sounds[Music.MAIN_MENU_MUSIC].play();
+        globals.sounds[Music.MAIN_MENU_MUSIC].volume = 1;
+    }
+
+    globals.currentSound = Sound.SCROLL;
 }
 
 function updateSpriteMenu(sprite)
@@ -296,7 +440,7 @@ function updateSpriteMenu(sprite)
 
         break;
     }
-} 
+}
 
 function updateSpriteLoad(sprite)
 {
@@ -336,6 +480,10 @@ function updateLoadJoseph(sprite)
     }
 
     sprite.xPos += sprite.physics.vx * globals.deltaTime;
+
+    if (sprite.xPos < 150) {
+        sprite.xPos = 250;
+    };
 
     updateAnimationFrames(sprite);
     
