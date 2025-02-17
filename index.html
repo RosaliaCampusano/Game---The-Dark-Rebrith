@@ -5,6 +5,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Dark ReBirth</title>
+    <link 
+        rel="preload"
+        href="./fonts/emulogic.ttf"
+        as="font"
+        type="font/ttf"
+        crossorigin="anonymous">
     <link rel="stylesheet" href="./css/styles.css">
 </head>
 <body>
@@ -25,11 +31,58 @@
         <source src="./sounds/gameMusicNightWav.wav" type="audio/wav">
     </audio>
 
-    <audio>
+    <audio id="mainMenuMusic">
+        <source src="./sounds/MainMenu(mp3).mp3" type="audio/mpeg">
+        <source src="./sounds/MainMenu(wav).wav" type="audio/wav">
+    </audio>
+
+    <audio id="storyMusic">
+        <source src="./sounds/StorySong(mp3).mp3" type="audio/mpeg">
+        <source src="./sounds/StorySong(wav).wav" type="audio/wav">
+    </audio>
+
+    <audio id="highscoreMusic">
+        <source src="./sounds/HighscoreSong(mp3).mp3" type="audio/mpeg">
+        <source src="./sounds/HighscoreSong(wav).wav" type="audio/wav">
+    </audio>
+
+    <audio id="gameOverMusic">
+        <source src="./sounds/GameOver(mp3).mp3" type="audio/mpeg">
+        <source src="./sounds/GameOver(wav).wav" type="audio/wav">
+    </audio>
+
+    <audio id="winMusic">
+        <source src="./sounds/Win(mp3).mp3" type="audio/mpeg">
+        <source src="./sounds/Win(wav).wav" type="audio/wav">
+    </audio>
+
         <audio id="explotionSound">
             <source src="./sounds/explotionSound.wav" type="audio/mpeg">
         </audio>
-    </audio>
+
+
+        <audio id="lockedDoor">
+            <source src="./sounds/Locked Door.mp3" type="audio/mpeg">
+        </audio>
+
+
+        <audio id="pickUpKey">
+            <source src="./sounds/PickUp Key.wav" type="audio/wav">
+        </audio>
+
+
+        <audio id="goblinHurt">
+            <source src="./sounds/Goblin hurt.wav" type="audio/wav">
+        </audio>
+
+
+        <audio id="demonHurt">
+            <source src="./sounds/Demon hurt.wav" type="audio/wav">
+        </audio>
+
+        <audio id="scroll">
+            <source src="./sounds/scroll.mp3" type="audio/mpeg">
+        </audio>
 
     <script type="module" src="./src/game.js"></script>
     
