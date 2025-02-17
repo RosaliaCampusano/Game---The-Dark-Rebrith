@@ -26,6 +26,10 @@ export default
 
     sprites: [],
 
+    spritesKeys: [],
+
+    activedKey: null,
+
     spritesAttack: [],
 
     spritesPlayers: [],
@@ -41,7 +45,11 @@ export default
     spriteWinScreen: [],
 
     spriteStory: [],
-    
+
+    spriteHighScore: [],
+
+    spriteHighScorePosition: [],
+        
     spriteControls: [],
 
     tileSet: {},
@@ -52,6 +60,23 @@ export default
     tileSets: [],
 
     level: {},
+
+    levels: [],
+
+    isPlaying: false,
+
+    fase: [1,1],
+
+    counterFase: 1,
+
+    isDark: false,
+
+    messageToDoor: {
+        x: 0,
+        y: 0,
+        text: "",
+        color: "white"
+    },
 
     action: {},  
 
@@ -64,6 +89,14 @@ export default
     highScore: 0,
 
     historyScore: [],
+
+    highScoreQuantity: 10,
+
+    highScoreInit: 0,
+
+    controlerHighScoreInit: 0,
+
+    playerName: "",
 
     time: 0,
 
@@ -79,5 +112,12 @@ export default
 
     sounds: [],
 
-    currentSound: -1
+    currentSound: -1,
+    
+    levelTimer: {},
+
+    currentMusic: -1,
+
+    incorrectKey: false,
+    
 }
