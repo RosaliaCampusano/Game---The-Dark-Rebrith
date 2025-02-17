@@ -46,8 +46,13 @@ export default function render()
             renderEnterName();
             break;
 
+        /*   case Game.LOAD_ENDING_LEVEL:
+            renderLoadLevel();
+            break; */
+            
         default: 
-            console.error("Error: Game State invalid");
+
+            console.error("Error: Game State invalid, gameState: " + globals.gameState);
     }
 }
 
@@ -61,19 +66,63 @@ function drawGame()
     globals.ctx.scale(globals.camera.zoom, globals.camera.zoom);
     globals.canvas.style.filter = `saturate(${globals.saturate})`;
     moveCamera();
-/* 
-    drawFullBlackBackground();
-    createVisibilityMask(); */
+
+    if (globals.isDark)
+    {        
+        drawFullBlackBackground();
+        createVisibilityMask();
+    }
 
     renderMap();
+    
+    renderHUD();
+
+    if (!globals.isPlaying)
+    {
+        renderPlayer();
+        return
+    };
+
     renderSprites();
 
-/*     globals.ctx.restore();  */
+    renderMesageToDoor();
 
-    renderHUD();
-    /* renderParticles(); */
+    // renderParticles();
 
     restoreCamera();
+}
+
+function renderPlayer()
+{
+    const sprite = globals.activedPlayer;
+    //Calculate the position in the TileMap to draw
+    const xTile = sprite.imageSet.xInit + sprite.frames.frameCounter * sprite.imageSet.xGridSize + sprite.imageSet.xOffset;
+    const yTile = sprite.imageSet.yInit + sprite.state * sprite.imageSet.yGridSize + sprite.imageSet.yOffset;
+
+    const xPos = Math.floor(sprite.xPos);
+    const yPos = Math.floor(sprite.yPos);
+
+    //Draw the new frame of sprite in the right position
+    globals.ctx.drawImage(
+        globals.tileSets[Tile.SIZE_SPRITE],
+        xTile, yTile,
+        sprite.imageSet.xSize, sprite.imageSet.ySize,
+        xPos, yPos,
+        sprite.imageSet.xSize * 0.6, sprite.imageSet.ySize * 0.6
+    );
+}
+
+function renderMesageToDoor()
+{
+    if(globals.incorrectKey === true)
+    {
+        globals.ctx.font = '5px emulogic';
+        globals.ctx.fillStyle = globals.messageToDoor.color;
+        globals.ctx.textAlign = 'center';
+        globals.ctx.strokeStyle = "black";
+        globals.ctx.fillText(globals.messageToDoor.text, globals.messageToDoor.x, globals.messageToDoor.y);
+        globals.incorrectKey = false;
+    }
 }
     
 function createVisibilityMask() 
@@ -165,7 +214,6 @@ function renderSprites()
         );
         //drawHitBox(sprite);
     }
-
 }
 
 function drawHitBox(sprite)
@@ -258,20 +306,19 @@ function renderHUD()
 {
     const score = globals.score;
     const highScore = globals.highScore;
-    const time = globals.time;
 
     //Draw score
     globals.ctxHUD.font = '8px emulogic';
     globals.ctxHUD.fillStyle = 'red';
-    globals.ctxHUD.fillText("SCORE", 58, 15);
+    globals.ctxHUD.fillText("SCORE", 70, 68);
     globals.ctxHUD.fillStyle = 'white';
-    globals.ctxHUD.fillText(" " + score, 55, 33);
+    globals.ctxHUD.fillText(" " + score, 75, 87);
 
     //Draw High Score
     globals.ctxHUD.fillStyle = 'red';
-    globals.ctxHUD.fillText("HIGH SCORE", 130, 15);
+    globals.ctxHUD.fillText("HIGH SCORE", 100, 24);
     globals.ctxHUD.fillStyle = 'white';
-    globals.ctxHUD.fillText(" " + highScore, 145, 33);
+    globals.ctxHUD.fillText(" " + highScore, 110, 44);
 
     //Draw Life
     globals.ctxHUD.fillStyle = 'red';
@@ -283,14 +330,9 @@ function renderHUD()
 
     //Draw Level
     globals.ctxHUD.fillStyle = 'red';
-    globals.ctxHUD.fillText("Level", 5, 15);
+    globals.ctxHUD.fillText("Level", 10, 15);
 
- /*    // Draw Time
-    globals.ctxHUD.fillStyle = 'red';
-    globals.ctxHUD.fillText("TIME", 58, 70);
-    globals.ctxHUD.fillStyle = 'white';
-    globals.ctxHUD.fillText("" + time, 60, 88);
- */
+    
     renderSpritesHUD();
 
 }
@@ -326,30 +368,29 @@ function renderLoading()
 
     //Title
     let title = "LOADING";
+let totalAssets = globals.assetsToLoad.length;
+    let loadedAssets = globals.assetsLoaded;
+    let progress = loadedAssets / totalAssets;
+    let barWidth = 200;
+    let barHeight = 15;
+    let barX = canvasDividedBy2 - barWidth / 2;
+    let barY = 130;
 
-    globals.ctx.font = '20px emulogic';
-    globals.ctx.fillStyle ='white';
-    globals.ctx.fillText("" + title, canvasDividedBy2 - 5, 120);
+    globals.ctx.strokeStyle = 'white';
+    globals.ctx.strokeRect(barX, barY, barWidth, barHeight);
+    globals.ctx.fillStyle = 'white';
+    globals.ctx.fillRect(barX, barY, barWidth * progress, barHeight);
 
-    for (let i = 0; i < globals.spriteLoading.length; i++)
+    if (loadedAssets === totalAssets) 
     {
-        const sprite = globals.spriteLoading[i];
-
-        const xTile = sprite.imageSet.xInit + sprite.frames.frameCounter * sprite.imageSet.xGridSize + sprite.imageSet.xOffset;
-        const yTile = sprite.imageSet.yInit + sprite.state * sprite.imageSet.yGridSize + sprite.imageSet.yOffset;
-
-        const xPos = Math.floor(sprite.xPos);
-        const yPos = Math.floor(sprite.yPos);
-
-        globals.ctx.drawImage(
-            globals.tileSets[Tile.SIZE_SPRITE],
-            xTile, yTile,
-            sprite.imageSet.xSize, sprite.imageSet.ySize,
-            xPos, yPos,
-            sprite.imageSet.xSize, sprite.imageSet.ySize
-        );
-
+        globals.ctx.font = '14px emulogic';
+        globals.ctx.fillText("PRESS ENTER TO START", canvasDividedBy2, 120);
+    } else 
+    {
+        globals.ctx.font = '20px emulogic';
+        globals.ctx.fillText("" + title, canvasDividedBy2 - 5, 120);
     }
+
 }
 
 function renderParticlesForMainMenu() 
@@ -369,11 +410,11 @@ function renderParticlesForMainMenu()
             particle.physics.velocityY *= -1;  
         }
 
+        ctx.filter = 'blur(2px)'; 
         ctx.fillStyle = particle.color;
-        ctx.beginPath();
-        ctx.arc(particle.xPos, particle.yPos, particle.radius, 0, Math.PI * 2, false);
-        ctx.fill();
-
+        const squareSize = particle.radius * 2; 
+        ctx.fillRect(particle.xPos - particle.radius, particle.yPos - particle.radius, squareSize, squareSize);
+        ctx.filter = 'none'; 
         particle.alpha += (Math.random() - 0.5) * 0.01; 
         particle.alpha = Math.max(0.3, Math.min(0.8, particle.alpha)); 
     });
@@ -388,6 +429,8 @@ function renderMainMenu()
             selectedOption: 0,
         };
     }
+
+    globals.highScoreInit = 0;
 
     const state = renderMainMenu.state;
     const options = MainMenuTexts; 
@@ -428,6 +471,13 @@ function renderMainMenu()
         }
     }
 
+    function removeKeyListener() 
+    {
+        document.removeEventListener("keydown", handlerKeyDownMainMenu);
+        renderMainMenu.eventListenerAdded = false;
+    }
+    
+    
     if (!renderMainMenu.eventListenerAdded) 
     {
         document.addEventListener("keydown", handlerKeyDownMainMenu);
@@ -453,51 +503,31 @@ function renderMainMenu()
     }
 
     renderParticlesForMainMenu();
+}
 
-    function handleMenuSelection(selectedIndex) {
-        const selectedOption = MainMenuTexts[selectedIndex][0];
+function handleMenuSelection(selectedIndex) {
+    const selectedOption = MainMenuTexts[selectedIndex][0];
 
-        switch (selectedOption) {
-            case "NEW GAME":
-                console.log("Starting a new game...");
-                globals.gameState = Game.PLAYING;
-                drawGame();
-                break;
-            case "CONTROLS":
-                console.log("Showing controls...");
-                globals.gameState = Game.CONTROLS;
-                renderControls();
-                break;
-            case "STORY":
-                console.log("Showing story...");
-                globals.gameState = Game.STORY;
-                renderStory();
-                break;
-            case "HIGHSCORE":
-                console.log("Showing highscore...");
-                globals.gameState = Game.HIGHSCORE;
-                renderHighscore();
-                break;
-            default:
-                console.log("Unknown option selected");
-                break;
-        }
-    }
-
-    function removeKeyListener() {
-        document.removeEventListener("keydown", handlerKeyDownMainMenu);
-        renderMainMenu.eventListenerAdded = true;
-    }
-
-    function addKeyListener() {
-        if (!renderMainMenu.eventListenerAdded) {
-            document.addEventListener("keydown", handlerKeyDownMainMenu);
-            renderMainMenu.eventListenerAdded = true;
-        }
-    }
-
-    if (globals.gameState === Game.MAIN_MENU) {
-        addKeyListener(); 
+    switch (selectedOption) {
+        case "NEW GAME":
+            console.log("Starting a new game...");
+            globals.gameState = Game.LOAD_PLAYING;
+            break;
+        case "CONTROLS":
+            console.log("Showing controls...");
+            globals.gameState = Game.LOAD_CONTROLS;
+            break;
+        case "STORY":
+            console.log("Showing story...");
+            globals.gameState = Game.LOAD_STORY;
+            break;
+        case "HIGHSCORE":
+            console.log("Showing highscore...");
+            globals.gameState = Game.LOAD_HIGH_SCORES;
+            break;
+        default:
+            console.log("Unknown option selected");
+            break;
     }
 }
 
@@ -589,8 +619,12 @@ function renderHighscore()
     globals.ctx.fillText(categoryName, canvasDividedBy2 - 20, startY);
     globals.ctx.fillText(categoryScore, canvasDividedBy2 + 110, startY);
 
-    globals.ctx.font = '8px emulogic';
     globals.ctx.fillStyle = 'lightgray';
+    
+    globals.ctx.fillText("<", canvasDividedBy2 - 150, 285);
+    globals.ctx.fillText(">", canvasDividedBy2 + 150, 285);
+
+    globals.ctx.font = '8px emulogic';
     globals.ctx.fillText("Press ESC to exit", 200, 285);
 
     const posRank = canvasDividedBy2 - 150; 
@@ -598,7 +632,6 @@ function renderHighscore()
     const posScore = canvasDividedBy2 + 90;
 
     const lineSpacing = 15;
-    const rankPositions = ["1.", "2.", "3.", "4.", "5.", "6.", "7.", "8.", "9.", "10."];
     let scoreFormat = "000000";
 
     if (!renderHighscore.state) {
@@ -612,24 +645,56 @@ function renderHighscore()
     }
 
     const state = renderHighscore.state;
-    let currentY = 110; 
+    let currentY = 110;
 
-    for (let i = 0; i <= state.activeLine; i++) {
-
-        let formattedScore = scoreFormat.substr(0, scoreFormat.length - globals.historyScore[i][1].toString().length) + globals.historyScore[i][1];
+    /* if (globals.highScoreInit > 0) {
+        globals.highScoreQuantity = 9;
+        let color = 'white';
+        
+        let formattedScore = scoreFormat.substr(0, scoreFormat.length - globals.historyScore[0].score.toString().length) + globals.historyScore[0].score;
 
         globals.ctx.font = '8px emulogic';
         globals.ctx.textAlign = 'right';
-        globals.ctx.fillStyle = 'white';
-        globals.ctx.fillText(rankPositions[i], posRank, currentY);
+        globals.ctx.fillStyle = color;
+        globals.ctx.fillText(globals.historyScore[0].position+".", posRank, currentY);
 
         globals.ctx.textAlign = 'center';
-        globals.ctx.fillStyle = 'white';
-        const nameDisplay = globals.historyScore[i][0]?.substring(0, i < state.activeLine ? scoreFormat.length : state.activeChar) || "";
+        globals.ctx.fillStyle = color;
+        globals.ctx.fillText(globals.historyScore[0].name, posName, currentY);
+
+        globals.ctx.textAlign = 'left';
+        globals.ctx.fillStyle = color;
+        globals.ctx.fillText(formattedScore, posScore, currentY);
+
+        currentY += lineSpacing;
+    }else {
+        globals.highScoreQuantity = 10;
+    } */
+    
+    for (let i = 0; i <= state.activeLine; i++) {
+
+        if (i+globals.highScoreInit >= globals.historyScore.length) return;
+
+        let color = 'white';
+        if (globals.historyScore[i+globals.highScoreInit].name === globals.playerName) 
+        {
+            color = 'red'
+        };
+        
+        let formattedScore = scoreFormat.substr(0, scoreFormat.length - globals.historyScore[i+globals.highScoreInit].score.toString().length) + globals.historyScore[i+globals.highScoreInit].score;
+
+        globals.ctx.font = '8px emulogic';
+        globals.ctx.textAlign = 'right';
+        globals.ctx.fillStyle = color;
+        globals.ctx.fillText(globals.historyScore[i+globals.highScoreInit].position+".", posRank, currentY);
+
+        globals.ctx.textAlign = 'center';
+        globals.ctx.fillStyle = color;
+        const nameDisplay = globals.historyScore[i+globals.highScoreInit].name.substring(0, i < state.activeLine ? scoreFormat.length : state.activeChar) || "";
         globals.ctx.fillText(nameDisplay, posName, currentY);
 
         globals.ctx.textAlign = 'left';
-        globals.ctx.fillStyle = 'white';
+        globals.ctx.fillStyle = color;
         const scoreDisplay = formattedScore.substring(0, i < state.activeLine ? scoreFormat.length : state.activeChar);
         globals.ctx.fillText(scoreDisplay, posScore, currentY);
 
@@ -642,7 +707,7 @@ function renderHighscore()
         state.frameTimer = 0;
     }
 
-    if (state.activeChar >= scoreFormat.length && state.activeLine < rankPositions.length - 1) {
+    if (state.activeChar >= scoreFormat.length && state.activeLine < globals.highScoreQuantity - 1) {
         if (state.frameTimer >= state.lineDelay) {
             state.frameTimer = 0;
             state.activeLine++;
@@ -650,17 +715,33 @@ function renderHighscore()
         }
     }
 
-    renderParticlesForHighScore();
-
     function handlerKeyDownhighscore(event)
     {
-        if (event.key === 'Escape') {
-            globals.gameState = Game.MAIN_MENU;
-            document.removeEventListener('keydown', handlerKeyDownhighscore);
+
+        if (event.key === 'ArrowLeft') {
+            renderHighscore.state = {
+                activeLine: 0,
+                activeChar: 0,
+                frameTimer: 0,
+                charDelay: 3,
+                lineDelay: 30
+            }
+        }
+
+        if (event.key === 'ArrowRight') {
+            renderHighscore.state = {
+                activeLine: 0,
+                activeChar: 0,
+                frameTimer: 0,
+                charDelay: 3,
+                lineDelay: 30
+            }
         }
     }
 
     document.addEventListener('keydown', handlerKeyDownhighscore);
+
+    renderParticlesForHighScore();
 }
 
 function renderParticleControl() 
@@ -779,8 +860,8 @@ function renderControls()
             if (event.key === 'Escape') 
             {  
                 document.removeEventListener('keydown', handlerKeyDownControls); 
-                globals.gameState = Game.MAIN_MENU;  
-                renderMainMenu();  
+                globals.gameState = Game.LOAD_MAIN_MENU;  
+                // renderMainMenu();  
                 renderControls.eventListenerAdded = false;
             }
         }
@@ -895,17 +976,17 @@ function renderStory()
 
     function handlerKeyDownStory(event) {
         if (event.key === 'Escape') {
+            globals.gameState = Game.LOAD_MAIN_MENU;
             document.removeEventListener('keydown', handlerKeyDownStory);
-            globals.gameState = Game.MAIN_MENU;
-            renderMainMenu();
+            renderStory.state = null;
             renderStory.eventListenerAdded = false;
         }
     }
 
-if (!renderStory.eventListenerAdded) {
-    document.addEventListener('keydown', handlerKeyDownStory);
-    renderStory.eventListenerAdded = true;
-}
+    if (!renderStory.eventListenerAdded) {
+        document.addEventListener('keydown', handlerKeyDownStory);
+        renderStory.eventListenerAdded = true;
+    }
 
 }
 
@@ -952,8 +1033,8 @@ function renderGameOver() {
             selectedOption: 0,
             options:
             [
-                { text: "HIGHSCORE", state: Game.HIGHSCORE },
-                { text: "EXIT", state: Game.MAIN_MENU },
+                { text: "HIGHSCORE", state: Game.LOAD_HIGH_SCORES },
+                { text: "EXIT", state: Game.LOAD_MAIN_MENU },
             ],
         };
     }
@@ -1023,7 +1104,7 @@ function renderGameOver() {
         renderGameOver.eventListenerAdded = true;
     }
     
-    if (globals.gameState === Game.GAME_OVER) {
+    if (globals.gameState === Game.LOAD_GAME_OVER) {
         renderGameOver();
         requestAnimationFrame(renderGameOver); 
     }
@@ -1091,6 +1172,15 @@ function renderEnterName()
 {
     deleteHUD();
 
+    globals.canvas.style.filter = `saturate(${1})`;
+
+    if (!renderEnterName.state) 
+    {
+        renderEnterName.state = {};
+    }
+
+    const state = renderEnterName.state
+
     const x = 45;
     const y = 85;
 
@@ -1121,5 +1211,54 @@ function renderEnterName()
     globals.ctx.font = '30px emulogic';
     globals.ctx.fillStyle = 'gray';
     globals.ctx.fillText("---", 145, 195);
+
+    
+    function handlerKeyDownGameOver(event) {
+        if (event.key === "Enter") 
+        {
+            globals.playerName = letter.join("");
+            globals.gameState = Game.LOAD_OVER;
+            document.removeEventListener("keydown", handlerKeyDownGameOver);
+
+            renderEnterName.state = undefined;
+            renderEnterName.eventListenerAdded = false;
+        }
+    }
+    
+    if (!renderEnterName.eventListenerAdded) {
+        document.addEventListener("keydown", handlerKeyDownGameOver);
+        renderEnterName.eventListenerAdded = true;
+    }
+}
+
+function renderLoadLevel()
+{
+    for (let i = 0; i < globals.spriteLoading.length; i++) {
+        const sprite = globals.spriteLoading[i];
+
+        const xTile = sprite.imageSet.xInit + sprite.frames.frameCounter * sprite.imageSet.xGridSize + sprite.imageSet.xOffset;
+        const yTile = sprite.imageSet.yInit + sprite.state * sprite.imageSet.yGridSize + sprite.imageSet.yOffset;
+
+        const xPos = Math.floor(sprite.xPos);
+        const yPos = Math.floor(sprite.yPos);
+
+        globals.ctx.drawImage(
+            globals.tileSets[Tile.SIZE_SPRITE],
+            xTile, yTile,
+            sprite.imageSet.xSize, sprite.imageSet.ySize,
+            xPos, yPos,
+            sprite.imageSet.xSize, sprite.imageSet.ySize
+        );
+    }
+
+    globals.ctx.font = '20px emulogic';
+    globals.ctx.fillStyle = 'red';
+
+    const message = 
+    [
+        'PLAYER',
+        'READY !',
+        'PHASE'
+    ]
 
 }
