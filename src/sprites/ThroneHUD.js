@@ -26,9 +26,28 @@ export class ThroneHUD extends Sprite
         this.updateAnimationFrames()
     }
 
-    updateAnimationFrames(){
-        this.frames.frameCounter = Math.floor(globals.defaultTime / globals.time) <= this.frames.framesPerState ? Math.floor(globals.defaultTime / globals.time) : this.frames.framesPerState;
-        globals.saturate = 2 - (this.frames.framesPerState + this.frames.frameCounter) / this.frames.framesPerState;
-        globals.levelCrazy = (this.frames.framesPerState + this.frames.frameCounter) / this.frames.framesPerState;;
+    updateAnimationFrames()
+    {  
+         if (globals.isMergeWithTheThrone === true && globals.action.merge) 
+        { 
+            globals.life -= 10;
+        
+            if (this.frames.frameCounter < this.frames.framesPerState) 
+            {
+                this.frames.frameCounter++; 
+                globals.isMergeWithTheThrone = false;
+            }
+
+            if (this.frames.frameCounter === 5)
+            {
+                globals.life -= 50;
+            } 
+        }
+
+        if (globals.madnessDeleted === true && this.frames.frameCounter === 5) 
+        {
+            this.frames.frameCounter = 0;
+            globals.isMergeWithTheThrone = false;
+        }
     }
 }
