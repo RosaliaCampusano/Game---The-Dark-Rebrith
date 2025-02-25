@@ -96,6 +96,12 @@ export default
 
     controlerHighScoreInit: 0,
 
+    currentRecord: {},
+
+    currentScoresPage: 0,
+
+    lastGamePlayerPosition: 0,
+
     playerName: "",
 
     time: 0,
@@ -119,5 +125,22 @@ export default
     currentMusic: -1,
 
     incorrectKey: false,
+
+    isMergeWithTheThrone: false,
+
+    madnessDeleted: false,
+
+    playerEnterThroughMainMenu: false,
+
+    lastPlayerPosition: 0,
     
+    timer: 0,
+    
+    lastTimeChunk: 0,
+
+    hasResetTimer: false,
+
+    playerEnterForGameOver: false,
+
+    isPlayerActive: false
 }
