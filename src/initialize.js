@@ -1,6 +1,6 @@
 import globals from "./globals.js";
-import {Game, SpriteID,State, FPS, Sound, ParticleState} from "./constants.js";
-import Sprite, { Enemies} from "./sprites/Sprites.js";
+import {Game, SpriteID,State, FPS, Sound, Music} from "./constants.js";
+import Sprite from "./sprites/Sprites.js";
 import ImageSet from "./ImageSet.js";
 import Frames from "./Frames.js";
 import { Level, level, level2 } from "./Level.js";
@@ -23,6 +23,9 @@ import { ThroneHUD } from "./sprites/ThroneHUD.js";
 import JosephMenu from "./sprites/JosephMenu.js";
 import Key from "./sprites/Key.js";
 import Door from "./sprites/Door.js";
+import { Timer } from "./Time.js";
+import HighScore from "./HighScore.js";
+
 
 export function initFirstDisplay(){
     initCamera();
@@ -36,8 +39,11 @@ export function initMainMenu()
 {
     globals.spriteMenu = [];
     globals.particles = [];
-    globals.sounds.forEach(sound => sound.pause());
-    globals.currentSound = Sound.NO_SOUND
+    globals.playerEnterThroughMainMenu = true;
+    globals.playerEnterForGameOver = false;
+
+    checkIfMusicIsPlayingAndIfSoReset();
+    setMusic(Music.MAIN_MENU_MUSIC);
 
     initSpritesMenu();
     initParticlesForMainMenu();
@@ -52,8 +58,7 @@ export function initPlaying()
     globals.spritesPlayers = [];
     globals.particles = [];
     globals.spritesHUD = [];
-    globals.sounds.forEach(sound => sound.pause());
-    globals.currentSound = Sound.NO_SOUND
+
 
     initLevels();
     initLevel();
@@ -61,8 +66,21 @@ export function initPlaying()
     globals.life = 125;
     globals.time = Time.time;
     globals.score = 0;
+    globals.timer = new Timer(380, 1);
+
+    sortHistoryHighScores();
+   
 
     globals.currentSound = Sound.NO_SOUND;
+
+    checkIfMusicIsPlayingAndIfSoReset();
+    if(!globals.isDark)
+    {
+        setMusic(Music.GAME_MUSIC);
+    } else 
+    {
+        setMusic(Music.GAME_MUSIC_NIGHT);
+    }
 
     initSprites();
     initSpritesHUD();
@@ -83,8 +101,6 @@ export function initControls()
 {
     globals.spriteControls = [];
     globals.particles = [];
-    globals.sounds.forEach(sound => sound.pause());
-    globals.currentSound = Sound.NO_SOUND
 
     initA();
     initD();
@@ -95,16 +111,18 @@ export function initControls()
 
     initParticlesControls();
 
+    checkIfMusicIsPlayingAndIfSoReset();
+
     globals.gameState = Game.CONTROLS;
 }
 
 export function initStory()
 {
     globals.spriteStory = [];
-    globals.sounds.forEach(sound => sound.pause());
-    globals.currentSound = Sound.NO_SOUND
-
     initBackgroundStory();
+
+    checkIfMusicIsPlayingAndIfSoReset();
+    setMusic(Music.STORY_MUSIC);
 
     globals.gameState = Game.STORY;
 }
@@ -112,79 +130,97 @@ export function initStory()
 export function initHighScore()
 {
     globals.spriteHighScore = [];
-    globals.sounds.forEach(sound => sound.pause());
-    globals.currentSound = Sound.NO_SOUND
+    globals.currentScoresPage = 1;
+    globals.lastGamePlayerPosition = 0;
 
+    sortHistoryHighScores();
+    sendRecordToServer(globals.currentRecord);
 
-    globals.highScoreInit += globals.controlerHighScoreInit;
-    globals.highScoreQuantity = 10;
+    checkIfMusicIsPlayingAndIfSoReset();
+    setMusic(Music.HIGHSCORE_MUSIC);
+    globals.gameState = Game.HIGHSCORE;
+ 
+}
 
-    initParticlesForHighscore();
+function sortHistoryHighScores() {
+   
+    for (let i = 0; i < globals.historyScore.length; i++) {        
+        for (let j = i + 1; j < globals.historyScore.length; j++) {
+            if (globals.historyScore[i].score < globals.historyScore[j].score) {
+                const scoreTemporary = globals.historyScore[i];
+                
+                globals.historyScore[i] = globals.historyScore[j];
+                
+                globals.historyScore[j] = scoreTemporary;
+            }
+            
+            globals.historyScore[j].position = j + 1;
+        }
 
-    let positionUser = globals.historyScore.findIndex(score => score.name === globals.playerName);
-    
-    let insertIndex = globals.historyScore.findIndex(score => globals.score > score.score);
-
-    if (positionUser !== -1) {
-        if (globals.historyScore[positionUser].score === globals.score) return;
-        globals.historyScore.splice(positionUser, 1);
+        globals.historyScore[i].position = i + 1;
+        
+        if (globals.historyScore[i].isLastGamePlayer) {
+            globals.historyScore[i].isLastGamePlayer = false;
+            globals.lastGamePlayerPosition = globals.historyScore[i].position;
+        }
     }
+}
 
-    if (insertIndex !== -1) {
-        globals.historyScore.splice(insertIndex, 0, {
-            "position": insertIndex + 1,
-            "name": globals.playerName,
-            "score": globals.score
-        });
-    }else{
-        globals.historyScore.push({
-            "position": globals.historyScore.length + 1,
-            "name": globals.playerName,
-            "score": globals.score
-        });
-    }
+async function sendRecordToServer() 
+{
+    const url = "http://localhost:3000/src/server/routes/postRecords.php"; 
 
-    globals.historyScore.forEach((score, index) => {
-        score.position = index + 1;
+    const response = await fetch(url, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(globals.currentRecord),
     });
 
-    globals.gameState = Game.HIGHSCORE;
+    if (response.ok) {
+        console.log("Récord enviado con éxito:", globals.currentRecord);
+    } 
 }
 
 export function initGameOver()
 {
-    console.log(globals.activedPlayer, globals.spritesPlayers);
     globals.isPlaying = false;
     globals.particles = [];
-    // globals.spriteGameOver = [];
     globals.spriteBackground = [];
-    globals.sounds.forEach(sound => sound.pause());
-    globals.currentSound = Sound.NO_SOUND
+    globals.currentSound = Sound.NO_SOUND;
+    globals.sounds[globals.currentSound];
+    globals.playerEnterThroughMainMenu = false;
+    globals.playerEnterForGameOver = true;
+    
 
     GameOverScreen();
     initParticlesForGameOver();
 
+    checkIfMusicIsPlayingAndIfSoReset();
+    setMusic(Music.GAME_OVER_MUSIC);
+    
     globals.gameState = Game.OVER;
 }
 
 export function initWin()
 {
     globals.spriteWinScreen = [];
-    globals.sounds.forEach(sound => sound.pause());
-    globals.currentSound = Sound.NO_SOUND
+    globals.currentSound = Sound.NO_SOUND;
+    globals.sounds[globals.currentSound];
 
     initWinScreen();
+
+    checkIfMusicIsPlayingAndIfSoReset();
+    setMusic(Music.WIN_MUSIC);
 
     globals.gameState = Game.WIN;
 }
 
 export function initEnterName()
 {
-    // globals.spriteEnterName = [];
-    globals.sounds.forEach(sound => sound.pause());
-    globals.currentSound = Sound.NO_SOUND
-
-    // initEnterNameScreen();
+    checkIfMusicIsPlayingAndIfSoReset();
+    setMusic(Music.GAME_OVER_MUSIC);
 
     globals.gameState = Game.ENTER_NAME;
 }
@@ -236,12 +272,7 @@ function initVars()
     globals.deltaTime = 0;
     globals.frameTimeObj = 1 / FPS;
 
-    
-
-    globals.gameState = Game.LOAD_PLAYING;
-
-    globals.highScore = globals.historyScore;
-    console.log(globals.highScore);
+    globals.gameState = Game.LOADING;
 
     globals.action = 
     {
@@ -264,11 +295,13 @@ function initEvents()
     window.addEventListener("keyup", keyupHandler, false);
 }
 
+let countInitPlaying = 0;
 function initSprites()
 {
-    if (globals.level == globals.levels[0]) {
+    if (countInitPlaying === 0) {
         initPlayer();
         initPlayerhWizard();
+        countInitPlaying++;
     }
     initThrone();
     initPotion();
@@ -281,6 +314,7 @@ function initSprites()
 
     initEnemies();
 }
+
 
 function initEnemies(){
     initGoblin();
@@ -307,10 +341,11 @@ function initSpriteBackground()
 
 function initParticles()
 {
-        initParticlesControls();
-        initParticlesForHighscore();
-        initParticlesForMainMenu();
-        initParticlesForGameOver();
+    initParticlesControls();
+    initParticlesForHighscore();
+    initParticlesForMainMenu();
+    initParticlesForGameOver();
+    initParticlesForPotion();
 }
 function initSpritesHUD()
 {
@@ -333,6 +368,21 @@ function initGoblin()
             [593, 127, 1.0, false],
             [682, 154, 0.9, true]
         ];
+
+        if (globals.fase[1] === 2) {
+            goblins = [
+                [55,  50, 1.0, false],
+                [55,  100, 1.0, false],
+                [524, 30, 1.5 , false],
+                [524, 40, 1.5 , false],
+                [593, 173, 1.4, true],
+                [593, 193, 1.4, true],
+                [593, 127, 1.0, false],
+                [593, 147, 1.0, false],
+                [682, 154, 0.9, true],
+                [682, 174, 0.9, true]
+            ]
+        }
     }
     if (globals.level.level === 2)
     {
@@ -343,6 +393,21 @@ function initGoblin()
             [400, 191, 1.4, false],
             [682, 190, 0.9, true]
         ];
+
+        if (globals.fase[1] === 2) {
+            goblins = [
+                [55,  50, 1.0 , false],
+                [55,  100, 1.0 , false],
+                [524, 15, 1.5 , false],
+                [524, 35, 1.5 , false],
+                [593, 30, 1.0 , false],
+                [593, 50, 1.0 , false],
+                [400, 191, 1.4, false],
+                [400, 211, 1.4, false],
+                [682, 190, 0.9, true],
+                [682, 210, 0.9, true]
+            ];
+        }
     }
 
     for (let i = 0; i < goblins.length; i++) 
@@ -383,6 +448,17 @@ function initDemon()
             [412, 48, 1.5],
             [508, 68, 1.4]
         ];
+
+        if (globals.fase[1] === 2) {
+            demos = [
+            [305, 75, 1.0], 
+            [280, 75, 1.0], 
+            [412, 48, 1.5],
+            [412, 54, 1.5],
+            [508, 68, 1.4],
+            [508, 68, 1.4]
+        ];
+        }
     }
 
     if (globals.level.level === 2)
@@ -396,6 +472,19 @@ function initDemon()
             [265, 63, 1.4 ],
             [744, 138, 1.0],
         ];
+
+        if (globals.fase[1] === 2) {
+            demos = [
+                [40,  55, 1.0 ],
+                [184, 75, 1.0 ], 
+                [410, 48, 1.5 ],
+                [505, 68, 1.4 ],
+                [655, 82, 1.4 ],
+                [265, 63, 1.4 ],
+                [744, 138, 1.0],
+                [744, 138, 1.0],
+            ];
+        }
     }
 
     for (let i = 0; i < demos.length; i++)
@@ -441,6 +530,15 @@ function initBat()
             [64, 64, 1.0], 
             [602, 171, 1.0],
         ];
+
+        if (globals.fase[1] === 2) {
+            bats = [
+                [64, 64, 1.0], 
+                [602, 171, 1.0],
+                [502, 81, 1.0 ],
+                [202, 51, 1.0 ],
+            ];
+        }
     }
     
     if (globals.level.level === 2)
@@ -451,6 +549,15 @@ function initBat()
             [502, 81, 1.0 ],
             [202, 51, 1.0 ],
         ];
+
+        if (globals.fase[1] === 2) {
+            bats = [
+                [64, 64, 1.0 ], 
+                [602, 171, 1.0],
+                [502, 81, 1.0 ],
+                [202, 51, 1.0 ],
+            ];
+        }
     }
 
     for (let i = 0; i < bats.length; i++)
@@ -540,14 +647,14 @@ function initHealthBarHUD()
 
 function initStages()
 {
-    const imageSet = new ImageSet(995, 3, 71, 78, 71, 78, 0, 0);
+    const imageSet = new ImageSet(994, 1, 71, 78, 71, 78, 0, 0);
     const imageSet1 = new ImageSet(2, 1543, 59, 55, 59, 55, 0, 0);
     const frames = new Frames(1);
 
-    const moon = new Sprite(SpriteID.MOON, State.MOON, 0, 40, imageSet1, frames);
-    const sun = new Sprite(SpriteID.SUN, State.SUN, -8, 30, imageSet, frames);
+    const moon = new Sprite(SpriteID.MOON, State.MOON, 0, 30, imageSet1, frames);
+    const sun = new Sprite(SpriteID.SUN, State.SUN, -3, 20, imageSet, frames);
 
-    // globals.spritesHUD.push(moon);
+    globals.spritesHUD.push(moon);
     globals.spritesHUD.push(sun);
 }
 
@@ -741,6 +848,8 @@ function initParticlesForHighscore()
     }
 }
 
+
+
 function initParticlesForGameOver()
 {
     const numParticles = 50;
@@ -789,8 +898,8 @@ function initKeys()
     const imageSet4 = new ImageSet(882, 682, 40, 40, 40, 40, 0, 0);
 
     const key1 = new Key(350, 50, imageSet1, 0);
-    const key2 = new Key(420, 205, imageSet2, 1);
-    const key3  = new Key(760, 205, imageSet3, 2);
+    const key2 = new Key(384, 425, imageSet2, 1);
+    const key3  = new Key(700, 205, imageSet3, 2);
     const key4 = new Key(730, 60, imageSet4, 3);
 
     globals.sprites.push(key1, key2, key3, key4);
@@ -965,8 +1074,29 @@ export async function loadDataHighScore()
 
 function initHighScoreData(data)
 {
-    globals.historyScore = data;
-    console.log(globals.historyScore);  
+    for (let i = 0; i < data.length; i++) {
+        globals.historyScore[i] = new HighScore(-1, data[i].name, data[i].score);
+        globals.historyScore[i].score = parseInt(globals.historyScore[i].score);
+    }
+    console.log(globals.historyScore); 
+    
+}
+
+function checkIfMusicIsPlayingAndIfSoReset() 
+{
+    if (globals.currentMusic !== Music.NO_MUSIC) 
+    {
+        const music = globals.sounds[globals.currentMusic];
+        music.pause();
+        music.currentTime = 0;
+    }
+}
+
+function setMusic(music) 
+{
+    globals.currentMusic = music;
+    globals.sounds[globals.currentMusic].play();
+    globals.sounds[globals.currentMusic].volume = 0.5;
 }
 
 export 
@@ -980,8 +1110,6 @@ export
     initSprites,
     initSpritesMenu,
     initSpriteBackground,
-    // initStory,
-    // initControls,
     initLevels,
     initLoadSprite,
     initCamera,
