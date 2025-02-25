@@ -5,8 +5,6 @@ import Sprite from "./Sprites.js";
 export class Potion extends Sprite
 {
 
-    // elapsedTimePotion = 0;
-
     positions = [
         {xPos: 210, yPos: 55},
         {xPos: 754, yPos: 93},
@@ -29,6 +27,8 @@ export class Potion extends Sprite
     
             if (this.frames.frameCounter === State.POTION_GREEN)
             {
+                globals.madnessDeleted = true;
+                
                 if (globals.life + 50 <= 125) {
                     globals.life += 50;
                 }else{
@@ -86,5 +86,21 @@ export class Potion extends Sprite
             }
         }
     }
+
+    getPotionColor() {
+        switch (this.frames.frameCounter) {
+            case State.POTION_RED:
+                return 'red';  
+            case State.POTION_BLUE:
+                return 'blue'; 
+            case State.POTION_PURPLE:
+                return 'purple';
+            case State.POTION_YELLOW:
+                return 'yellow';
+            case State.POTION_GREEN:
+                return 'green';  
+        }
+    }
     
 }
+
