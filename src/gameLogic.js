@@ -112,7 +112,7 @@ function updateHighScore()
     }
 }
 
-function updateUpdateTime()
+function updateTime()
 {
     Time.update();
 }
@@ -330,6 +330,10 @@ function updateSprite(sprite)
         case SpriteID.MOON:
             updateSunAndMoon(sprite);
             break;
+
+        /*  case SpriteID.MOON:
+            updateDayNightCycle(sprite);
+            break; */
         
         case SpriteID.BAT:
             sprite.update()
