@@ -1,4 +1,4 @@
-import { ParticleID, ParticleState } from "../constants.js";
+import { ParticleState } from "../constants.js";
 import Frames from "../Frames.js";
 import globals from "../globals.js";
 import ImageSet from "../ImageSet.js";
