@@ -1,9 +1,8 @@
 import globals from "./globals.js";
-import {Game, SpriteID, MainMenuTexts, WayOut, State, ParticleState} from "./constants.js";
+import {Game, SpriteID, MainMenuTexts, WayOut} from "./constants.js";
 import { Tile } from "./constants.js";
-import detectCollisions from "./collisions.js";
-import { Player } from "./sprites/Player.js";
 import { getletter, getCurrentIndex } from "./events.js";
+import { initControls, initEnterName, initGameOver, initHighScore, initMainMenu, initPlaying, initStory, initWin } from "./initialize.js";
 
 export default function render()
 {
@@ -45,10 +44,35 @@ export default function render()
         case Game.ENTER_NAME:
             renderEnterName();
             break;
+        
+        case Game.LOAD_MAIN_MENU:
+                initMainMenu();
+                break;
 
-        /*   case Game.LOAD_ENDING_LEVEL:
-            renderLoadLevel();
-            break; */
+        case Game.LOAD_PLAYING:
+            initPlaying();
+            break;
+
+        case Game.LOAD_STORY:
+            initStory();
+            break;
+
+        case Game.LOAD_CONTROLS:
+            initControls();
+            break;
+
+        case Game.LOAD_HIGH_SCORES:
+            initHighScore();
+            break;
+        case Game.LOAD_OVER:
+            initGameOver();
+            break;
+        case Game.LOAD_ENTER_NAME:
+            initEnterName();
+            break;
+        case Game.LOAD_WIN:
+            initWin();
+            break;
             
         default: 
 
@@ -62,7 +86,6 @@ function drawGame()
     globals.ctx.clearRect(0, 0, globals.canvas.width, globals.canvas.height);
     globals.ctxHUD.clearRect(0, 0, globals.canvasHUD.width, globals.canvasHUD.height);
 
-    // Aplicar zoom y mover la cámara
     globals.ctx.scale(globals.camera.zoom, globals.camera.zoom);
     globals.canvas.style.filter = `saturate(${globals.saturate})`;
     moveCamera();
@@ -74,7 +97,6 @@ function drawGame()
     }
 
     renderMap();
-    
     renderHUD();
 
     if (!globals.isPlaying)
@@ -84,11 +106,7 @@ function drawGame()
     };
 
     renderSprites();
-
     renderMesageToDoor();
-
-    // renderParticles();
-
     restoreCamera();
 }
 
@@ -120,7 +138,7 @@ function renderMesageToDoor()
         globals.ctx.fillStyle = globals.messageToDoor.color;
         globals.ctx.textAlign = 'center';
         globals.ctx.strokeStyle = "black";
-        globals.ctx.fillText(globals.messageToDoor.text, globals.messageToDoor.x, globals.messageToDoor.y);
+        globals.ctx.fillText(globals.messageToDoor.text, globals.messageToDoor.x - 10, globals.messageToDoor.y);
         globals.incorrectKey = false;
     }
 }
@@ -189,7 +207,7 @@ function renderSpritesHUD()
         );
     }
 }
-    
+
 function renderSprites()
 {
 
@@ -213,24 +231,14 @@ function renderSprites()
             sprite.imageSet.xSize * 0.6, sprite.imageSet.ySize * 0.6
         );
         //drawHitBox(sprite);
+
+        if(sprite.id === SpriteID.POTION)
+        {
+            renderParticleForPotion(sprite);
+        }
     }
 }
 
-function drawHitBox(sprite)
-{
-    if (!sprite.hitBox) {
-        console.log(`Sprite no tiene una hitBox:`, sprite);
-        return; // Salir de la función si no tiene hitBox
-    }
-
-    const x1 = Math.floor(sprite.xPos) + Math.floor(sprite.hitBox.xOffset);
-    const y1 = Math.floor(sprite.yPos) + Math.floor(sprite.hitBox.yOffset);
-    const w1 = sprite.hitBox.xSize;
-    const h1 = sprite.hitBox.ySize;
-
-    globals.ctx.strokeStyle = sprite.hitBox.color;
-    globals.ctx.strokeRect(x1, y1, w1, h1);
-}
 
 function moveCamera()
 {
@@ -273,33 +281,6 @@ function renderMap()
     }
 }
 
-function renderMapLevelTwo()
-{
-    const brickSize = globals.level.imageSet.xGridSize;
-    const levelData = globals.level[1].data;
-
-    const num_fil = levelData.length;
-    const num_col = levelData[0].length;
-
-    for(i = 0; i < num_fil; i++)
-    {
-        for( let j = 0; j < num_col; j++)
-        {
-            const xTile = (levelData[i][j] - 1) * brickSize;
-            const yTile = 0;
-            const xPos = j * brickSize;
-            const yPos = i * brickSize;
-
-            globals.ctx.drawImage(
-                globals.tileSets[Tile.SIZE_16],
-                xTile, yTile,
-                brickSize, brickSize,
-                xPos, yPos,
-                brickSize, brickSize
-            );
-        }
-    }
-}
 
 
 function renderHUD()
@@ -312,7 +293,7 @@ function renderHUD()
     globals.ctxHUD.fillStyle = 'red';
     globals.ctxHUD.fillText("SCORE", 70, 68);
     globals.ctxHUD.fillStyle = 'white';
-    globals.ctxHUD.fillText(" " + score, 75, 87);
+    globals.ctxHUD.fillText(" " + score, 70, 87);
 
     //Draw High Score
     globals.ctxHUD.fillStyle = 'red';
@@ -352,7 +333,6 @@ function deleteHUD()
 function displayHUD()
 {
     const canvasHeight = 240;
-    const canvasHUDHeight = 100;
 
     globals.canvasHUD.style.display = '';
     globals.canvas.style.height = '';
@@ -421,71 +401,105 @@ function renderParticlesForMainMenu()
     
 }
 
+function renderParticleForPotion(sprite)
+{
+    const ctx = globals.ctx;
+    const numParticles = 5;
+    const squareSize = 3;
+    const alpha = 0.8;
+    const potionColors = sprite.getPotionColor();
+
+   
+    for (let i = 0; i < numParticles; i++) 
+    {
+       
+        let xPos = (sprite.xPos + 7) + Math.random() * 10 - 5;
+        let yPos = (sprite.yPos + 12) + Math.random() * 10 - 5;
+        let velocityX = (Math.random() * 2 + 1); 
+        let velocityY = (Math.random() * 2 + 1); 
+
+        xPos += velocityX;
+        yPos += velocityY;
+
+        if (xPos < 0 || xPos > globals.canvas.width) 
+        {
+            velocityX *= -1;
+        }
+        if (yPos < 0 || yPos > globals.canvas.height) 
+        {
+            velocityY *= -1;
+        }
+
+       
+        ctx.filter = 'blur(2px)';
+        ctx.fillStyle = potionColors;
+        ctx.globalAlpha = alpha;
+
+        ctx.fillRect(xPos - squareSize / 2, yPos - squareSize / 2, squareSize, squareSize); 
+        ctx.filter = 'none'; 
+    }
+}
 
 function renderMainMenu() 
 {
     if (!renderMainMenu.state) {
         renderMainMenu.state = {
             selectedOption: 0,
+            moveUpProcessed: false,
+            moveDownProcessed: false,
+            enterProcessed: false
         };
     }
 
     globals.highScoreInit = 0;
-
     const state = renderMainMenu.state;
-    const options = MainMenuTexts; 
+    const options = MainMenuTexts;
+
     deleteHUD();
 
     const canvasDividedBy2 = globals.canvas.width / 2;
-    globals.ctx.textAlign = 'center';
+    globals.ctx.textAlign = "center";
+    globals.ctx.font = "20px emulogic";
+    globals.ctx.fillStyle = "darkred";
+    globals.ctx.fillText("THE DARK REBIRTH", canvasDividedBy2, 85);
 
-    // Title
-    let title = "THE DARK REBIRTH";
-    globals.ctx.font = '20px emulogic';
-    globals.ctx.fillStyle = 'darkred';
-    globals.ctx.fillText(title, canvasDividedBy2, 85);
-
-    // Design
-    globals.ctx.font = '12px emulogic';
-    globals.ctx.fillStyle = 'white';
+    globals.ctx.font = "12px emulogic";
+    globals.ctx.fillStyle = "white";
     globals.ctx.fillText("-----------------------------", canvasDividedBy2, 45);
     globals.ctx.fillText("-----------------------------", canvasDividedBy2, 250);
 
     let yCoordinate = 130;
-
-    // Draw menu options
+    
     for (let i = 0; i < options.length; i++) {
-        globals.ctx.fillStyle = i === state.selectedOption ? "white" : "grey"; 
+        globals.ctx.fillStyle = i === state.selectedOption ? "white" : "grey";
         globals.ctx.fillText(options[i][0], canvasDividedBy2, yCoordinate);
         yCoordinate += 25;
     }
 
-    function handlerKeyDownMainMenu(event) {
-        if (event.key === "s") {
-            state.selectedOption = (state.selectedOption + 1) % options.length;
-        } else if (event.key === "w") {
-            state.selectedOption = (state.selectedOption - 1 + options.length) % options.length;
-        } else if (event.key === "Enter") {
-            handleMenuSelection(state.selectedOption);
-            removeKeyListener();
-        }
+ 
+    if (globals.action.moveDown && !state.moveDownProcessed) {
+        state.selectedOption = (state.selectedOption + 1) % options.length;
+        state.moveDownProcessed = true; 
+    } else if (!globals.action.moveDown) {
+        state.moveDownProcessed = false; 
     }
 
-    function removeKeyListener() 
-    {
-        document.removeEventListener("keydown", handlerKeyDownMainMenu);
-        renderMainMenu.eventListenerAdded = false;
-    }
-    
-    
-    if (!renderMainMenu.eventListenerAdded) 
-    {
-        document.addEventListener("keydown", handlerKeyDownMainMenu);
-        renderMainMenu.eventListenerAdded = true;
+    if (globals.action.moveUp && !state.moveUpProcessed) {
+        state.selectedOption = (state.selectedOption - 1 + options.length) % options.length;
+        state.moveUpProcessed = true;
+    } else if (!globals.action.moveUp) {
+        state.moveUpProcessed = false;
     }
 
-    for (let j = 0; j < globals.spriteMenu.length; j++) 
-    {
+    if (globals.action.enter && !state.enterProcessed) {
+        handleMenuSelection(state.selectedOption);
+        state.enterProcessed = true;
+    } else if (!globals.action.enter) {
+        state.enterProcessed = false;
+    }
+
+
+    for (let j = 0; j < globals.spriteMenu.length; j++) {
         const sprite = globals.spriteMenu[j];
         const xTile = sprite.imageSet.xInit + sprite.frames.frameCounter * sprite.imageSet.xGridSize + sprite.imageSet.xOffset;
         const yTile = sprite.imageSet.yInit + sprite.state * sprite.imageSet.yGridSize + sprite.imageSet.yOffset;
@@ -499,7 +513,7 @@ function renderMainMenu()
             sprite.imageSet.xSize, sprite.imageSet.ySize,
             xPos, yPos,
             sprite.imageSet.xSize, sprite.imageSet.ySize
-        );  
+        );
     }
 
     renderParticlesForMainMenu();
@@ -531,39 +545,6 @@ function handleMenuSelection(selectedIndex) {
     }
 }
 
-function renderParticles()
-{
-    const ctx = globals.ctxHUD;
-    globals.particles.forEach((particle) => {
-        if (particle.xPos >= 50) particle.xPos = 5;
-        if (particle.yPos <= 50) particle.yPos = 35 + Math.random() * 10;
-
-        particle.xPos += particle.physics.velocityX;
-        particle.yPos += particle.physics.velocityY;
-
-        if (particle.xPos < 0 || particle.xPos > 45) 
-        {
-            particle.physics.velocityX *= -1;  
-        }
-        if (particle.yPos < 0 || particle.yPos > 10) 
-        {
-            particle.physics.velocityY *= -1;  
-        }
-
-        let colors = ["rgba(200, 0, 0, 0.6)", "rgba(200, 153, 0, 0.6)", "rgba(200, 63, 0, 0.6)"];
-
-        let color = colors[Math.floor(Math.random() * colors.length)];
-
-        ctx.fillStyle = color;
-        ctx.beginPath();
-        ctx.arc(particle.xPos, particle.yPos, particle.radius, 0, Math.PI * 2, false);
-        ctx.fill();
-
-        particle.alpha += (Math.random() - 0.5) * 0.01; 
-        particle.alpha = Math.max(0.3, Math.min(0.8, particle.alpha)); 
-    });
-}
-
 function renderParticlesForHighScore() {
 
     const ctx = globals.ctx;
@@ -581,17 +562,17 @@ function renderParticlesForHighScore() {
         }
 
         ctx.fillStyle = `rgba(215, 0, 0, ${particle.alpha})`;
-        ctx.beginPath();
-        ctx.arc(particle.xPos, particle.yPos, particle.radius, 0, Math.PI * 2, false);
-        ctx.fill();
+        ctx.filter = 'blur(2px)'; 
+        const squareSize = particle.radius * 2; 
+        ctx.fillRect(particle.xPos - particle.radius, particle.yPos - particle.radius, squareSize, squareSize);
+        ctx.filter = 'none'; 
 
         particle.alpha += (Math.random() - 0.5) * 0.01; 
         particle.alpha = Math.max(0.3, Math.min(0.8, particle.alpha)); 
     });
 }
 
-function renderHighscore()
-{
+function renderHighscore() {
     deleteHUD();
 
     const canvasDividedBy2 = globals.canvas.width / 2;
@@ -621,127 +602,151 @@ function renderHighscore()
 
     globals.ctx.fillStyle = 'lightgray';
     
-    globals.ctx.fillText("<", canvasDividedBy2 - 150, 285);
-    globals.ctx.fillText(">", canvasDividedBy2 + 150, 285);
+    if (globals.playerEnterThroughMainMenu === true) {
+        globals.ctx.fillText("<", canvasDividedBy2 - 150, 285);
+        globals.ctx.fillText(">", canvasDividedBy2 + 150, 285);
+    }
 
     globals.ctx.font = '8px emulogic';
     globals.ctx.fillText("Press ESC to exit", 200, 285);
 
-    const posRank = canvasDividedBy2 - 150; 
-    const posName = canvasDividedBy2 - 20;        
-    const posScore = canvasDividedBy2 + 90;
-
-    const lineSpacing = 15;
-    let scoreFormat = "000000";
-
-    if (!renderHighscore.state) {
-        renderHighscore.state = {
-            activeLine: 0,
-            activeChar: 0,
-            frameTimer: 0,
-            charDelay: 3,
-            lineDelay: 30
-        };
+    if (globals.playerEnterThroughMainMenu && !globals.playerEnterForGameOver) {
+        globals.lastGamePlayerPosition = 0;
+        renderHighScoreFromMainMenu();
+    } else {
+        globals.historyScore.isLastGamePlayer = true;
+        renderHighScoreFromGameOver();
     }
-
-    const state = renderHighscore.state;
-    let currentY = 110;
-
-    /* if (globals.highScoreInit > 0) {
-        globals.highScoreQuantity = 9;
-        let color = 'white';
-        
-        let formattedScore = scoreFormat.substr(0, scoreFormat.length - globals.historyScore[0].score.toString().length) + globals.historyScore[0].score;
-
-        globals.ctx.font = '8px emulogic';
-        globals.ctx.textAlign = 'right';
-        globals.ctx.fillStyle = color;
-        globals.ctx.fillText(globals.historyScore[0].position+".", posRank, currentY);
-
-        globals.ctx.textAlign = 'center';
-        globals.ctx.fillStyle = color;
-        globals.ctx.fillText(globals.historyScore[0].name, posName, currentY);
-
-        globals.ctx.textAlign = 'left';
-        globals.ctx.fillStyle = color;
-        globals.ctx.fillText(formattedScore, posScore, currentY);
-
-        currentY += lineSpacing;
-    }else {
-        globals.highScoreQuantity = 10;
-    } */
-    
-    for (let i = 0; i <= state.activeLine; i++) {
-
-        if (i+globals.highScoreInit >= globals.historyScore.length) return;
-
-        let color = 'white';
-        if (globals.historyScore[i+globals.highScoreInit].name === globals.playerName) 
-        {
-            color = 'red'
-        };
-        
-        let formattedScore = scoreFormat.substr(0, scoreFormat.length - globals.historyScore[i+globals.highScoreInit].score.toString().length) + globals.historyScore[i+globals.highScoreInit].score;
-
-        globals.ctx.font = '8px emulogic';
-        globals.ctx.textAlign = 'right';
-        globals.ctx.fillStyle = color;
-        globals.ctx.fillText(globals.historyScore[i+globals.highScoreInit].position+".", posRank, currentY);
-
-        globals.ctx.textAlign = 'center';
-        globals.ctx.fillStyle = color;
-        const nameDisplay = globals.historyScore[i+globals.highScoreInit].name.substring(0, i < state.activeLine ? scoreFormat.length : state.activeChar) || "";
-        globals.ctx.fillText(nameDisplay, posName, currentY);
-
-        globals.ctx.textAlign = 'left';
-        globals.ctx.fillStyle = color;
-        const scoreDisplay = formattedScore.substring(0, i < state.activeLine ? scoreFormat.length : state.activeChar);
-        globals.ctx.fillText(scoreDisplay, posScore, currentY);
-
-        currentY += lineSpacing;
-    }
-
-    state.frameTimer++;
-    if (state.frameTimer >= state.charDelay && state.activeChar < scoreFormat.length) {
-        state.activeChar++;
-        state.frameTimer = 0;
-    }
-
-    if (state.activeChar >= scoreFormat.length && state.activeLine < globals.highScoreQuantity - 1) {
-        if (state.frameTimer >= state.lineDelay) {
-            state.frameTimer = 0;
-            state.activeLine++;
-            state.activeChar = 0;
-        }
-    }
-
-    function handlerKeyDownhighscore(event)
-    {
-
-        if (event.key === 'ArrowLeft') {
-            renderHighscore.state = {
-                activeLine: 0,
-                activeChar: 0,
-                frameTimer: 0,
-                charDelay: 3,
-                lineDelay: 30
-            }
-        }
-
-        if (event.key === 'ArrowRight') {
-            renderHighscore.state = {
-                activeLine: 0,
-                activeChar: 0,
-                frameTimer: 0,
-                charDelay: 3,
-                lineDelay: 30
-            }
-        }
-    }
-
-    document.addEventListener('keydown', handlerKeyDownhighscore);
 
     renderParticlesForHighScore();
+}
+
+function renderHighScoreFromMainMenu() {
+    let scoresLowerLimit = 0;
+    let scoressUpperLimit = 10;
+
+    if (globals.currentScoresPage === 2) {
+        scoresLowerLimit = 10;
+        scoressUpperLimit = 20;
+    }
+
+    renderCurrentScoresPageRecords(scoresLowerLimit, scoressUpperLimit);
+}
+
+function renderHighScoreFromGameOver() {
+    let scoresLowerLimit = 0;
+    let scoressUpperLimit = 10;
+
+
+    if (globals.lastGamePlayerPosition > 10) {
+      
+        scoresLowerLimit = (globals.lastGamePlayerPosition - 5) - 1;
+        scoressUpperLimit = globals.lastGamePlayerPosition;
+    }
+    globals.ctx.font = "8px emulogic";
+    globals.ctx.fillStyle = "rgb(212 212 212)";
+
+    renderCurrentScoresPageRecords(scoresLowerLimit, scoressUpperLimit);
+}
+
+
+function renderCurrentScoresPageRecords(scoresLowerLimit, scoressUpperLimit) {
+
+    const topThreeLimit = 3;
+
+    let counterOfRenderedRecords = 0;
+    let rowYCoordinate = 106;
+    const lineSpacing = 15;
+
+    const canvasDividedBy2 = globals.canvas.width / 2;
+    const posRank = canvasDividedBy2 - 150;
+    const posName = canvasDividedBy2 - 20;
+    const posScore = canvasDividedBy2 + 90;
+
+    if (!globals.renderHighscoreState) {
+        globals.renderHighscoreState = {
+            activeLine: scoresLowerLimit, 
+            frameTimer: 0,
+            lineDelay: 5, 
+        };
+    }
+
+    const state = globals.renderHighscoreState;
+
+    state.frameTimer++;
+    if (state.frameTimer >= state.lineDelay && state.activeLine < scoressUpperLimit - 1) {
+        state.frameTimer = 0;
+        state.activeLine++; 
+    }
+
+   if(globals.currentScoresPage === 1 && scoresLowerLimit > 2)
+   {
+        for (let i = 0; i < topThreeLimit; i++) {
+            let scoreEntry = globals.historyScore[i];
+            let color = scoreEntry.isLastPlayer ? 'red' : 'white';
+
+            let formattedScore = scoreEntry.score.toString();
+            while (formattedScore.length < 6) {
+                formattedScore = "0" + formattedScore;
+            }
+
+            globals.ctx.font = '8px emulogic';
+            globals.ctx.fillStyle = color;
+
+            // RANK
+            globals.ctx.textAlign = 'right';
+            globals.ctx.fillText(scoreEntry.position + ".", posRank, rowYCoordinate);
+
+            // NAME
+            globals.ctx.textAlign = 'center';
+            globals.ctx.fillText(scoreEntry.name, posName, rowYCoordinate);
+
+            // SCORE
+            globals.ctx.textAlign = 'left';
+            globals.ctx.fillText(formattedScore, posScore, rowYCoordinate);
+
+            rowYCoordinate += lineSpacing;
+            counterOfRenderedRecords++;
+        }
+
+        const separatorLine = "---------------------------------------";
+        globals.ctx.textAlign = "center";
+        globals.ctx.fillStyle = 'lightgray';
+        globals.ctx.fillText(separatorLine, canvasDividedBy2 - 15, rowYCoordinate);
+
+        rowYCoordinate += lineSpacing;
+
+    }
+
+    for (let i = scoresLowerLimit; i < scoressUpperLimit; i++) {
+        if (i > state.activeLine) break; 
+
+        let scoreEntry = globals.historyScore[i];
+        let color = scoreEntry.isLastPlayer ? 'red' : 'white';
+        let formattedScore = scoreEntry.score.toString();
+
+        while (formattedScore.length < 6) {
+            formattedScore = "0" + formattedScore;
+        }
+
+        globals.ctx.font = '8px emulogic';
+        globals.ctx.fillStyle = color;
+
+        // RANK
+        globals.ctx.textAlign = 'right';
+        globals.ctx.fillText(scoreEntry.position + ".", posRank, rowYCoordinate);
+
+        // NAME
+        globals.ctx.textAlign = 'center';
+        globals.ctx.fillText(scoreEntry.name, posName, rowYCoordinate);
+
+        // SCORE
+        globals.ctx.textAlign = 'left';
+        globals.ctx.fillText(formattedScore, posScore, rowYCoordinate);
+
+        rowYCoordinate += lineSpacing;
+        counterOfRenderedRecords++;
+    }
 }
 
 function renderParticleControl() 
@@ -762,15 +767,16 @@ function renderParticleControl()
         }
         
         particle.radius += particle.growth * 0.1;
-
+        ctx.filter = 'blur(2px)'; 
         ctx.fillStyle = `rgba(225, 215, 250, ${particle.alpha})`;
-        ctx.beginPath();
-        ctx.arc(particle.xPos, particle.yPos, particle.radius, 0, Math.PI * 2, false);
-        ctx.fill();
+        const squareSize = particle.radius * 2; 
+        ctx.fillRect(particle.xPos - particle.radius, particle.yPos - particle.radius, squareSize, squareSize);
+        ctx.filter = 'none'; 
 
         particle.alpha += (Math.random() - 0.5) * 0.01; 
         particle.alpha = Math.max(0.3, Math.min(0.8, particle.alpha)); 
     });
+
 }
 
 function renderControls()
@@ -855,22 +861,6 @@ function renderControls()
         globals.ctx.fillText(WayOut, canvasDividedBy2, 265);
 
         renderParticleControl();
-        
-        function handlerKeyDownControls(event) {
-            if (event.key === 'Escape') 
-            {  
-                document.removeEventListener('keydown', handlerKeyDownControls); 
-                globals.gameState = Game.LOAD_MAIN_MENU;  
-                // renderMainMenu();  
-                renderControls.eventListenerAdded = false;
-            }
-        }
-        
-        if (!renderControls.eventListenerAdded) 
-        {
-            document.addEventListener('keydown', handlerKeyDownControls);
-            renderControls.eventListenerAdded = true;
-        }
 }
 
 function renderStory() 
@@ -974,20 +964,6 @@ function renderStory()
     globals.ctx.fillStyle = 'lightgray';
     globals.ctx.fillText("Press ESC to exit", canvasDividedBy2, 280);
 
-    function handlerKeyDownStory(event) {
-        if (event.key === 'Escape') {
-            globals.gameState = Game.LOAD_MAIN_MENU;
-            document.removeEventListener('keydown', handlerKeyDownStory);
-            renderStory.state = null;
-            renderStory.eventListenerAdded = false;
-        }
-    }
-
-    if (!renderStory.eventListenerAdded) {
-        document.addEventListener('keydown', handlerKeyDownStory);
-        renderStory.eventListenerAdded = true;
-    }
-
 }
 
 function renderParticlesForGameOver()
@@ -1010,9 +986,10 @@ function renderParticlesForGameOver()
         }
 
         ctx.fillStyle = particle.color;
-        ctx.beginPath();
-        ctx.arc(particle.xPos, particle.yPos, particle.radius, 0, Math.PI * 2, false);
-        ctx.fill();
+        ctx.filter = 'blur(2px)'; 
+        const squareSize = particle.radius * 2; 
+        ctx.fillRect(particle.xPos - particle.radius, particle.yPos - particle.radius, squareSize, squareSize);
+        ctx.filter = 'none'; 
 
         particle.alpha += (Math.random() - 0.5) * 0.01; 
         particle.alpha = Math.max(0.3, Math.min(0.8, particle.alpha)); 
@@ -1022,26 +999,24 @@ function renderParticlesForGameOver()
 function renderGameOver() {
 
     globals.canvas.style.filter = 'none';
-    globals.time = globals.defaultTime;
-    globals.life = globals.maxLife;
+    globals.time = globals.defaultTime; 
+    globals.life = globals.maxLife; 
+    globals.playerEnterThroughMainMenu = false;
     deleteHUD();
 
-    if (!renderGameOver.state) 
-    {
-        renderGameOver.state = 
-        {
+    if (!renderGameOver.state) {
+        renderGameOver.state = {
             selectedOption: 0,
-            options:
-            [
+            options: [
                 { text: "HIGHSCORE", state: Game.LOAD_HIGH_SCORES },
                 { text: "EXIT", state: Game.LOAD_MAIN_MENU },
             ],
+            isTransitioning: false 
         };
     }
 
     const state = renderGameOver.state;
     const options = state.options;
-
 
     for (let i = 0; i < globals.spriteBackground.length; i++) {
         const sprite = globals.spriteBackground[i];
@@ -1075,35 +1050,26 @@ function renderGameOver() {
     globals.ctx.font = '10px emulogic';
     globals.ctx.fillStyle = 'lightgray';
 
-    options.forEach((option, index) => {
-        globals.ctx.fillStyle = index === state.selectedOption ? "grey" : "white"; // Resaltar la opción seleccionada
-        globals.ctx.fillText(option.text, canvasDividedBy2, yStart + index  * yStep);
-    });
+    for (let i = 0; i < options.length; i++) {
+        const option = options[i];
+        globals.ctx.fillStyle = i === state.selectedOption ? "white" : "grey"; 
+        globals.ctx.fillText(option.text, canvasDividedBy2, yStart + i * yStep);
+    }
 
     renderParticlesForGameOver();
 
-    function handlerKeyDownGameOver(event) {
-        if (event.key === "s") 
-            {
-            state.selectedOption = (state.selectedOption + 1) % options.length;
-        } else if (event.key === "w") 
-            { 
-            state.selectedOption = (state.selectedOption - 1 + options.length) % options.length;
-        } else if (event.key === "Enter") 
-            { 
-            globals.gameState = options[state.selectedOption].state;
-            document.removeEventListener("keydown", handlerKeyDownGameOver);
+    if (globals.action.moveDown) {
+        state.selectedOption = (state.selectedOption + 1) % options.length;
+        globals.action.moveDown = false;
+    } else if (globals.action.moveUp) { 
+        state.selectedOption = (state.selectedOption - 1 + options.length) % options.length;
+        globals.action.moveUp = false;
+    } else if (globals.action.enter) { 
+        state.isTransitioning = true; 
+        globals.gameState = options[state.selectedOption].state;
+    }
 
-            renderGameOver.state = undefined;
-            renderGameOver.eventListenerAdded = false;
-        }
-    }
-    
-    if (!renderGameOver.eventListenerAdded) {
-        document.addEventListener("keydown", handlerKeyDownGameOver);
-        renderGameOver.eventListenerAdded = true;
-    }
-    
+
     if (globals.gameState === Game.LOAD_GAME_OVER) {
         renderGameOver();
         requestAnimationFrame(renderGameOver); 
@@ -1174,13 +1140,6 @@ function renderEnterName()
 
     globals.canvas.style.filter = `saturate(${1})`;
 
-    if (!renderEnterName.state) 
-    {
-        renderEnterName.state = {};
-    }
-
-    const state = renderEnterName.state
-
     const x = 45;
     const y = 85;
 
@@ -1195,15 +1154,39 @@ function renderEnterName()
     const nameY = y + 90; 
     for (let i = 0; i < letter.length; i++) {
         if (i === currentIndex) {
-            globals.ctx.fillStyle = 'red'; 
+            globals.ctx.fillStyle = 'red';  
         } else {
             globals.ctx.fillStyle = 'white';
         }
-
+        
         globals.ctx.font = '20px emulogic';
         globals.ctx.fillText(letter[i], 150 + i * letterSpacing, nameY);
     }
 
+    let playerNameStr = "";  
+    for (let j = 0; j < 3; j++) 
+    {  
+        playerNameStr += letter[j];  
+    }
+
+    globals.playerName = playerNameStr;
+
+    if (globals.action.enter) 
+    {
+        let newRecord = 
+        {
+            position: globals.historyScore.length + 1,
+            name: globals.playerName,
+            score: globals.score,
+            isLastPlayer: true,
+            isLastGamePlayer: true,  
+        };
+
+        globals.historyScore.push(newRecord);
+        newRecord = globals.currentRecord;
+        globals.gameState = Game.LOAD_OVER;
+    }
+    
     globals.ctx.font = '10px emulogic';
     globals.ctx.fillStyle = 'red';
     globals.ctx.fillText("PRESS ENTER TO CONFIRM", 85, 250);
@@ -1211,54 +1194,5 @@ function renderEnterName()
     globals.ctx.font = '30px emulogic';
     globals.ctx.fillStyle = 'gray';
     globals.ctx.fillText("---", 145, 195);
-
-    
-    function handlerKeyDownGameOver(event) {
-        if (event.key === "Enter") 
-        {
-            globals.playerName = letter.join("");
-            globals.gameState = Game.LOAD_OVER;
-            document.removeEventListener("keydown", handlerKeyDownGameOver);
-
-            renderEnterName.state = undefined;
-            renderEnterName.eventListenerAdded = false;
-        }
-    }
-    
-    if (!renderEnterName.eventListenerAdded) {
-        document.addEventListener("keydown", handlerKeyDownGameOver);
-        renderEnterName.eventListenerAdded = true;
-    }
-}
-
-function renderLoadLevel()
-{
-    for (let i = 0; i < globals.spriteLoading.length; i++) {
-        const sprite = globals.spriteLoading[i];
-
-        const xTile = sprite.imageSet.xInit + sprite.frames.frameCounter * sprite.imageSet.xGridSize + sprite.imageSet.xOffset;
-        const yTile = sprite.imageSet.yInit + sprite.state * sprite.imageSet.yGridSize + sprite.imageSet.yOffset;
-
-        const xPos = Math.floor(sprite.xPos);
-        const yPos = Math.floor(sprite.yPos);
-
-        globals.ctx.drawImage(
-            globals.tileSets[Tile.SIZE_SPRITE],
-            xTile, yTile,
-            sprite.imageSet.xSize, sprite.imageSet.ySize,
-            xPos, yPos,
-            sprite.imageSet.xSize, sprite.imageSet.ySize
-        );
-    }
-
-    globals.ctx.font = '20px emulogic';
-    globals.ctx.fillStyle = 'red';
-
-    const message = 
-    [
-        'PLAYER',
-        'READY !',
-        'PHASE'
-    ]
 
 }
