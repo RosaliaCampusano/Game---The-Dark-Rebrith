@@ -11,7 +11,7 @@ export default class Key extends Sprite
     {
         super(SpriteID.KEY, State.BE, 
             xPos, yPos, imageSet, 
-            new Frames(1), null, new HitBox(40, 40, 0, 0)
+            new Frames(1), null, new HitBox(15, 15, 2, 5)
         );
 
         this.internalID = internalID;
@@ -33,7 +33,6 @@ export default class Key extends Sprite
             this.isCollidingWithPlayer = true;
             if (this.internalID === globals.activedKey.internalID) 
             {
-                globals.messageToDoor.text = "You found a key";
                 player.isCollidingWithKey = true;
             }else
             {
