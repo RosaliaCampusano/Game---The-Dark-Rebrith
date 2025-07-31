@@ -24,11 +24,32 @@ export class ThroneHUD extends Sprite
         this.yPos = 20;
 
         this.updateAnimationFrames()
+        this.flicker()
+    }
+
+    flicker()
+    {
+        if (globals.isThroneFlicker)
+        {
+            this.imageSet.xSize = 0;
+        }
+
+        if (!this.flickerTimer)
+        {
+            this.flickerTimer = 0;
+        }
+
+        this.flickerTimer++;
+        if (this.flickerTimer >= 10)
+        {
+            this.imageSet.xSize = 83;
+            this.flickerTimer = 0;
+        }
     }
 
     updateAnimationFrames()
     {  
-         if (globals.isMergeWithTheThrone === true && globals.action.merge) 
+         if (globals.isMergeWithTheThrone && globals.action.merge) 
         { 
             globals.life -= 10;
         

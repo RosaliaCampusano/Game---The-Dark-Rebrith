@@ -1,12 +1,11 @@
 <?php
 
+ require_once "login_data.php";
+
 class Conexion
 {
     private static $_singleton = null;
     private $dbh;
-    private $errno;
-    private $num_rows;
-
     private $conexion;
     
 
@@ -27,12 +26,19 @@ class Conexion
     }
 
     private function __construct(){
+  global $cfg;
 
-        $this->conexion = "host=ep-small-rain-a2yi9am0-pooler.eu-central-1.aws.neon.tech port=5432 dbname=Proyect user=rosalia_owner password=npg_0lP9MLnECcYT";
-        $this->dbh = pg_connect($this->conexion);
-        if(!$this->dbh) {
-            die("Fatal error en la conexion con la BD");
-        } 
+            $host       = $cfg["host"];
+            $dbname     = $cfg["dbname"];
+            $user       = $cfg["user"];
+            $password   = $cfg["password"];
+
+            $this->conexion = "host=$host port=5432 dbname=$dbname user=$user password=$password";
+
+            $this->dbh = pg_connect($this->conexion);
+            if (!$this->dbh) {
+                die("Database connection error");
+            }
     }
 
     public function getConnection()

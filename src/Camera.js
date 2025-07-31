@@ -27,5 +27,4 @@ export function updateCamera()
 
     globals.camera.x = Math.min(Math.max(targetX, minCameraX), maxCameraX);
     globals.camera.y = Math.min(Math.max(targetY, minCameraY), maxCameraY);
-
 }

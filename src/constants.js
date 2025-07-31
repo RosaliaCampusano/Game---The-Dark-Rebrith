@@ -11,7 +11,15 @@ export const Game =
     CONTROLS:                5,
     HIGHSCORE:               6,
     WIN:                     7,
-    ENTER_NAME:              8
+    ENTER_NAME:              8,
+    LOAD_HIGH_SCORES:        9,
+    LOAD_MAIN_MENU:          10,
+    LOAD_STORY:              11,
+    LOAD_CONTROLS:           12,
+    LOAD_WIN:                13,
+    LOAD_ENTER_NAME:         14,
+    LOAD_PLAYING:            15,
+    LOAD_OVER:               16
 };
 
 //Game Speed
@@ -20,9 +28,24 @@ export const FPS = 30;
 export const Sound = {
 
     NO_SOUND:          -1,
+    EXPLOTION:          2,
+    DEMON:              8,
+    GOBLIN:             9,
+    KEY:                10,
+    LOCKED_DOOR:        11,
+    SCROLL:             12
+}
+
+export const Music = 
+{
+    NO_MUSIC:          -1,
     GAME_MUSIC:         0,
-    EXPLOTION:          1,
-    GAME_MUSIC_NIGHT:   2,
+    GAME_MUSIC_NIGHT:   1,
+    STORY_MUSIC:        3,
+    MAIN_MENU_MUSIC:    4,
+    HIGHSCORE_MUSIC:    5,
+    GAME_OVER_MUSIC:    6,
+    WIN_MUSIC:          7,
 }
 
 export const MainMenuTexts = 
@@ -69,7 +92,6 @@ export const SpriteID = {
     WIN_SCREEN:             29,
     KEY:                    30,
     DOOR:                   31
-
 }
 
 export const ParticleID = 
@@ -133,7 +155,8 @@ export const State = {
     //Level 1 = SUN
     //Level 2 = MOON
     MOON:                   0,
-    SUN:                    1,
+    SUN:                    0,
+    SUN_OFF:                1,
 
     //Old Joseph  1 State 
     RIGHT_JOSEPH:           0,
@@ -185,7 +208,7 @@ export const Key = {
     LEFT:               65,         //A
     ATTACK:             76,         //L
     MERGE_THRONE:       77,         //M   
-    ESC:                32,
+    ESC:                27,
     ENTER:              13,     
 }
 

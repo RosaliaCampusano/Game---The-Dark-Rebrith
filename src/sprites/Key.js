@@ -7,11 +7,12 @@ import Sprite from "./Sprites.js";
 export default class Key extends Sprite
 {
     internalID = 0;
+    isCollected = false;
     constructor(xPos, yPos, imageSet, internalID)
     {
         super(SpriteID.KEY, State.BE, 
             xPos, yPos, imageSet, 
-            new Frames(1), null, new HitBox(40, 40, 0, 0)
+            new Frames(1), null, new HitBox(15, 15, 2, 5)
         );
 
         this.internalID = internalID;
@@ -31,13 +32,14 @@ export default class Key extends Sprite
         {
             globals.currentSound = Sound.KEY;
             this.isCollidingWithPlayer = true;
-            if (this.internalID === globals.activedKey.internalID) 
-            {
-                globals.messageToDoor.text = "You found a key";
-                player.isCollidingWithKey = true;
-            }else
-            {
-                globals.messageToDoor.text = "The door is locked";
+            this.isCollected = true;
+            for (let i = 0; i < globals.spritesKeys.length; i++) {
+                if (globals.spritesKeys[i].isCollected) {
+                    player.isCollidingWithKey = true;
+                }else
+                {
+                    globals.messageToDoor.text = "The door is locked";
+                }
             }
         }
         else

@@ -2,12 +2,12 @@
 
 require_once "ModelBase.php";
 
-class Records extends ModelBase
+class Record extends ModelBase
 {
     function __construct()
     {
-        $this->table_name = 'records';
         parent::__construct();
+        $this->table_name = "records";
     }
 }
 ?>
