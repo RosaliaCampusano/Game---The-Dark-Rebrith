@@ -43,6 +43,8 @@ class ModelBase extends Conexion {
 
     protected function createArray($data)
     {
+        $array = array();
+
         while($row = pg_fetch_array($data, null, PGSQL_ASSOC))
         {
             $array[] = $row;
@@ -53,50 +55,42 @@ class ModelBase extends Conexion {
     protected function selectDB($table, $columns = "*", $name = "", $value = "")
     {
         $query = "SELECT $columns FROM $table";
-        if($name != "" && $value != "")
+        if (($name !== "") && ($value !== "")) {
             $query .= " WHERE $name = '$value'";
-
+        }
         return $query;
     }
 
     protected function insertDB($table, $array)
     {
-        foreach($array as $name => $value)
-        {
+        foreach ($array as $name => $value) {
             $insert_name[] = $name;
             $insert_value[] = $value;
         }
 
         $query = "INSERT INTO $table (";
-
-        $num_elem = count($insert_name);
-
-        for ($i = 0; $i < $num_elem; ++$i)
-        {
+        $num_of_elements = count($insert_name);
+        for ($i = 0; $i < $num_of_elements; $i++) {
             $query .= "$insert_name[$i]";
-
-            if($i != $num_elem - 1)
+            if ($i !== ($num_of_elements - 1)) {
                 $query .= ", ";
-            else
+            } else {
                 $query .= ") ";
+            }
         }
 
-        $query .= "VALUES(";
-
-        for ($i = 0; $i < $num_elem; ++$i)
-        {
+        $query .= "VALUES (";
+        for ($i = 0; $i < $num_of_elements; $i++) {
             $query .= "'$insert_value[$i]'";
-
-            if ($i != $num_elem - 1)
+            if ($i !== ($num_of_elements - 1)) {
                 $query .= ", ";
-            else 
-                $query .= ") ";
+            } else {
+                $query .= ")";
+            }
         }
 
         return $query;
     }
-
-
 }
 
 ?>

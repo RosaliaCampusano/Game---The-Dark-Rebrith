@@ -31,13 +31,20 @@ export default class Door extends Sprite
             globals.activedPlayer.isCollidingWithKey = false;
         }
 
-        globals.messageToDoor.x = this.xPos;
+        globals.messageToDoor.x = this.xPos - 15;
         globals.messageToDoor.y = this.yPos;
     }
 
     updateFase(){
         if (globals.counterFase === 4) {
-            globals.gameState = Game.LOAD_WIN;
+            globals.counterFase = 0;
+            globals.fase = [1, 1];
+            globals.level = globals.levels[0];
+            globals.isDark = false;
+            // globals.activedPlayer.xPos = 100;
+            // globals.activedPlayer.yPos = 10;
+
+            globals.gameState = Game.LOAD_PLAYING;
             return;
         }
 
@@ -47,6 +54,29 @@ export default class Door extends Sprite
             globals.isDark = true
             globals.activedPlayer.xPos = 100
             globals.activedPlayer.yPos = 10
+
+            let player = null;
+            let playerWizard = null;
+            for (let index = 0; index < globals.sprites.length; index++) {
+                const sprite = globals.sprites[index];
+                if (sprite.id === SpriteID.PLAYER) {
+                    player = sprite;
+                }
+
+                if (sprite.id === SpriteID.PLAYER_WIZARD) {
+                    playerWizard = sprite;
+                }
+            }
+
+            globals.sprites = []
+
+            globals.sprites.push(player, playerWizard)
+
+            globals.activedPlayer.xPos = 100
+            globals.activedPlayer.yPos = 10
+
+            initSprites()
+
         } else if (globals.fase[1] === 2 && globals.fase[0] === 1) {
             globals.fase[0] = 2;
             globals.fase[1] = 1;
@@ -57,7 +87,8 @@ export default class Door extends Sprite
 
             let player = null;
             let playerWizard = null;
-            globals.sprites.forEach((sprite, index, array) => {
+            for (let index = 0; index < globals.sprites.length; index++) {
+                const sprite = globals.sprites[index];
                 if (sprite.id === SpriteID.PLAYER) {
                     player = sprite;
                 }
@@ -65,7 +96,7 @@ export default class Door extends Sprite
                 if (sprite.id === SpriteID.PLAYER_WIZARD) {
                     playerWizard = sprite;
                 }
-            })
+            }
 
             globals.sprites = []
 

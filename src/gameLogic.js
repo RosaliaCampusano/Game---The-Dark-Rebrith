@@ -1,5 +1,5 @@
 import globals from "./globals.js";
-import { Game, State, SpriteID, ParticleState, Sound, Music } from "./constants.js";
+import { Game, State, SpriteID, Sound, Music } from "./constants.js";
 import detectCollisions from "./collisions.js";
 import {updateCamera} from "./Camera.js";
 import Time from "./Time.js";
@@ -69,15 +69,14 @@ export default function update()
 
 function updateWin()
 {
-    playWinMusic();
-    for (let index = 0; index < globals.spriteWinScreen.length; index++) {
+    for (let i = 0; i < globals.spriteWinScreen.length; i++) {
 
-        const sprite = globals.spriteWinScreen[index];
+        const sprite = globals.spriteWinScreen[i];
 
         switch (sprite.id) {
             case SpriteID.WIN_SCREEN:
                 if (sprite.internalTimer < sprite.maxInternalTimer) sprite.internalTimer += 1 * globals.deltaTime;
-                else globals.gameState = Game.LOAD_MAIN_MENU
+                else globals.gameState = Game.LOAD_MAIN_MENU;
                 break;
         
             default:
@@ -87,138 +86,79 @@ function updateWin()
     }
 }
 
-function playWinMusic()
-{
-    globals.currentMusic = Music.WIN_MUSIC;
-    globals.sounds[globals.currentMusic].play();
-    globals.sounds[globals.currentMusic].volume = 1;
-}
-
 function updateEnterName()
 {
-    if (globals.action.enter) {
-        globals.gameState = Game.LOAD_OVER;
-    }
-
-    // globals.sounds.forEach(sound => sound.pause());
-    // globals.currentSound = Sound.NO_SOUND
-
-    if(globals.gameState === Game.ENTER_NAME)
-    {
-        globals.sounds[Music.GAME_OVER_MUSIC].play();
-        globals.sounds[Music.GAME_OVER_MUSIC].volume = 1;
-    }
-
     globals.saturate = 0;
-}
-
-function playHighScoreMusic()
-{
-    if (globals.gameState === Game.HIGHSCORE)
-    {
-        globals.sounds[Music.HIGHSCORE_MUSIC].play();
-        globals.sounds[Music.HIGHSCORE_MUSIC].volume = 1;
-        
-    }
 }
 
 function updateHighScore()
 {
-    playHighScoreMusic();
-
-    function handlerKeyDownhighscore(event)
-    {
-        if (event.key === 'Escape') {
-            globals.gameState = Game.LOAD_MAIN_MENU;
-            document.removeEventListener('keydown', handlerKeyDownhighscore);
-        }
-
-        if (event.key === 'ArrowLeft') {
-            if (globals.highScoreInit > 0){
-                globals.controlerHighScoreInit = -10;
-            }else {
-                globals.highScoreInit = 0
-                globals.controlerHighScoreInit = 0;
-            }
-            globals.gameState = Game.LOAD_HIGH_SCORES;
-        }
-
-        if (event.key === 'ArrowRight') {
-            globals.controlerHighScoreInit = 10;
-            if (globals.highScoreInit + 10 >= globals.historyScore.length){
-                globals.controlerHighScoreInit = 0;
-            }
-            globals.gameState = Game.LOAD_HIGH_SCORES;
-        }
+   
+    if (globals.action.esc) {
+        globals.gameState = Game.LOAD_MAIN_MENU;
     }
 
-    document.addEventListener('keydown', handlerKeyDownhighscore);
-}
-
-function updateUpdateTime()
-{
-    Time.update();
+    if (globals.playerEnterThroughMainMenu) 
+    {
+        if (globals.action.moveRight && globals.currentScoresPage === 1) 
+        {
+            globals.currentScoresPage = 2;
+            globals.action.moveRight = false;
+        } else if (globals.action.moveLeft && globals.currentScoresPage === 2) 
+        {
+            globals.currentScoresPage = 1;
+            globals.action.moveLeft = false;
+        }
+    }
 }
 
 function updateLoading()
 {
     if (globals.action.enter) {
         globals.gameState = Game.LOAD_MAIN_MENU;
+        globals.action.enter = false;
     }
 }
 function updateGameOver()
 {
     updateScreenGameOver();
-    // checkIsMusicContinue();
-    playGameOverMusic();
-}
-
-function playGameOverMusic()
-{
-    globals.currentMusic = Music.GAME_OVER_MUSIC;
-    globals.sounds[globals.currentMusic].play();
-    globals.sounds[globals.currentMusic].volume = 1;
-} 
-
-function checkIsMusicContinue()
-{
-    if (globals.currentMusic !== Music.NO_MUSIC) {
-        globals.sounds[globals.currentMusic].pause();
-        globals.sounds[globals.currentMusic].currentTime = 0;
-        // console.log("aver " + globals.currentMusic);
-    }
 }
 
 function updateStory()
 {
-    playStoryMusic();
     updateTheStory();
-}
 
-function playStoryMusic()
-{
-    if(globals.gameState === Game.STORY)
-        {
-            globals.sounds[Music.STORY_MUSIC].play();
-            globals.sounds[Music.STORY_MUSIC].volume = 1;
-        }
+    if (globals.action.esc)
+    {
+        globals.gameState = Game.LOAD_MAIN_MENU;
+    }
 }
 
 function playGame()
 {
-
     globals.highScore = globals.historyScore[0].score;
-    updateUpdateTime();
+
+    if (globals.score > globals.highScore) 
+    {
+        globals.highScore = globals.score;
+    }
     updateHUD();
     if (!globals.isPlaying) return;
     updateSprites();
     updateCamera();
-    // updatePaticles();
     detectCollisions();
     playSound();
-    playMusic();
+    updateScore();
 }
 
+
+function updateScore()
+{
+    if (globals.score === 250000)
+    {
+        globals.gameState = Game.LOAD_WIN;
+    }
+}
 function playSound()
 {
     if( globals.currentSound != Sound.NO_SOUND)
@@ -230,27 +170,14 @@ function playSound()
     globals.currentSound = Sound.NO_SOUND;
 }
 
-function playMusic()
-{
-    if( globals.gameState === Game.PLAYING)
-    {
-        globals.sounds[Music.GAME_MUSIC].play();
-        globals.sounds[Music.GAME_MUSIC].volume = 1;
-    }
-}
-
-function updatePaticles()
-{
-    for (let i = 0; i < globals.particles.length; i++)
-    {
-        const particle = globals.particles[i];
-        particle.update()
-    }
-}
 
 function updateControls()
 {
     updateKeyboardControls();
+    if (globals.action.esc)
+    {
+        globals.gameState = Game.LOAD_MAIN_MENU;
+    }
 }
 
 
@@ -276,50 +203,82 @@ function updateEmptybar(sprite)
     sprite.state = State.BE;
 }
 
+function resetTimer() {
+    globals.timer.value = 380;
+    globals.timer.timeChangeCounter = 0; 
+}
 
-function updateDayNightCycle(sprite) {
-    let isDay = true;  
-    let timeElapsed = 0; 
-    const timeLimit = globals.time; 
-    const sunShrinkRate = 1;
-    sprite.xPos = -5;
-    sprite.yPos = 30;
-        timeElapsed++;
+function updateSunAndMoon(sprite) 
+{
+    const minSize = 0;
+    const maxSize = 70;
+    const totalTime = 380; 
+    globals.timer.update(globals.deltaTime);
+   
+    handleTimerReset();
+
+    if (!globals.isDark && sprite.id === SpriteID.SUN) 
+    {
+        sprite.imageSet.xSize = maxSize;
+        sprite.state = State.SUN; 
+        globals.saturate = 1;
     
-        if (isDay) {
-            if (sprite.imageSet && sprite.imageSet.xSize > 0) { 
-                sprite.imageSet.xSize -= sunShrinkRate;
-            }
-    
-            if (sprite.imageSet.xSize <= 0) { 
-                sprite.imageSet.xSize = 0;
-                isDay = false; 
-                timeElapsed = 0; 
-                updateMoon(sprite); 
-            }
-        } else {
-            if (timeElapsed >= timeLimit) { 
-                isDay = true; 
-                timeElapsed = 0;
-                updateSun(sprite); 
-            }
+        updateSunSize(sprite, minSize, maxSize, totalTime);
+    } else if (globals.isDark) 
+    {
+        updateMoonVisibility(sprite);
+    }
+}
+
+function handleTimerReset() 
+{
+    if (globals.isDark && !globals.hasResetTimer) 
+    {
+        resetTimer();
+        globals.hasResetTimer = true;
+    } else if (!globals.isDark) 
+    {
+        globals.hasResetTimer = false;
+    }
+}
+
+function updateSunSize(sprite, minSize, maxSize, totalTime) 
+{
+    let remainingTime = Math.max(0, globals.timer.value); 
+    let progress = remainingTime / totalTime; 
+
+    let newSize = minSize + progress * (maxSize - minSize); 
+    sprite.imageSet.xSize = newSize;
+   
+
+    if (progress <= 0.5) 
+    {
+        let darkeningProgress = (0.5 - progress) / 0.5; 
+        globals.saturate = Math.max(0, 0.5 - (darkeningProgress * 0.5)); 
+        globals.throne_saturation = Math.min(100, 1 + (darkeningProgress * 10));    
+    }
+
+    if (remainingTime <= 0) 
+    {
+        globals.gameState = Game.LOAD_ENTER_NAME;
+    }
+}
+
+function updateMoonVisibility(sprite) 
+{
+    if (sprite.id === SpriteID.SUN) 
+    {
+        sprite.state = State.SUN_OFF;
+    } else if (sprite.id === SpriteID.MOON) 
+    {
+        sprite.state = State.MOON;
+
+        if (globals.timer.value <= 0) 
+        {
+            globals.gameState = Game.LOAD_ENTER_NAME;
         }
     }
-    
-    function updateMoon(sprite) {
-        sprite.xPos = 0;
-        sprite.yPos = 40;
-        if (sprite.imageSet) sprite.imageSet.xSize = 50;
-        sprite.state = State.MOON;
-    }
-    
-    function updateSun(sprite) {
-        sprite.xPos = -5;
-        sprite.yPos = 30;
-        sprite.imageSet.xSize = 70; 
-        sprite.xPos = 0; 
-        sprite.state = State.BE;
-    }
+}
 
 function updateSprite(sprite)
 {
@@ -358,14 +317,17 @@ function updateSprite(sprite)
             sprite.update();
             break;
 
-        case SpriteID.MOON:
-            updateMoon(sprite);
+        case SpriteID.SUN:
+            updateSunAndMoon(sprite);
             break;
 
-        case SpriteID.SUN:
-             updateDayNightCycle(sprite);
-            /* updateSun(sprite); */
+        case SpriteID.MOON:
+            updateSunAndMoon(sprite);
             break;
+
+        /*  case SpriteID.MOON:
+            updateDayNightCycle(sprite);
+            break; */
         
         case SpriteID.BAT:
             sprite.update()
@@ -415,12 +377,6 @@ function updateMainMenu()
 {
     updateJosephs();
 
-    if( globals.gameState === Game.MAIN_MENU)
-    {
-        globals.sounds[Music.MAIN_MENU_MUSIC].play();
-        globals.sounds[Music.MAIN_MENU_MUSIC].volume = 1;
-    }
-
     globals.currentSound = Sound.SCROLL;
 }
 
@@ -442,52 +398,8 @@ function updateSpriteMenu(sprite)
     }
 }
 
-function updateSpriteLoad(sprite)
-{
-    const type = sprite.id;
-    switch(type)
-    {
-        case SpriteID.LOAD_JOSEPH:
-            updateLoadJoseph(sprite);
-            break;
 
-        default:
-            break;
-    }
-}
 
-function updateLoad()
-{
-    for (let i = 0; i < globals.spriteLoading.length; i++)
-    {
-        const sprite = globals.spriteLoading[i]
-        updateSpriteLoad(sprite);
-    }
-}
-
-function updateLoadJoseph(sprite)
-{
-    const state = sprite.state;
-    switch(state)
-    {
-        case State.LEFT_JOSEPH:
-            sprite.physics.vx = -sprite.physics.vLimit;
-            break;
-        
-
-        default:
-            console.error("Error, Game State invalid");
-    }
-
-    sprite.xPos += sprite.physics.vx * globals.deltaTime;
-
-    if (sprite.xPos < 150) {
-        sprite.xPos = 250;
-    };
-
-    updateAnimationFrames(sprite);
-    
-}
 
 let fallTimer = 0;
 

@@ -1,4 +1,4 @@
-import { Key, Sound } from "./constants.js";
+import { Key, Music } from "./constants.js";
 import globals from "./globals.js";
 
 
@@ -47,21 +47,13 @@ export function keydownHandler(event)
     }
 }
 
-// Función para obtener el nombre actual (para usarlo en el renderizado)
 export function getletter() {
     return letter;
 }
 
-// Función para obtener el índice actual (para resaltar la letra seleccionada)
 export function getCurrentIndex() {
     return currentIndex;
 }
-
-/* // Función para reiniciar el estado del nombre
-export function resetletter() {
-    letter = ['A', 'A', 'A'];
-    currentIndex = 0;
-} */
 
 export function keyupHandler(event)
 {
@@ -91,24 +83,29 @@ export function keyupHandler(event)
             globals.action.merge = false;
             break;
 
-            case Key.ESC:
-                globals.action.esc = false;
-                break;
-            
-            case Key.ENTER:
-                globals.action.enter = false;
-                break;
+        case Key.ESC:
+            globals.action.esc = false;
+            break;
+        
+        case Key.ENTER:
+            globals.action.enter = false;
+            break;
     }
 }
 
 export function updateMusic()
 {
-    const buffer = 0.28;
-    const music = globals.sounds[Sound.GAME_MUSIC];
     
-    if( music.currentTime > music.duration - buffer)
+    if( globals.currentMusic !== Music.NO_MUSIC)
     {
-        music.currentTime = 0;
-        music.play();
+        const buffer = 0.28;
+        const music = globals.sounds[globals.currentMusic];
+        
+        if ( music.currentTime > music.duration - buffer)
+        {
+            music.currentTime = 0;
+            music.play();
+        }
     }
 }
+

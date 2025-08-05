@@ -1,4 +1,4 @@
-import { SpriteID, State } from "../constants.js";
+import { Sound, SpriteID, State } from "../constants.js";
 import globals from "../globals.js";
 
 export default class Sprite
@@ -44,6 +44,10 @@ export default class Sprite
             case State.STILL_LEFT:
             case State.STILL_DOWN:
             case State.STILL_RIGHT:
+            case State.STILL_UP_WIZARD:
+            case State.STILL_LEFT_WIZARD:
+            case State.STILL_DOWN_WIZARD:
+            case State.STILL_RIGHT_WIZARD:
                 // Reset the animation frames to the first frame
                 this.frames.frameCounter = 0;
                 this.frames.framesChangeCounter = 0;
@@ -58,7 +62,6 @@ export default class Sprite
                     this.frames.frameCounter++;
                     this.frames.framesChangeCounter = 0;
                 }
-
                 // If the frame counter has reached the number of frames per state, reset it to 0
                 if (this.frames.frameCounter === this.frames.framesPerState)
                 {
@@ -112,13 +115,38 @@ export default class Sprite
 
     getMapTileId(xPos, yPos)
     {
-        const brickSize = globals.level.imageSet.xGridSize;
         const levelData = globals.level.data;
+        const maxRows =levelData.length;        
+        const maxCols = levelData[0].length;     
+        const tileSize = 16;
     
-        const fil = Math.floor(yPos / brickSize);
-        const col = Math.floor(xPos / brickSize);
+       
+        let fil = Math.floor(yPos / tileSize);  
+        let col = Math.floor(xPos / tileSize);   
+    
+       
+        fil = Math.max(0, Math.min(fil, maxRows - 1));   
+        col = Math.max(0, Math.min(col, maxCols - 1));   
     
         return levelData[fil][col];
+    }
+
+    setMapTileId(xPos, yPos, id)
+    {
+        const levelData = globals.level.data;
+        const maxRows =levelData.length;        
+        const maxCols = levelData[0].length;     
+        const tileSize = 16;
+    
+       
+        let fil = Math.floor(yPos / tileSize);  
+        let col = Math.floor(xPos / tileSize);   
+    
+       
+        fil = Math.max(0, Math.min(fil, maxRows - 1));   
+        col = Math.max(0, Math.min(col, maxCols - 1));   
+    
+        levelData[fil][col] = id;
     }
 
     isCollidingWithObstacleAt(xPos, yPos, obstacleId) {
@@ -358,8 +386,6 @@ export default class Sprite
         {
             return;
         } 
-        this.hitBox.color = "blue"
-        setTimeout(() => {this.hitBox.color = this.hitBox.defaultColor}, 1);
     }
 
     detectCollisionsBetweenSpriteAndSprite(sprite)
@@ -515,13 +541,20 @@ export class Enemies extends Sprite
                 this.isCollidingWithAttack = false;
             }
 
-            setInterval(() => {
+            if (!this.flickerTimer) {
+                this.flickerTimer = 0;
+            }
+
+            this.flickerTimer += globals.deltaTime * 1000;
+            if (this.flickerTimer >= 500) {
                 this.flicker = !this.flicker;
-            }, 500);
+                this.flickerTimer = 0;
+            }
         }else
         {
             this.imageSet.xInit = this.default.imageSet.x;
             this.imageSet.yInit = this.default.imageSet.y;
+            this.flickerTimer = null;
         }
 
         for (let index = 0; index < globals.sprites.length; index++) 
@@ -535,7 +568,7 @@ export class Enemies extends Sprite
         }
 
         if (this.isCollidingWithPlayer) {
-            globals.life--;
+            globals.life -= 0.25;
         }
 
         if (this.isCollidingWithAttack && this.life > 0)
@@ -549,10 +582,11 @@ export class Enemies extends Sprite
             this.internalTimer = 0;
             globals.score += this.scorePerKill;
             this.redExplotion.getPosition(this.xPos, this.yPos);
+            globals.currentSound = Sound.EXPLOTION;
         }
 
         // random movement speed
-        if (this.internalTimer >= this.maxInternalTimer && !this.isRangeActivationRunning)
+        if (this.internalTimer >= this.maxInternalTimer && !this.isRangeActivationRunning) 
         {
             let randomNumber = Math.floor(Math.random() * this.life) + 1;
 
@@ -560,9 +594,18 @@ export class Enemies extends Sprite
 
             this.moveSpeed += randomNumber + globals.levelCrazy;
 
-            setTimeout(() => {
-                this.moveSpeed -= randomNumber + globals.levelCrazy;
-            }, randomNumber * 1000);
+            this.speedReductionTimer = randomNumber * 1000;
+            this.speedReductionAmount = randomNumber + globals.levelCrazy;
+        }
+
+        if (this.speedReductionTimer !== undefined) {
+            this.speedReductionTimer -= globals.deltaTime * 1000;
+
+            if (this.speedReductionTimer <= 0) {
+                this.moveSpeed -= this.speedReductionAmount;
+                delete this.speedReductionTimer;
+                delete this.speedReductionAmount;
+            }
         }
     }
 
@@ -581,19 +624,6 @@ export class Enemies extends Sprite
 
         // const isOverLap = rectIntersect(x1, y1, w1, h1, x2, y2, w2, h2);
         this.isRangeActivationRunning = this.rectIntersect(x1, y1, w1, h1, x2, y2, w2, h2);
-
-        if (this.isRangeActivationRunning)
-        {
-            let randomNumber = Math.floor(Math.random() * this.life) + 1;
-
-            // if (randomNumber / globals.levelCrazy > this.life / 2) return;
-
-            this.moveSpeed += randomNumber //+ globals.levelCrazy;
-
-            setTimeout(() => {
-                this.moveSpeed -= randomNumber //+ globals.levelCrazy;
-            }, randomNumber * 10);
-        }
 
         return this.isRangeActivationRunning
     }

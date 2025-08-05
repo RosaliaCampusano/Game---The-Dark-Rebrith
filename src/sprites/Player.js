@@ -1,9 +1,16 @@
-import { Game, Sound, SpriteID, State } from "../constants.js";
+import { Block, Game, SpriteID, State } from "../constants.js";
+import Frames from "../Frames.js";
 import globals from "../globals.js";
+import HitBox from "../HitBox.js";
+import ImageSet from "../ImageSet.js";
+import { Potion } from "./Potion.js";
 import Sprite from "./Sprites.js";
 
 export class Player extends Sprite
 {
+    mergeTime = 0;
+    isMergedWithThrone = false;
+
     poisoned = {
         lifeReduction: 0,
         duration: 0,
@@ -42,34 +49,43 @@ export class Player extends Sprite
     }
 
     flicker = false;
-    
     update()
     {
         super.update();
 
-        // console.log("xPos:", this.xPos, "yPos:", this.yPos);
-
-        // globals.activedPlayer = globals.spritesPlayers[1]
-
-        if (this.isCollidingWithEnemies)
-        {
+        if (this.isCollidingWithEnemies) {
             this.imageSet.xInit = this.default.imageSet.x + 1000;
-            this.imageSet.yInit = this.default.imageSet.x + 1000;
-
-            if (this.flicker)
-            {
+            this.imageSet.yInit = this.default.imageSet.y + 1000;
+        
+            if (this.flicker) {
                 this.imageSet.xInit = this.default.imageSet.x;
                 this.imageSet.yInit = this.default.imageSet.y;
                 this.isCollidingWithEnemies = false;
             }
-
-            setInterval(() => {
+        
+            if (!this.flickerTimer) {
+                this.flickerTimer = 0;
+            }
+        
+            this.flickerTimer += globals.deltaTime * 1000;
+            if (this.flickerTimer >= 100) {
                 this.flicker = !this.flicker;
-            }, 100);
-        }else
-        {
+                this.flickerTimer = 0;
+            }
+        } else {
             this.imageSet.xInit = this.default.imageSet.x;
             this.imageSet.yInit = this.default.imageSet.y;
+            this.flickerTimer = null;
+        }
+
+        if (globals.life - 15 + (globals.maxLife * 0.75) <= globals.maxLife)
+        {
+            globals.sounds[globals.currentMusic].playbackRate = 1.5;
+            globals.health_bar_saturation = 3;
+        }else
+        {
+            globals.sounds[globals.currentMusic].playbackRate = 1;
+            globals.health_bar_saturation = 1;
         }
 
         if (globals.life <= 15)
@@ -82,6 +98,7 @@ export class Player extends Sprite
         }
 
         this.handlerPoisoned()
+        this.bigEvent()
 
         if (globals.activedPlayer.id != this.id) {
             this.xPos = -20;
@@ -91,24 +108,26 @@ export class Player extends Sprite
 
         if (this.id == SpriteID.PLAYER_WIZARD && globals.activedPlayer.id === this.id) 
         {
-            this.moveSpeed = 1.2;
-            // this.isCollidingWithKey = true;
+            globals.isPlayerActive = true;
+            this.moveSpeed = 1.7;
             this.readKeyboardAndAssignState();
             this.handlerStateWizard();
         } else if (this.id === SpriteID.PLAYER && globals.activedPlayer.id === this.id)
         {
-            this.moveSpeed = 1;
+            globals.isPlayerActive = false;
+            this.moveSpeed = 1.5;
             this.readKeyboardAndAssignStatePlayer();
-            this.handlerStatePlayer()
-
+            this.handlerStatePlayer();
             this.healthRegeneration();
+            if (!globals.isPlayerActive)
+            {
+                this.handlerStateWizard();
+            }
         }
         this.xPos += this.physics.vx * globals.deltaTime;
         this.yPos += this.physics.vy * globals.deltaTime;
         
-        this.updateAnimationFrames()
-
-        // this.adjustPositionAfterCollision();
+        this.updateAnimationFrames();
     }
 
     handlerPoisoned()
@@ -130,15 +149,32 @@ export class Player extends Sprite
         }
     }
 
+    addLife = 0;
+    previousLife = 0;
+    healthRegenerationCounter = 0;
+    maxInternalCounter = 10;
     healthRegeneration()
     {
-        if (globals.life < globals.maxLife && this.internalTimer >= this.maxInternalTimer)
+        if (globals.life > this.previousLife)
         {
-            if (globals.life+15 <= globals.maxLife) {
-                globals.life += 15;
-            }else{
-                globals.life = globals.maxLife
-            }
+            this.healthRegenerationCounter = 0;
+            this.previousLife = globals.life;
+        }
+        this.healthRegenerationCounter += globals.deltaTime;
+        if (this.healthRegenerationCounter >= this.maxInternalCounter)
+        {
+            this.healthRegenerationCounter = 0;
+            this.addLife = 0;
+            this.previousLife = globals.life;
+        }
+        if (globals.life >= this.previousLife && this.addLife < 10)
+        {
+            globals.life += 1;
+            this.addLife += 1;
+        }
+        if (globals.life > globals.maxLife)
+        {
+            globals.life = globals.maxLife;
         }
     }
 
@@ -161,82 +197,72 @@ export class Player extends Sprite
     
     }
 
-    handlerStateWizard()
+    handlerStateWizard() 
     {
         let attack;
 
-        for (let index = 0; index < globals.sprites.length; index++) 
+    
+        for (let i = 0; i < globals.sprites.length; i++) 
         {
-            const sprite = globals.sprites[index];
-            if (sprite.id == SpriteID.ATTACK) 
-            {
-                attack = sprite
-
-                attack.update()
+            const sprite = globals.sprites[i];
+            if (sprite.id == SpriteID.ATTACK) {
+                attack = sprite;
+                attack.update();
             }
         }
+        
+        if(!globals.isPlayerActive) return;
 
-        switch(this.state)
-        {
-            case State.UP_WIZARD:
-                this.physics.vx = 0;
-                this.physics.vy = -this.physics.vLimit * this.moveSpeed;
-                attack.defaultPositionAndFrame();
-
-                break;
-
-            case State.DOWN_WIZARD:
-                this.physics.vx = 0;
-                this.physics.vy = this.physics.vLimit * this.moveSpeed;
-                attack.defaultPositionAndFrame();
+        switch (this.state) {
+            case State.LEFT_WIZARD:
+                this.physics.vx = -this.physics.vLimit * this.moveSpeed;
+                this.physics.vy = 0;
                 break;
 
             case State.RIGHT_WIZARD:
                 this.physics.vx = this.physics.vLimit * this.moveSpeed;
                 this.physics.vy = 0;
-                attack.defaultPositionAndFrame();
                 break;
 
-            case State.LEFT_WIZARD:
-                this.physics.vx = -this.physics.vLimit * this.moveSpeed;
-                this.physics.vy = 0;
-                attack.defaultPositionAndFrame();
+            case State.UP_WIZARD:
+                this.physics.vx = 0;
+                this.physics.vy = -this.physics.vLimit * this.moveSpeed;
+                break;
+
+            case State.DOWN_WIZARD:
+                this.physics.vx = 0;
+                this.physics.vy = this.physics.vLimit * this.moveSpeed;
                 break;
 
             case State.LEFT_ATTACK_WIZARD:
                 this.physics.vx = 0;
                 this.physics.vy = 0;
-
-                attack.leftAttack(this)
+                attack.startAttack(this, 'left');
                 break;
 
             case State.RIGHT_ATTACK_WIZARD:
                 this.physics.vx = 0;
                 this.physics.vy = 0;
-
-                attack.rightAttack(this)
+                attack.startAttack(this, 'right');
                 break;
 
             case State.UP_ATTACK_WIZARD:
                 this.physics.vx = 0;
                 this.physics.vy = 0;
-                
-                attack.upAttack(this)
+                attack.startAttack(this, 'up');
                 break;
 
             case State.DOWN_ATTACK_WIZARD:
                 this.physics.vx = 0;
                 this.physics.vy = 0;
-                attack.downAttack(this)
+                attack.startAttack(this, 'down');
                 break;
 
-            default:             
+            default:
                 this.physics.vx = 0;
                 this.physics.vy = 0;
-                this.frames.frameCounter = 0;
-                this.frames.framesChangeCounter = 0;
                 attack.defaultPositionAndFrame();
-
+                break;
         }
     }
 
@@ -248,27 +274,27 @@ export class Player extends Sprite
                 this.physics.vx = 0;
                 this.physics.vy = -this.physics.vLimit * this.moveSpeed;
                 break;
-    
+
             case State.DOWN:
                 this.physics.vx = 0;
                 this.physics.vy = this.physics.vLimit * this.moveSpeed;
                 break;
-    
+
             case State.RIGHT:
                 this.physics.vx = this.physics.vLimit * this.moveSpeed;
                 this.physics.vy = 0;
                 break;
-    
+
             case State.LEFT:
                 this.physics.vx = -this.physics.vLimit * this.moveSpeed;
                 this.physics.vy = 0;
                 break;
-            
+
             case State.STILL_UP:
                 this.physics.vx = 0;
                 this.physics.vy = 0;
                 break;
-    
+
             default:             
                 this.physics.vx = 0;
                 this.physics.vy = 0;
@@ -288,7 +314,69 @@ export class Player extends Sprite
                         this.state === State.DOWN                  ? State.STILL_DOWN            : //No  key press down
                         this.state; // Maintain current state if no keys are pressed
     }
+
+    numBick = 10;
+    bigEventCouter = 0;
+    bricksBigEvent = [];
+    bigEvent()
+    {
+        if (globals.life <= globals.maxLife/2)
+        {
+            if (this.bigEventCouter === 0){
+
+                const centerX = this.xPos;
+                const centerY = this.yPos;
+                const radius = 50;
+                let isTurnBrick = true;
+
+                for (let i = 0; i < this.numBick; i++) {
+                    const angle = (Math.PI * 2) / this.numBick;
+                    const x = centerX + Math.cos(angle * i) * radius;
+                    const y = centerY + Math.sin(angle * i) * radius;
+                    
+                    if (this.getMapTileId(x, y) !== Block.BRICK){
+                        if (isTurnBrick){
+                            const block = this.getMapTileId(x, y);
+                            this.bricksBigEvent.push({x, y, block});
+                            this.setMapTileId(x, y, Block.BRICK);
+                            isTurnBrick = false;
+                        }else{
+                            this.initPotion(x, y);
+                            isTurnBrick = true;
+                        }
+                    }
+
+                    this.bigEventCouter = 1;
+                }
+            }
+        }
+
+        if ((this.bigEventCouter === 1 && this.internalTimer >= this.maxInternalTimer) || globals.gameState !== Game.PLAYING)
+        {
+            for (let i = 0; i < globals.sprites.length; i++) {
+                if (globals.sprites[i].id === SpriteID.POTION){
+                    globals.sprites.splice(i, 1);
+                }
+            }
+
+            for (let i = 0; i < this.bricksBigEvent.length; i++) {
+                this.setMapTileId(this.bricksBigEvent[i].x, this.bricksBigEvent[i].y, this.bricksBigEvent[i].block);
+            }
+
+            this.bricksBigEvent = [];
+            this.bigEventCouter = 0;
+        }
+    }
+
+    initPotion(x, y)
+    {
+        const imageSet = new ImageSet(510, 567, 30, 33, 28, 35, 0, 0);
+        const frames = new Frames(5, 5);
+    
+        const hitBox = new HitBox(18, 20, 0, 0);
+    
+        const potion = new Potion(SpriteID.POTION, State.ACTIVATED_SKILL, x, y, imageSet, frames, null, hitBox);
+    
+        return globals.sprites.push(potion);
+    }
 }
-
-
-

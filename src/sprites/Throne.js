@@ -9,10 +9,8 @@ export class Throne extends Sprite
         { xPos: 20, yPos: 20 },
         { xPos: 150, yPos: 170 },
         { xPos: 100, yPos: 50 },
-        { xPos: 205, yPos: 20 },
         { xPos: 230, yPos: 110 },
         { xPos: 310, yPos: 100 },
-        { xPos: 230, yPos: 20 },
         { xPos: 250, yPos: 190 },
         { xPos: 69, yPos: 69 },
         { xPos: 432, yPos: 27 },
@@ -22,16 +20,20 @@ export class Throne extends Sprite
     ];
 
     changePosition = false;
-    
-    maxInternalTimer = 7;
 
     countChangePlayer = 1;
+    previousPlayer = null;
+    previousPlayerPosition = { xPos: 0, yPos: 0 };
+    previousAttackState = false;
+    mergeTimer = 0;
+    mergeDuration = 700; 
+    isMerged = false;
 
     update()
     {
         super.update();
         
-        if (this.internalTimer >= this.maxInternalTimer || this.changePosition) 
+        if (this.changePosition) 
         {
         
             const randomIndex = Math.floor(Math.random() * this.thronePositions.length);
@@ -40,6 +42,23 @@ export class Throne extends Sprite
             this.yPos = newPosition.yPos;
 
             this.changePosition = false;
+        }
+
+        if (this.isMerged) {
+            this.mergeTimer++;
+            if (this.mergeTimer >= this.mergeDuration) {
+                this.restorePreviousPlayer();
+                globals.isThroneFlicker = false;
+            } else {
+                if (this.mergeTimer + 50 >= this.mergeDuration)
+                {
+                    globals.isThroneFlicker = true;
+                }
+                this.previousPlayerPosition = { 
+                    xPos: globals.activedPlayer.xPos, 
+                    yPos: globals.activedPlayer.yPos 
+                }; 
+            }
         }
     }
 
@@ -54,30 +73,50 @@ export class Throne extends Sprite
 
     event(player)
     {
-        if (this.focusPlayer && globals.action.merge && this.countChangePlayer == 1)
+        if (this.focusPlayer && globals.action.merge && this.countChangePlayer == 1 && globals.activedPlayer.id == SpriteID.PLAYER)
         {
             globals.isMergeWithTheThrone = true;
-            this.countChangePlayer++
+            this.countChangePlayer++;
+            this.previousPlayer = globals.activedPlayer; 
+            this.previousPlayerPosition = { xPos: player.xPos, yPos: player.yPos }; 
+            this.previousAttackState = player.isAttacking || false; 
+            player.isAttacking = false; 
+
             while (true) {
                 const randomNumber = Math.floor(Math.random() * globals.spritesPlayers.length);
-                const newActivedPlayer = globals.spritesPlayers[randomNumber]
-                const xPos = globals.activedPlayer.xPos;
-                const yPos = globals.activedPlayer.yPos;
-    
-                if (player.id != newActivedPlayer.id)
-                {
-                    newActivedPlayer.xPos = xPos;
-                    newActivedPlayer.yPos = yPos;
+                const newActivedPlayer = globals.spritesPlayers[randomNumber];
+
+                if (player.id !== newActivedPlayer.id) {
+                    newActivedPlayer.xPos = player.xPos;
+                    newActivedPlayer.yPos = player.yPos;
                     globals.activedPlayer = newActivedPlayer;
                     this.changePosition = true;
+
+                    globals.isPlayerActive = true;
+
+                    this.isMerged = true;
+                    this.mergeTimer = 0;
+
                     break;
                 }
             }
         }
 
-        if (this.blurPlayer){
-
+        if (this.blurPlayer) {
             this.countChangePlayer = 1;
+        }
+    }
+    
+    restorePreviousPlayer() {
+        if (this.previousPlayer) {
+            this.previousPlayer.xPos = this.previousPlayerPosition.xPos;
+            this.previousPlayer.yPos = this.previousPlayerPosition.yPos;
+            this.previousPlayer.isAttacking = this.previousAttackState;
+            globals.activedPlayer = this.previousPlayer;
+            this.previousPlayer = null;
+            this.isMerged = false;
+            this.mergeTimer = 0;
+            globals.isPlayerActive = false;
         }
     }
 }
