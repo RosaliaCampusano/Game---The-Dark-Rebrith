@@ -56,6 +56,7 @@ export class Throne extends Sprite
     {
         if (this.focusPlayer && globals.action.merge && this.countChangePlayer == 1)
         {
+            globals.isMergeWithTheThrone = true;
             this.countChangePlayer++
             while (true) {
                 const randomNumber = Math.floor(Math.random() * globals.spritesPlayers.length);
