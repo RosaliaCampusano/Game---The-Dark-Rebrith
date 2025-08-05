@@ -1,156 +1,155 @@
-import {Game} from "./constants.js"
+import { Game } from "./constants.js";
 
-export default 
-{
-    //Access to Canvas and context
-    canvas: {},
-    ctx: {},
-    canvasHUD: {},
-    ctxHUD: {},
+export default {
+  //Access to Canvas and context
+  canvas: {},
+  ctx: {},
+  canvasHUD: {},
+  ctxHUD: {},
 
-    //Game State. Initialize a INVALID
-    gameState: Game.INVALID,
+  //Game State. Initialize a INVALID
+  gameState: Game.INVALID,
 
-    //Previous cycle time (milliseconds)
-    previousCycleMilleseconds: -1,
+  //Previous cycle time (milliseconds)
+  previousCycleMilleseconds: -1,
 
-    //Real cycle time (seconds)
-    deltaTime: 0,
+  //Real cycle time (seconds)
+  deltaTime: 0,
 
-    cycleRealTime: 0,
+  cycleRealTime: 0,
 
-    //Objective cycle time (seconds, constants)
-    frameTimeObj: 0,
+  //Objective cycle time (seconds, constants)
+  frameTimeObj: 0,
 
-    spritesHUD: [],
+  spritesHUD: [],
 
-    sprites: [],
+  sprites: [],
 
-    spritesKeys: [],
+  spritesKeys: [],
 
-    activedKey: null,
+  activedKey: null,
 
-    spritesAttack: [],
+  spritesAttack: [],
 
-    spritesPlayers: [],
+  spritesPlayers: [],
 
-    activedPlayer: null,
+  activedPlayer: null,
 
-    spriteLoading: [],
+  spriteLoading: [],
 
-    spriteMenu: [],
+  spriteMenu: [],
 
-    spriteBackground: [],
+  spriteBackground: [],
 
-    spriteWinScreen: [],
+  spriteWinScreen: [],
 
-    spriteStory: [],
+  spriteStory: [],
 
-    spriteHighScore: [],
+  spriteHighScore: [],
 
-    spriteHighScorePosition: [],
-        
-    spriteControls: [],
+  spriteHighScorePosition: [],
 
-    tileSet: {},
+  spriteControls: [],
 
-    assetsToLoad: [],
-    assetsLoaded: 0,
+  tileSet: {},
 
-    tileSets: [],
+  assetsToLoad: [],
+  assetsLoaded: 0,
 
-    level: {},
+  tileSets: [],
 
-    levels: [],
+  level: {},
 
-    isPlaying: false,
+  levels: [],
 
-    fase: [1,1],
+  isPlaying: false,
 
-    counterFase: 1,
+  fase: [1, 1],
 
-    isDark: false,
+  counterFase: 1,
 
-    messageToDoor: {
-        x: 0,
-        y: 0,
-        text: "",
-        color: "white"
-    },
+  isDark: false,
 
-    action: {},  
+  messageToDoor: {
+    x: 0,
+    y: 0,
+    text: "",
+    color: "white",
+  },
 
-    life: 0,
+  action: {},
 
-    maxLife: 125,
+  life: 0,
 
-    score: 0,
+  maxLife: 125,
 
-    highScore: 0,
+  score: 0,
 
-    historyScore: [],
+  highScore: 0,
 
-    highScoreQuantity: 10,
+  historyScore: [],
 
-    highScoreInit: 0,
+  highScoreQuantity: 10,
 
-    controlerHighScoreInit: 0,
+  highScoreInit: 0,
 
-    currentRecord: {},
+  controlerHighScoreInit: 0,
 
-    currentScoresPage: 0,
+  currentRecord: {},
 
-    lastGamePlayerPosition: 0,
+  currentScoresPage: 0,
 
-    playerName: "",
+  lastGamePlayerPosition: 0,
 
-    time: 0,
+  playerName: "",
 
-    levelCrazy: 1,
-    
-    defaultTime: 0,
+  time: 0,
 
-    camera: {},
+  levelCrazy: 1,
 
-    saturate: 1,
+  defaultTime: 0,
 
-    particles: [],
+  camera: {},
 
-    particlesRain: [],
+  saturate: 1,
 
-    health_bar_saturation: 1,
+  particles: [],
 
-    throne_saturation: 1,
+  particlesRain: [],
 
-    countInitPlaying: 0,
+  health_bar_saturation: 1,
 
-    isThroneFlicker: false,
+  throne_saturation: 1,
 
-    sounds: [],
+  countInitPlaying: 0,
 
-    currentSound: -1,
-    
-    levelTimer: {},
+  isThroneFlicker: false,
 
-    currentMusic: -1,
+  sounds: [],
 
-    incorrectKey: false,
+  currentSound: -1,
 
-    isMergeWithTheThrone: false,
+  levelTimer: {},
 
-    madnessDeleted: false,
+  currentMusic: -1,
 
-    playerEnterThroughMainMenu: false,
+  incorrectKey: false,
 
-    lastPlayerPosition: 0,
-    
-    timer: 0,
-    
-    lastTimeChunk: 0,
+  isMergeWithTheThrone: false,
 
-    hasResetTimer: false,
+  madnessDeleted: false,
 
-    playerEnterForGameOver: false,
+  playerEnterThroughMainMenu: false,
 
-    isPlayerActive: false
-}
+  lastPlayerPosition: 0,
+
+  timer: 0,
+
+  lastTimeChunk: 0,
+
+  hasResetTimer: false,
+
+  playerEnterForGameOver: false,
+
+  isPlayerActive: false,
+};
