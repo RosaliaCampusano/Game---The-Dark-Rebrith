@@ -232,17 +232,6 @@ function renderSpritesHUD() {
     const xPos = Math.floor(sprite.xPos);
     const yPos = Math.floor(sprite.yPos);
 
-    let drawW = sprite.imageSet.xSize;
-    let drawH = sprite.imageSet.ySize;
-
-    if (sprite.id === SpriteID.SUN || sprite.id === SpriteID.MOON) {
-      drawW = sprite.imageSet.xSize * 0.4;
-      drawH = sprite.imageSet.ySize * 0.4;
-    } else if (sprite.id === SpriteID.THRONEHUB) {
-      drawW = sprite.imageSet.xSize * 0.45;
-      drawH = sprite.imageSet.ySize * 0.45;
-    }
-
     globals.ctxHUD.drawImage(
       globals.tileSets[Tile.SIZE_SPRITE],
       xTile,
@@ -251,8 +240,8 @@ function renderSpritesHUD() {
       sprite.imageSet.ySize,
       xPos,
       yPos,
-      drawW,
-      drawH
+      sprite.imageSet.xSize,
+      sprite.imageSet.ySize
     );
 
     globals.ctxHUD.filter = `saturate(1)`;
