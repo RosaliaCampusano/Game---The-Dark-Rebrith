@@ -304,7 +304,6 @@ function initSprites() {
   }
   initThrone();
   initPotion();
-  initAttack();
   initBlueExplotion();
   initRedExplotion();
   initSunLight();

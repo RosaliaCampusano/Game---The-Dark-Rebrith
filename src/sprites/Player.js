@@ -3,6 +3,7 @@ import Frames from "../Frames.js";
 import globals from "../globals.js";
 import HitBox from "../HitBox.js";
 import ImageSet from "../ImageSet.js";
+import { Attack } from "./Attack.js";
 import { Potion } from "./Potion.js";
 import Sprite from "./Sprites.js";
 
@@ -181,39 +182,42 @@ export class Player extends Sprite
         }
     }
 
+    wasAttackPressed = false;
     readKeyboardAndAssignState()
     {
-    
-        this.state =  globals.action.moveLeft                             ? State.LEFT_WIZARD           : //Left key
-                        globals.action.moveRight                          ? State.RIGHT_WIZARD          : //Right key
-                        globals.action.moveUp                             ? State.UP_WIZARD             : //Up key
-                        globals.action.moveDown                           ? State.DOWN_WIZARD           : //Down key
-                        this.state === State.LEFT_WIZARD                  ? State.STILL_LEFT_WIZARD            : //No  key press left
-                        this.state === State.RIGHT_WIZARD                 ? State.STILL_RIGHT_WIZARD           : //No  key press right
-                        this.state === State.UP_WIZARD                    ? State.STILL_UP_WIZARD              : //No  key press up
-                        this.state === State.DOWN_WIZARD                  ? State.STILL_DOWN_WIZARD            : //No  key press down
-                        globals.action.moveAttack && this.state === State.STILL_LEFT_WIZARD  ? State.LEFT_ATTACK_WIZARD   : //Left key attack
-                        globals.action.moveAttack && this.state === State.STILL_RIGHT_WIZARD ? State.RIGHT_ATTACK_WIZARD : //Right key attack
-                        globals.action.moveAttack && this.state === State.STILL_UP_WIZARD    ? State.UP_ATTACK_WIZARD       : //Up key attack
-                        globals.action.moveAttack && this.state === State.STILL_DOWN_WIZARD  ? State.DOWN_ATTACK_WIZARD   : //Down key attack
+        const attackJustPressed = globals.action.moveAttack && !this.wasAttackPressed;
+        this.wasAttackPressed = globals.action.moveAttack;
+
+        this.state =  globals.action.moveLeft                             ? State.LEFT_WIZARD           :
+                        globals.action.moveRight                          ? State.RIGHT_WIZARD          :
+                        globals.action.moveUp                             ? State.UP_WIZARD             :
+                        globals.action.moveDown                           ? State.DOWN_WIZARD           :
+                        this.state === State.LEFT_WIZARD                  ? State.STILL_LEFT_WIZARD     :
+                        this.state === State.RIGHT_WIZARD                 ? State.STILL_RIGHT_WIZARD    :
+                        this.state === State.UP_WIZARD                    ? State.STILL_UP_WIZARD       :
+                        this.state === State.DOWN_WIZARD                  ? State.STILL_DOWN_WIZARD     :
+                        attackJustPressed && this.state === State.STILL_LEFT_WIZARD  ? State.LEFT_ATTACK_WIZARD  :
+                        attackJustPressed && this.state === State.STILL_RIGHT_WIZARD ? State.RIGHT_ATTACK_WIZARD :
+                        attackJustPressed && this.state === State.STILL_UP_WIZARD    ? State.UP_ATTACK_WIZARD    :
+                        attackJustPressed && this.state === State.STILL_DOWN_WIZARD  ? State.DOWN_ATTACK_WIZARD  :
                         this.state;
-    
     }
 
     handlerStateWizard()
     {
-        let attack = null;
-
-        for (let i = 0; i < globals.sprites.length; i++)
-        {
+        for (let i = globals.sprites.length - 1; i >= 0; i--) {
             const sprite = globals.sprites[i];
-            if (sprite.id == SpriteID.ATTACK) {
-                attack = sprite;
-                attack.update();
+            if (sprite.id === SpriteID.ATTACK) {
+                sprite.update();
+                if (sprite.finished) {
+                    globals.sprites.splice(i, 1);
+                }
             }
         }
 
-        if (!globals.isPlayerActive || !attack) return;
+        if (!globals.isPlayerActive) return;
+
+        let direction = null;
 
         switch (this.state) {
             case State.LEFT_WIZARD:
@@ -237,34 +241,34 @@ export class Player extends Sprite
                 break;
 
             case State.LEFT_ATTACK_WIZARD:
-                this.physics.vx = 0;
-                this.physics.vy = 0;
-                attack.startAttack(this, 'left');
+                direction = 'left';
                 break;
-
             case State.RIGHT_ATTACK_WIZARD:
-                this.physics.vx = 0;
-                this.physics.vy = 0;
-                attack.startAttack(this, 'right');
+                direction = 'right';
                 break;
-
             case State.UP_ATTACK_WIZARD:
-                this.physics.vx = 0;
-                this.physics.vy = 0;
-                attack.startAttack(this, 'up');
+                direction = 'up';
                 break;
-
             case State.DOWN_ATTACK_WIZARD:
-                this.physics.vx = 0;
-                this.physics.vy = 0;
-                attack.startAttack(this, 'down');
+                direction = 'down';
                 break;
 
             default:
                 this.physics.vx = 0;
                 this.physics.vy = 0;
-                attack.defaultPositionAndFrame();
                 break;
+        }
+
+        if (direction) {
+            this.physics.vx = 0;
+            this.physics.vy = 0;
+            const newAttack = new Attack();
+            newAttack.startAttack(this, direction);
+            globals.sprites.push(newAttack);
+            this.state = direction === 'left' ? State.STILL_LEFT_WIZARD :
+                         direction === 'right' ? State.STILL_RIGHT_WIZARD :
+                         direction === 'up' ? State.STILL_UP_WIZARD :
+                         State.STILL_DOWN_WIZARD;
         }
     }
 

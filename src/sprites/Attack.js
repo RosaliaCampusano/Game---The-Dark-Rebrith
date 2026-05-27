@@ -49,10 +49,8 @@ export class Attack extends Sprite
         }
     
         startAttack(player, direction) {
-           
-            if (this.isActive) return;
-    
             this.isActive = true;
+            this.finished = false;
             this.attackDirection = direction;
             this.countFrameAttack = 0;
     
@@ -93,11 +91,12 @@ export class Attack extends Sprite
     
         defaultPositionAndFrame() {
             this.countFrameAttack = 0;
-            this.xPos = -10;
-            this.yPos = -10;
             this.attackSpeedX = 0;
             this.attackSpeedY = 0;
             this.isActive = false;
+            this.finished = true;
+            this.xPos = -10;
+            this.yPos = -10;
         }
     
 
