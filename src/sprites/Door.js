@@ -120,12 +120,27 @@ export default class Door extends Sprite {
     const isOverLap = this.detectCollisionsBetweenSpriteAndSprite(player);
 
     if (isOverLap) {
-      if (player.isCollidingWithKey) {
-        this.isCollidingWithPlayer = true;
+      const carriedKey = globals.spritesKeys.find(k => k.isCollected && !k.isDelivered);
+
+      if (carriedKey) {
+        carriedKey.isDelivered = true;
+        globals.currentSound = Sound.KEY;
+
+        const allDelivered = globals.spritesKeys.every(k => k.isDelivered);
+        if (allDelivered) {
+          this.isCollidingWithPlayer = true;
+        } else {
+          const remaining = globals.spritesKeys.filter(k => !k.isCollected).length;
+          globals.messageToDoor.text = remaining + " keys left";
+          globals.incorrectKey = true;
+          this.incorrectKeyTimer = 2.0;
+        }
       } else {
         globals.currentSound = Sound.LOCKED_DOOR;
         globals.incorrectKey = true;
         this.incorrectKeyTimer = 2.0;
+        const remaining = globals.spritesKeys.filter(k => !k.isCollected).length;
+        globals.messageToDoor.text = "Find " + remaining + " keys";
       }
     } else {
       this.isCollidingWithPlayer = false;

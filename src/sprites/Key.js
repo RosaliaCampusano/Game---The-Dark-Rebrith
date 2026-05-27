@@ -8,6 +8,9 @@ export default class Key extends Sprite
 {
     internalID = 0;
     isCollected = false;
+    isDelivered = false;
+    originalPos = { xPos: 0, yPos: 0 };
+
     constructor(xPos, yPos, imageSet, internalID)
     {
         super(SpriteID.KEY, State.BE,
@@ -16,10 +19,11 @@ export default class Key extends Sprite
         );
 
         this.internalID = internalID;
+        this.originalPos = { xPos, yPos };
     }
 
     update() {
-        if (this.isCollected){
+        if (this.isCollected && !this.isDelivered){
             this.xPos = -50;
             this.yPos = -50;
         }
@@ -32,24 +36,17 @@ export default class Key extends Sprite
 
         if (isOverLap)
         {
-            const playerAlreadyHasKey = globals.spritesKeys.some(
-                k => k.isCollected && k !== this && !k.isDelivered
+            const carrying = globals.spritesKeys.some(
+                k => k.isCollected && !k.isDelivered
             );
-            if (playerAlreadyHasKey) {
-                globals.messageToDoor.text = "Deliver your key first";
+            if (carrying) {
+                globals.messageToDoor.text = "You carry a key already";
                 globals.incorrectKey = true;
                 return;
             }
 
             globals.currentSound = Sound.KEY;
             this.isCollected = true;
-
-            const allCollected = globals.spritesKeys.every(k => k.isCollected);
-            if (allCollected) {
-                player.isCollidingWithKey = true;
-            } else {
-                globals.messageToDoor.text = "Find more keys";
-            }
         }
     }
 }
