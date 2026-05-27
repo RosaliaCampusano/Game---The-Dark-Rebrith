@@ -1156,7 +1156,7 @@ function initLevel() {
 }
 
 export async function loadDataHighScore() {
-  const url = "./src/server/routes/getAllRecords.php";
+  const url = "/api/records";
 
   const response = await fetch(url);
 

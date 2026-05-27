@@ -1295,16 +1295,14 @@ function renderEnterName() {
 }
 
 async function sendRecordToServer() {
-  const url = "./src/server/routes/postRecords.php";
-
-  const record = `name=${globals.playerName}&score=${globals.score}`;
+  const url = "/api/records";
 
   const response = await fetch(url, {
     method: "POST",
     headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
+      "Content-Type": "application/json",
     },
-    body: record,
+    body: JSON.stringify({ name: globals.playerName, score: globals.score }),
   });
 
     if (!response.ok) {
