@@ -36,9 +36,7 @@ export default class Key extends Sprite
 
         if (isOverLap)
         {
-            const carrying = globals.spritesKeys.some(
-                k => k.isCollected && !k.isDelivered
-            );
+            const carrying = globals.spritesKeys.some(k => k.isCollected && !k.isDelivered);
             if (carrying) {
                 globals.messageToDoor.text = "You carry a key already";
                 globals.messageToDoor.x = this.originalPos.xPos;

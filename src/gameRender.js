@@ -162,14 +162,13 @@ function renderPlayer() {
 function renderMesageToDoor() {
   if (globals.messageTimer > 0) {
     globals.messageTimer -= globals.deltaTime;
-    globals.ctx.font = "5px emulogic";
-    globals.ctx.fillStyle = "white";
+    const text = globals.messageToDoor.text;
+    const x = globals.messageToDoor.x;
+    const y = globals.messageToDoor.y - 8;
+    globals.ctx.font = "4px emulogic";
     globals.ctx.textAlign = "center";
-    globals.ctx.fillText(
-      globals.messageToDoor.text,
-      globals.messageToDoor.x - 10,
-      globals.messageToDoor.y
-    );
+    globals.ctx.fillStyle = "white";
+    globals.ctx.fillText(text, x, y);
     if (globals.messageTimer <= 0) {
       globals.incorrectKey = false;
     }

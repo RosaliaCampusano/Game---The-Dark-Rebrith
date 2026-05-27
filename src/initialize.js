@@ -1000,9 +1000,8 @@ function initKeys() {
 
   globals.spritesKeys.push(key1, key2, key3, key4);
 
-  const randomKey = Math.floor(Math.random() * globals.spritesKeys.length) + 1;
-
-  // globals.activedKey = globals.spritesKeys[randomKey - 1];
+  const randomIndex = Math.floor(Math.random() * globals.spritesKeys.length);
+  globals.correctKey = globals.spritesKeys[randomIndex];
 }
 
 function loadAssets() {

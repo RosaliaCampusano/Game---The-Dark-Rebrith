@@ -116,20 +116,18 @@ export default class Door extends Sprite {
 
       if (carriedKey) {
         carriedKey.isDelivered = true;
-        globals.currentSound = Sound.KEY;
 
-        const allDelivered = globals.spritesKeys.every(k => k.isDelivered);
-        if (allDelivered) {
+        if (carriedKey === globals.correctKey) {
+          globals.currentSound = Sound.KEY;
           this.isCollidingWithPlayer = true;
         } else {
-          const remaining = globals.spritesKeys.filter(k => !k.isCollected).length;
-          globals.messageToDoor.text = remaining + " keys left";
+          globals.currentSound = Sound.LOCKED_DOOR;
+          globals.messageToDoor.text = "Wrong key!";
           globals.messageTimer = 2.0;
         }
       } else {
         globals.currentSound = Sound.LOCKED_DOOR;
-        const remaining = globals.spritesKeys.filter(k => !k.isCollected).length;
-        globals.messageToDoor.text = "Find " + remaining + " keys";
+        globals.messageToDoor.text = "Locked";
         globals.messageTimer = 2.0;
       }
     } else {
