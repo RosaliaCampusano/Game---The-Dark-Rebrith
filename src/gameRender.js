@@ -695,18 +695,22 @@ function renderHighscore() {
   ctx.fillText("- - - - - - - - - - - - - - - - - - - - -", cx, 260);
 
   if (globals.playerEnterThroughMainMenu === true) {
-    ctx.font = "12px emulogic";
-    ctx.fillStyle = "#555";
-    ctx.fillText("<", cx - 160, 278);
-    ctx.fillText(">", cx + 160, 278);
-
     ctx.font = "7px emulogic";
-    ctx.fillStyle = "#444";
-    ctx.fillText("PAGE " + globals.currentScoresPage + "/2", cx, 278);
+    const dotActive = "white";
+    const dotInactive = "#333";
+    ctx.fillStyle = globals.currentScoresPage === 1 ? dotActive : dotInactive;
+    ctx.fillText("o", cx - 8, 275);
+    ctx.fillStyle = globals.currentScoresPage === 2 ? dotActive : dotInactive;
+    ctx.fillText("o", cx + 8, 275);
+
+    ctx.font = "8px emulogic";
+    ctx.fillStyle = "#555";
+    ctx.fillText("<", cx - 30, 275);
+    ctx.fillText(">", cx + 30, 275);
   }
 
   ctx.font = "7px emulogic";
-  ctx.fillStyle = "#666";
+  ctx.fillStyle = "#555";
   ctx.fillText("ESC TO EXIT", cx, 293);
 
   renderParticlesForHighScore();

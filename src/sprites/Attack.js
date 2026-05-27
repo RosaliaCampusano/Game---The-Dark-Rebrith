@@ -103,29 +103,25 @@ export class Attack extends Sprite
 
         isCollidingOrMaxCountFrameAttack()
         {
-            return this.isCollidingWithObstacleOnTheLeft || 
-            this.isCollidingWithObstacleOnTheRight || 
+            return this.isCollidingWithObstacleOnTheLeft ||
+            this.isCollidingWithObstacleOnTheRight ||
             this.isCollidingWithObstacleOnTheTop ||
             this.isCollidingWithObstacleOnTheBottom ||
-            this.isCollidingWithSprite ||
             this.countFrameAttack === 30;
         }
 
     detectCollisionsBetweenSpriteAndSprite(sprite)
     {
         const isColliding = super.detectCollisionsBetweenSpriteAndSprite(sprite);
-    
+
         sprite.isCollidingWithAttack = isColliding;
 
-        if (sprite.id === SpriteID.GOBLIN || sprite.id === SpriteID.DEMON) 
+        if (sprite.id === SpriteID.GOBLIN || sprite.id === SpriteID.DEMON)
         {
-            if (sprite.isCollidingWithAttack) 
+            if (sprite.isCollidingWithAttack)
             {
-              
                 if (sprite.id === SpriteID.GOBLIN) globals.soundQueue.push(Sound.GOBLIN);
                 if (sprite.id === SpriteID.DEMON) globals.soundQueue.push(Sound.DEMON);
-
-                this.isCollidingWithSprite = true;
             }
         }
 

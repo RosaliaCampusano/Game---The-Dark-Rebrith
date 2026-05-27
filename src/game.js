@@ -9,10 +9,13 @@ import render from "./gameRender.js";
 
 window.onload = init;
 
-function init() {
+async function init() {
+  try {
+    await document.fonts.load("20px emulogic");
+  } catch (e) {}
+
   loadDataHighScore();
 
-  //Start the first frame request
   window.requestAnimationFrame(gameLoop);
 }
 
