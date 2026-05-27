@@ -49,7 +49,7 @@ export class Demon extends Enemies
                 break;
         
             default:
-                console.error("Error, Game State invalid");
+                break;
         }
     
         this.yPos += this.physics.vy * globals.deltaTime;

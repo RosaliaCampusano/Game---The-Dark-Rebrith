@@ -82,23 +82,17 @@ export class Throne extends Sprite
             this.previousAttackState = player.isAttacking || false; 
             player.isAttacking = false; 
 
-            while (true) {
-                const randomNumber = Math.floor(Math.random() * globals.spritesPlayers.length);
-                const newActivedPlayer = globals.spritesPlayers[randomNumber];
+            const otherPlayer = globals.spritesPlayers.find(p => p.id !== player.id);
+            if (otherPlayer) {
+                otherPlayer.xPos = player.xPos;
+                otherPlayer.yPos = player.yPos;
+                globals.activedPlayer = otherPlayer;
+                this.changePosition = true;
 
-                if (player.id !== newActivedPlayer.id) {
-                    newActivedPlayer.xPos = player.xPos;
-                    newActivedPlayer.yPos = player.yPos;
-                    globals.activedPlayer = newActivedPlayer;
-                    this.changePosition = true;
+                globals.isPlayerActive = true;
 
-                    globals.isPlayerActive = true;
-
-                    this.isMerged = true;
-                    this.mergeTimer = 0;
-
-                    break;
-                }
+                this.isMerged = true;
+                this.mergeTimer = 0;
             }
         }
 

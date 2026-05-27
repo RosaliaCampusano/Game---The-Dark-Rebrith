@@ -122,11 +122,10 @@ export class Attack extends Sprite
             if (sprite.isCollidingWithAttack) 
             {
               
-                if (sprite.id === SpriteID.GOBLIN) globals.currentSound = Sound.GOBLIN;
-                if (sprite.id === SpriteID.DEMON) globals.currentSound = Sound.DEMON;
+                if (sprite.id === SpriteID.GOBLIN) globals.soundQueue.push(Sound.GOBLIN);
+                if (sprite.id === SpriteID.DEMON) globals.soundQueue.push(Sound.DEMON);
 
-                this.isCollidingWithSprite = sprite.isCollidingWithAttack || isColliding;
-                this.isCollidingWithSprite = false;
+                this.isCollidingWithSprite = true;
             }
         }
 

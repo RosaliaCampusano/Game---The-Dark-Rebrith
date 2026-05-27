@@ -71,18 +71,11 @@ export class Potion extends Sprite
     event(){
         if (this.focusPlayer)
         {
-            while (true) {
-                const randomPositionNumber = Math.floor(Math.random() * this.positions.length);
-                const position = this.positions[randomPositionNumber];
-                const xPos = position.xPos;
-                const yPos = position.yPos;
-    
-                if (this.xPos != xPos && this.yPos != yPos)
-                {
-                    this.xPos = xPos;
-                    this.yPos = yPos;
-                    break;
-                }
+            const available = this.positions.filter(p => p.xPos !== this.xPos || p.yPos !== this.yPos);
+            if (available.length > 0) {
+                const position = available[Math.floor(Math.random() * available.length)];
+                this.xPos = position.xPos;
+                this.yPos = position.yPos;
             }
         }
     }

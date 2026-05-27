@@ -5,9 +5,9 @@ import globals from "./globals.js";
 let letter = ['U', 'W', 'U']; 
 let currentIndex = 1; 
 
-export function keydownHandler(event) 
+export function keydownHandler(event)
 {
-    switch(event.keyCode) 
+    switch(event.code)
     {
         case Key.UP:
             letter[currentIndex] = String.fromCharCode(((letter[currentIndex].charCodeAt(0) - 65 + 25) % 26) + 65);
@@ -57,7 +57,7 @@ export function getCurrentIndex() {
 
 export function keyupHandler(event)
 {
-    switch(event.keyCode)
+    switch(event.code)
     {
         case Key.UP:
             globals.action.moveUp = false;

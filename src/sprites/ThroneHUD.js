@@ -47,25 +47,31 @@ export class ThroneHUD extends Sprite
         }
     }
 
+    mergeProcessed = false;
     updateAnimationFrames()
-    {  
-         if (globals.isMergeWithTheThrone && globals.action.merge) 
-        { 
-            globals.life -= 10;
-        
-            if (this.frames.frameCounter < this.frames.framesPerState) 
-            {
-                this.frames.frameCounter++; 
-                globals.isMergeWithTheThrone = false;
-            }
+    {
+         if (globals.isMergeWithTheThrone && globals.action.merge)
+        {
+            if (!this.mergeProcessed) {
+                globals.life -= 10;
+                this.mergeProcessed = true;
 
-            if (this.frames.frameCounter === 5)
-            {
-                globals.life -= 50;
-            } 
+                if (this.frames.frameCounter < this.frames.framesPerState)
+                {
+                    this.frames.frameCounter++;
+                    globals.isMergeWithTheThrone = false;
+                }
+
+                if (this.frames.frameCounter === 5)
+                {
+                    globals.life -= 50;
+                }
+            }
+        } else {
+            this.mergeProcessed = false;
         }
 
-        if (globals.madnessDeleted === true && this.frames.frameCounter === 5) 
+        if (globals.madnessDeleted === true && this.frames.frameCounter === 5)
         {
             this.frames.frameCounter = 0;
             globals.isMergeWithTheThrone = false;

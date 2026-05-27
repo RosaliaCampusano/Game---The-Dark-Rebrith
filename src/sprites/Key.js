@@ -10,8 +10,8 @@ export default class Key extends Sprite
     isCollected = false;
     constructor(xPos, yPos, imageSet, internalID)
     {
-        super(SpriteID.KEY, State.BE, 
-            xPos, yPos, imageSet, 
+        super(SpriteID.KEY, State.BE,
+            xPos, yPos, imageSet,
             new Frames(1), null, new HitBox(15, 15, 2, 5)
         );
 
@@ -19,32 +19,37 @@ export default class Key extends Sprite
     }
 
     update() {
-        if (this.isCollidingWithPlayer){
+        if (this.isCollected){
             this.xPos = -50;
             this.yPos = -50;
         }
     }
 
     detectCollisionsBetweenPlayerAndSprite(player) {
+        if (this.isCollected) return;
+
         const isOverLap = this.detectCollisionsBetweenSpriteAndSprite(player);
 
         if (isOverLap)
         {
-            globals.currentSound = Sound.KEY;
-            this.isCollidingWithPlayer = true;
-            this.isCollected = true;
-            for (let i = 0; i < globals.spritesKeys.length; i++) {
-                if (globals.spritesKeys[i].isCollected) {
-                    player.isCollidingWithKey = true;
-                }else
-                {
-                    globals.messageToDoor.text = "The door is locked";
-                }
+            const playerAlreadyHasKey = globals.spritesKeys.some(
+                k => k.isCollected && k !== this && !k.isDelivered
+            );
+            if (playerAlreadyHasKey) {
+                globals.messageToDoor.text = "Deliver your key first";
+                globals.incorrectKey = true;
+                return;
             }
-        }
-        else
-        {
-            this.isCollidingWithPlayer = false;
+
+            globals.currentSound = Sound.KEY;
+            this.isCollected = true;
+
+            const allCollected = globals.spritesKeys.every(k => k.isCollected);
+            if (allCollected) {
+                player.isCollidingWithKey = true;
+            } else {
+                globals.messageToDoor.text = "Find more keys";
+            }
         }
     }
 }

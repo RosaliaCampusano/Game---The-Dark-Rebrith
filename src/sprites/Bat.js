@@ -47,8 +47,7 @@ export class Bat extends Enemies
                 this.physics.vy = 20 * this.moveSpeed; 
                 break;
             default:
-                console.error("Error, Game State invalid");
-                return;
+                break;
         }
 
         this.xPos += this.physics.vx * globals.deltaTime;

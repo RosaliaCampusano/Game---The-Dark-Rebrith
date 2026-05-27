@@ -532,7 +532,7 @@ export class Enemies extends Sprite
         if (this.isCollidingWithAttack)
         {
             this.imageSet.xInit = this.default.imageSet.x + 1000;
-            this.imageSet.yInit = this.default.imageSet.x + 1000;
+            this.imageSet.yInit = this.default.imageSet.y + 1000;
 
             if (this.flicker)
             {
@@ -582,7 +582,7 @@ export class Enemies extends Sprite
             this.internalTimer = 0;
             globals.score += this.scorePerKill;
             this.redExplotion.getPosition(this.xPos, this.yPos);
-            globals.currentSound = Sound.EXPLOTION;
+            globals.soundQueue.push(Sound.EXPLOTION);
         }
 
         // random movement speed
@@ -619,8 +619,8 @@ export class Enemies extends Sprite
 
         const x2 = this.xPos + this.hitBox.xOffset - this.rangeActivation;
         const y2 = this.yPos + this.hitBox.yOffset - this.rangeActivation;
-        const w2 = this.hitBox.xSize + this.rangeActivation;
-        const h2 = this.hitBox.ySize + this.rangeActivation;
+        const w2 = this.hitBox.xSize + this.rangeActivation * 2;
+        const h2 = this.hitBox.ySize + this.rangeActivation * 2;
 
         // const isOverLap = rectIntersect(x1, y1, w1, h1, x2, y2, w2, h2);
         this.isRangeActivationRunning = this.rectIntersect(x1, y1, w1, h1, x2, y2, w2, h2);
@@ -675,5 +675,12 @@ export class Enemies extends Sprite
         this.hitBox.ySize = this.defaultHitBoxYSize;
         this.isDead = false;
         this.life = this.defaultLife;
+        this.directionChangeCounter = 0;
+        if (this.counterLeftCollision !== undefined) {
+            this.counterLeftCollision = 0;
+            this.counterRightCollision = 0;
+            this.counterTopCollision = 0;
+            this.counterBottomCollision = 0;
+        }
     }
 }

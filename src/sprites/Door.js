@@ -35,6 +35,14 @@ export default class Door extends Sprite {
 
     globals.messageToDoor.x = this.xPos - 15;
     globals.messageToDoor.y = this.yPos;
+
+    if (this.incorrectKeyTimer > 0) {
+      this.incorrectKeyTimer -= globals.deltaTime;
+      globals.incorrectKey = true;
+      if (this.incorrectKeyTimer <= 0) {
+        globals.incorrectKey = false;
+      }
+    }
   }
 
   updateFase() {
@@ -107,6 +115,7 @@ export default class Door extends Sprite {
     }
   }
 
+  incorrectKeyTimer = 0;
   detectCollisionsBetweenPlayerAndSprite(player) {
     const isOverLap = this.detectCollisionsBetweenSpriteAndSprite(player);
 
@@ -116,6 +125,7 @@ export default class Door extends Sprite {
       } else {
         globals.currentSound = Sound.LOCKED_DOOR;
         globals.incorrectKey = true;
+        this.incorrectKeyTimer = 2.0;
       }
     } else {
       this.isCollidingWithPlayer = false;

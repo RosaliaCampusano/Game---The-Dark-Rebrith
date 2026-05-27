@@ -152,6 +152,7 @@ export class Player extends Sprite
     addLife = 0;
     previousLife = 0;
     healthRegenerationCounter = 0;
+    regenTickTimer = 0;
     maxInternalCounter = 10;
     healthRegeneration()
     {
@@ -167,10 +168,12 @@ export class Player extends Sprite
             this.addLife = 0;
             this.previousLife = globals.life;
         }
-        if (globals.life >= this.previousLife && this.addLife < 10)
+        this.regenTickTimer += globals.deltaTime;
+        if (this.regenTickTimer >= 1.0 && globals.life >= this.previousLife && this.addLife < 10)
         {
             globals.life += 1;
             this.addLife += 1;
+            this.regenTickTimer = 0;
         }
         if (globals.life > globals.maxLife)
         {
@@ -197,12 +200,11 @@ export class Player extends Sprite
     
     }
 
-    handlerStateWizard() 
+    handlerStateWizard()
     {
-        let attack;
+        let attack = null;
 
-    
-        for (let i = 0; i < globals.sprites.length; i++) 
+        for (let i = 0; i < globals.sprites.length; i++)
         {
             const sprite = globals.sprites[i];
             if (sprite.id == SpriteID.ATTACK) {
@@ -210,8 +212,8 @@ export class Player extends Sprite
                 attack.update();
             }
         }
-        
-        if(!globals.isPlayerActive) return;
+
+        if (!globals.isPlayerActive || !attack) return;
 
         switch (this.state) {
             case State.LEFT_WIZARD:
@@ -315,45 +317,53 @@ export class Player extends Sprite
                         this.state; // Maintain current state if no keys are pressed
     }
 
-    numBick = 10;
+    numBick = 12;
     bigEventCouter = 0;
     bricksBigEvent = [];
     bigEvent()
     {
-        if (globals.life <= globals.maxLife/2)
+        if (globals.life <= globals.maxLife * 0.3)
         {
             if (this.bigEventCouter === 0){
 
-                const centerX = this.xPos;
-                const centerY = this.yPos;
-                const radius = 50;
-                let isTurnBrick = true;
+                const centerX = globals.activedPlayer.xPos;
+                const centerY = globals.activedPlayer.yPos;
+                const innerRadius = 40;
+                const outerRadius = 70;
+                let potionCount = 0;
 
                 for (let i = 0; i < this.numBick; i++) {
-                    const angle = (Math.PI * 2) / this.numBick;
-                    const x = centerX + Math.cos(angle * i) * radius;
-                    const y = centerY + Math.sin(angle * i) * radius;
-                    
-                    if (this.getMapTileId(x, y) !== Block.BRICK){
-                        if (isTurnBrick){
-                            const block = this.getMapTileId(x, y);
-                            this.bricksBigEvent.push({x, y, block});
-                            this.setMapTileId(x, y, Block.BRICK);
-                            isTurnBrick = false;
-                        }else{
-                            this.initPotion(x, y);
-                            isTurnBrick = true;
-                        }
+                    const angle = (Math.PI * 2 / this.numBick) * i;
+
+                    const brickX = centerX + Math.cos(angle) * innerRadius;
+                    const brickY = centerY + Math.sin(angle) * innerRadius;
+
+                    if (this.getMapTileId(brickX, brickY) !== Block.BRICK) {
+                        const block = this.getMapTileId(brickX, brickY);
+                        this.bricksBigEvent.push({x: brickX, y: brickY, block});
+                        this.setMapTileId(brickX, brickY, Block.BRICK);
                     }
 
-                    this.bigEventCouter = 1;
+                    if (i % 3 === 0 && potionCount < 3) {
+                        const potionX = centerX + Math.cos(angle) * outerRadius;
+                        const potionY = centerY + Math.sin(angle) * outerRadius;
+
+                        if (potionX > 0 && potionY > 0 &&
+                            potionX < globals.canvas.width * 2 &&
+                            potionY < globals.canvas.height) {
+                            this.initPotion(potionX, potionY);
+                            potionCount++;
+                        }
+                    }
                 }
+
+                this.bigEventCouter = 1;
             }
         }
 
         if ((this.bigEventCouter === 1 && this.internalTimer >= this.maxInternalTimer) || globals.gameState !== Game.PLAYING)
         {
-            for (let i = 0; i < globals.sprites.length; i++) {
+            for (let i = globals.sprites.length - 1; i >= 0; i--) {
                 if (globals.sprites[i].id === SpriteID.POTION){
                     globals.sprites.splice(i, 1);
                 }

@@ -83,7 +83,7 @@ export function initPlaying() {
   initSpritesHUD();
 
   const keydownHandler = (event) => {
-    if (event.keyCode) {
+    if (event.code) {
       globals.isPlaying = true;
       window.removeEventListener("keydown", keydownHandler, false);
     }
@@ -127,6 +127,7 @@ export function initHighScore() {
   globals.spriteHighScore = [];
   globals.currentScoresPage = 1;
   globals.lastGamePlayerPosition = 0;
+  globals.renderHighscoreState = null;
 
   sortHistoryHighScores();
 
@@ -198,7 +199,7 @@ export function initEnterName() {
 }
 
 function initParticlesForMainMenu() {
-  const numParticles = 80;
+  const numParticles = 25;
   const minRadius = 2;
   const maxRadius = 5;
   const alpha = 0.6;
@@ -235,7 +236,7 @@ function initParticlesForMainMenu() {
     });
   }
 
-  for (let i = 0; i < numParticles * 2; i++) {
+  for (let i = 0; i < numParticles; i++) {
     const x = Math.random() * globals.canvas.width;
     const angle = Math.random() * Math.PI * 2;
     const speed = 2;
@@ -874,7 +875,7 @@ function initRedExplotion() {
 }
 
 function initSunLight() {
-  const numParticles = 100;
+  const numParticles = 30;
   const xInit = -40;
   const yInit = 50;
   const radius = 2.5;
@@ -898,7 +899,7 @@ function initSunLight() {
 }
 
 function initParticlesControls() {
-  const numParticles = 50;
+  const numParticles = 20;
   const radius = 2;
   const alpha = 1;
 
@@ -922,7 +923,7 @@ function initParticlesControls() {
 }
 
 function initParticlesForHighscore() {
-  const numParticles = 50;
+  const numParticles = 15;
   const radius = 2;
   const alpha = 0.8;
 
@@ -940,7 +941,7 @@ function initParticlesForHighscore() {
 }
 
 function initParticlesForGameOver() {
-  const numParticles = 50;
+  const numParticles = 20;
   const radius = 2;
   const alpha = 1;
   const explosionCenterX = globals.canvas.width / 2;
@@ -1131,7 +1132,6 @@ function loadHandler() {
       );
     }
 
-    console.log("Assets finished loading");
   }
 }
 
@@ -1158,18 +1158,22 @@ function initLevel() {
 export async function loadDataHighScore() {
   const url = "/api/records";
 
-  const response = await fetch(url);
+  try {
+    const response = await fetch(url);
 
-  if (response.ok) {
-    const resultJSON = await response.json();
-    initHighScoreData(resultJSON);
-    initFirstDisplay();
-  } else {
-    alert(`Communication error: ${response.statusText}`);
+    if (response.ok) {
+      const resultJSON = await response.json();
+      initHighScoreData(resultJSON);
+    }
+  } catch (e) {
+    console.warn("Could not load highscores:", e);
   }
+
+  initFirstDisplay();
 }
 
 function initHighScoreData(data) {
+  if (!data || !data.length) return;
   for (let i = 0; i < data.length; i++) {
     globals.historyScore[i] = new HighScore(-1, data[i].name, data[i].score);
     globals.historyScore[i].score = parseInt(globals.historyScore[i].score);

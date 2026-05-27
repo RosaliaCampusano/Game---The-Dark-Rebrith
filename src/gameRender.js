@@ -115,6 +115,19 @@ function drawGame() {
   renderSprites();
   renderMesageToDoor();
   restoreCamera();
+
+  if (globals.isPaused) {
+    const ctx = globals.ctx;
+    ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+    ctx.fillRect(0, 0, globals.canvas.width, globals.canvas.height);
+    ctx.textAlign = "center";
+    ctx.font = "20px emulogic";
+    ctx.fillStyle = "white";
+    ctx.fillText("PAUSED", globals.canvas.width / 2, globals.canvas.height / 2 - 10);
+    ctx.font = "8px emulogic";
+    ctx.fillStyle = "#888";
+    ctx.fillText("PRESS ESC TO RESUME", globals.canvas.width / 2, globals.canvas.height / 2 + 15);
+  }
 }
 
 function renderPlayer() {
@@ -495,27 +508,45 @@ function renderMainMenu() {
   globals.highScoreInit = 0;
   const state = renderMainMenu.state;
   const options = MainMenuTexts;
+  const ctx = globals.ctx;
 
   deleteHUD();
 
   const canvasDividedBy2 = globals.canvas.width / 2;
-  globals.ctx.textAlign = "center";
-  globals.ctx.font = "20px emulogic";
-  globals.ctx.fillStyle = "darkred";
-  globals.ctx.fillText("THE DARK REBIRTH", canvasDividedBy2, 85);
+  ctx.textAlign = "center";
 
-  globals.ctx.font = "12px emulogic";
-  globals.ctx.fillStyle = "white";
-  globals.ctx.fillText("-----------------------------", canvasDividedBy2, 45);
-  globals.ctx.fillText("-----------------------------", canvasDividedBy2, 250);
+  ctx.font = "7px emulogic";
+  ctx.fillStyle = "#444";
+  ctx.fillText("- - - - - - - - - - - - - - - - - - - -", canvasDividedBy2, 40);
 
-  let yCoordinate = 130;
+  ctx.font = "22px emulogic";
+  ctx.fillStyle = "#1a0000";
+  ctx.fillText("THE DARK REBIRTH", canvasDividedBy2 + 1, 71);
+  ctx.fillStyle = "darkred";
+  ctx.fillText("THE DARK REBIRTH", canvasDividedBy2, 70);
+
+  ctx.font = "7px emulogic";
+  ctx.fillStyle = "#444";
+  ctx.fillText("- - - - - - - - - - - - - - - - - - - -", canvasDividedBy2, 85);
+
+  let yCoordinate = 120;
 
   for (let i = 0; i < options.length; i++) {
-    globals.ctx.fillStyle = i === state.selectedOption ? "white" : "grey";
-    globals.ctx.fillText(options[i][0], canvasDividedBy2, yCoordinate);
-    yCoordinate += 25;
+    if (i === state.selectedOption) {
+      ctx.fillStyle = "white";
+      ctx.font = "11px emulogic";
+      ctx.fillText("> " + options[i][0] + " <", canvasDividedBy2, yCoordinate);
+    } else {
+      ctx.fillStyle = "#666";
+      ctx.font = "10px emulogic";
+      ctx.fillText(options[i][0], canvasDividedBy2, yCoordinate);
+    }
+    yCoordinate += 28;
   }
+
+  ctx.font = "7px emulogic";
+  ctx.fillStyle = "#444";
+  ctx.fillText("- - - - - - - - - - - - - - - - - - - -", canvasDividedBy2, 252);
 
   if (globals.action.moveDown && !state.moveDownProcessed) {
     state.selectedOption = (state.selectedOption + 1) % options.length;
@@ -567,7 +598,6 @@ function renderMainMenu() {
   }
 
   renderParticlesForMainMenu();
-  renderParticlesRainForMainMenu();
 }
 
 function handleMenuSelection(selectedIndex) {
@@ -575,23 +605,18 @@ function handleMenuSelection(selectedIndex) {
 
   switch (selectedOption) {
     case "NEW GAME":
-      console.log("Starting a new game...");
       globals.gameState = Game.LOAD_PLAYING;
       break;
     case "CONTROLS":
-      console.log("Showing controls...");
       globals.gameState = Game.LOAD_CONTROLS;
       break;
     case "STORY":
-      console.log("Showing story...");
       globals.gameState = Game.LOAD_STORY;
       break;
     case "HIGHSCORE":
-      console.log("Showing highscore...");
       globals.gameState = Game.LOAD_HIGH_SCORES;
       break;
     default:
-      console.log("Unknown option selected");
       break;
   }
 }
@@ -628,40 +653,33 @@ function renderParticlesForHighScore() {
 function renderHighscore() {
   deleteHUD();
 
-  const canvasDividedBy2 = globals.canvas.width / 2;
-  globals.ctx.textAlign = "center";
+  const ctx = globals.ctx;
+  const w = globals.canvas.width;
+  const cx = w / 2;
+  ctx.textAlign = "center";
 
-  let titleHighscore = "HIGHSCORE";
-  globals.ctx.font = "20px emulogic";
-  globals.ctx.fillStyle = "red";
-  globals.ctx.fillText(titleHighscore, canvasDividedBy2, 40);
+  ctx.font = "18px emulogic";
+  ctx.fillStyle = "darkred";
+  ctx.fillText("HALL OF FAME", cx, 30);
 
-  const separatorLine = "------------------";
-  globals.ctx.fillStyle = "lightgray";
-  globals.ctx.fillText(separatorLine, canvasDividedBy2, 60);
-  globals.ctx.fillText(separatorLine, canvasDividedBy2, 270);
+  ctx.font = "6px emulogic";
+  ctx.fillStyle = "#333";
+  ctx.fillText("- - - - - - - - - - - - - - - - - - - - -", cx, 42);
 
-  const startY = 90;
-  let categoryRank = "RANK";
-  let categoryName = "NAME";
-  let categoryScore = "SCORE";
+  const headerY = 58;
+  ctx.font = "8px emulogic";
+  ctx.fillStyle = "#cc3333";
+  ctx.textAlign = "right";
+  ctx.fillText("#", cx - 120, headerY);
+  ctx.textAlign = "center";
+  ctx.fillText("NAME", cx - 20, headerY);
+  ctx.textAlign = "left";
+  ctx.fillText("SCORE", cx + 70, headerY);
 
-  globals.ctx.font = "15px emulogic";
-  globals.ctx.fillStyle = "darkred";
-  globals.ctx.textAlign = "center";
-  globals.ctx.fillText(categoryRank, canvasDividedBy2 - 150, startY);
-  globals.ctx.fillText(categoryName, canvasDividedBy2 - 20, startY);
-  globals.ctx.fillText(categoryScore, canvasDividedBy2 + 110, startY);
-
-  globals.ctx.fillStyle = "lightgray";
-
-  if (globals.playerEnterThroughMainMenu === true) {
-    globals.ctx.fillText("<", canvasDividedBy2 - 150, 285);
-    globals.ctx.fillText(">", canvasDividedBy2 + 150, 285);
-  }
-
-  globals.ctx.font = "8px emulogic";
-  globals.ctx.fillText("Press ESC to exit", 200, 285);
+  ctx.fillStyle = "#333";
+  ctx.textAlign = "center";
+  ctx.font = "6px emulogic";
+  ctx.fillText("- - - - - - - - - - - - - - - - - - - - -", cx, 67);
 
   if (globals.playerEnterThroughMainMenu && !globals.playerEnterForGameOver) {
     globals.lastGamePlayerPosition = 0;
@@ -670,6 +688,26 @@ function renderHighscore() {
     globals.historyScore.isLastGamePlayer = true;
     renderHighScoreFromGameOver();
   }
+
+  ctx.fillStyle = "#333";
+  ctx.textAlign = "center";
+  ctx.font = "6px emulogic";
+  ctx.fillText("- - - - - - - - - - - - - - - - - - - - -", cx, 260);
+
+  if (globals.playerEnterThroughMainMenu === true) {
+    ctx.font = "12px emulogic";
+    ctx.fillStyle = "#555";
+    ctx.fillText("<", cx - 160, 278);
+    ctx.fillText(">", cx + 160, 278);
+
+    ctx.font = "7px emulogic";
+    ctx.fillStyle = "#444";
+    ctx.fillText("PAGE " + globals.currentScoresPage + "/2", cx, 278);
+  }
+
+  ctx.font = "7px emulogic";
+  ctx.fillStyle = "#666";
+  ctx.fillText("ESC TO EXIT", cx, 293);
 
   renderParticlesForHighScore();
 }
@@ -701,103 +739,68 @@ function renderHighScoreFromGameOver() {
 }
 
 function renderCurrentScoresPageRecords(scoresLowerLimit, scoressUpperLimit) {
-  const topThreeLimit = 3;
-
-  let counterOfRenderedRecords = 0;
-  let rowYCoordinate = 106;
-  const lineSpacing = 15;
+  const ctx = globals.ctx;
+  let rowYCoordinate = 82;
+  const lineSpacing = 17;
 
   const canvasDividedBy2 = globals.canvas.width / 2;
-  const posRank = canvasDividedBy2 - 150;
+  const posRank = canvasDividedBy2 - 120;
   const posName = canvasDividedBy2 - 20;
-  const posScore = canvasDividedBy2 + 90;
+  const posScore = canvasDividedBy2 + 70;
 
   if (!globals.renderHighscoreState) {
     globals.renderHighscoreState = {
       activeLine: scoresLowerLimit,
       frameTimer: 0,
-      lineDelay: 5,
+      lineDelay: 4,
     };
   }
 
   const state = globals.renderHighscoreState;
 
   state.frameTimer++;
-  if (
-    state.frameTimer >= state.lineDelay &&
-    state.activeLine < scoressUpperLimit - 1
-  ) {
+  if (state.frameTimer >= state.lineDelay && state.activeLine < scoressUpperLimit - 1) {
     state.frameTimer = 0;
     state.activeLine++;
   }
 
-  if (globals.currentScoresPage === 1 && scoresLowerLimit > 2) {
-    for (let i = 0; i < topThreeLimit; i++) {
-      let scoreEntry = globals.historyScore[i];
-
-      let color = scoreEntry.isLastPlayer ? "red" : "white";
-
-      let formattedScore = scoreEntry.score.toString();
-      while (formattedScore.length < 6) {
-        formattedScore = "0" + formattedScore;
-      }
-
-      globals.ctx.font = "8px emulogic";
-      globals.ctx.fillStyle = color;
-
-      // RANK
-      globals.ctx.textAlign = "right";
-      globals.ctx.fillText(scoreEntry.position + ".", posRank, rowYCoordinate);
-
-      // NAME
-      globals.ctx.textAlign = "center";
-      globals.ctx.fillText(scoreEntry.name, posName, rowYCoordinate);
-
-      // SCORE
-      globals.ctx.textAlign = "left";
-      globals.ctx.fillText(formattedScore, posScore, rowYCoordinate);
-
-      rowYCoordinate += lineSpacing;
-      counterOfRenderedRecords++;
-    }
-
-    const separatorLine = "---------------------------------------";
-    globals.ctx.textAlign = "center";
-    globals.ctx.fillStyle = "lightgray";
-    globals.ctx.fillText(separatorLine, canvasDividedBy2 - 15, rowYCoordinate);
-
-    rowYCoordinate += lineSpacing;
-  }
+  const medalColors = ["#ffd700", "#c0c0c0", "#cd7f32"];
 
   for (let i = scoresLowerLimit; i < scoressUpperLimit; i++) {
     if (i > state.activeLine) break;
+    if (i >= globals.historyScore.length) break;
 
-    let scoreEntry = globals.historyScore[i];
+    const scoreEntry = globals.historyScore[i];
 
-    let color = scoreEntry.isLastPlayer ? "red" : "white";
+    let color;
+    if (scoreEntry.isLastPlayer) {
+      color = "#ff4444";
+    } else if (i < 3) {
+      color = medalColors[i];
+    } else {
+      color = "#aaaaaa";
+    }
+
     let formattedScore = scoreEntry.score.toString();
-
     while (formattedScore.length < 6) {
       formattedScore = "0" + formattedScore;
     }
 
-    globals.ctx.font = "8px emulogic";
-    globals.ctx.fillStyle = color;
+    const prefix = i < 3 ? ["1ST", "2ND", "3RD"][i] : (i + 1) + ".";
 
-    // RANK
-    globals.ctx.textAlign = "right";
-    globals.ctx.fillText(scoreEntry.position + ".", posRank, rowYCoordinate);
+    ctx.font = i < 3 ? "9px emulogic" : "8px emulogic";
+    ctx.fillStyle = color;
 
-    // NAME
-    globals.ctx.textAlign = "center";
-    globals.ctx.fillText(scoreEntry.name, posName, rowYCoordinate);
+    ctx.textAlign = "right";
+    ctx.fillText(prefix, posRank, rowYCoordinate);
 
-    // SCORE
-    globals.ctx.textAlign = "left";
-    globals.ctx.fillText(formattedScore, posScore, rowYCoordinate);
+    ctx.textAlign = "center";
+    ctx.fillText(scoreEntry.name, posName, rowYCoordinate);
+
+    ctx.textAlign = "left";
+    ctx.fillText(formattedScore, posScore, rowYCoordinate);
 
     rowYCoordinate += lineSpacing;
-    counterOfRenderedRecords++;
   }
 }
 

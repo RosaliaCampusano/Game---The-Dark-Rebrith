@@ -19,6 +19,7 @@ export class Particle
 
 export class ParticleLight extends Particle
 {
+    state = ParticleState.ON;
     timeToFade  = 1 * Math.random() + 1;
     fadeCounter = 0;
     imageSet = new ImageSet(0, 800, 19, 19, 19, 19, 0, 0);
@@ -26,7 +27,7 @@ export class ParticleLight extends Particle
 
     constructor (xPos, yPos, radius, alpha, physics)
     {
-        super(xPos, yPos, radius, 
+        super(xPos, yPos, radius,
             alpha, physics);
     }
 
@@ -86,7 +87,7 @@ export class ParticleLight extends Particle
     moveRender()
     {
         const randomAngle = Math.random() * 2 * Math.PI;
-        this.physics.xv = this.physics.vLimit * Math.cos(randomAngle);
+        this.physics.vx = this.physics.vLimit * Math.cos(randomAngle);
         this.physics.vy = this.physics.vLimit * Math.sin(randomAngle);
 
         this.physics.ax = -this.physics.aLimit * Math.cos(randomAngle);

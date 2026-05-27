@@ -101,9 +101,11 @@ function updateHighScore() {
   if (globals.playerEnterThroughMainMenu) {
     if (globals.action.moveRight && globals.currentScoresPage === 1) {
       globals.currentScoresPage = 2;
+      globals.renderHighscoreState = null;
       globals.action.moveRight = false;
     } else if (globals.action.moveLeft && globals.currentScoresPage === 2) {
       globals.currentScoresPage = 1;
+      globals.renderHighscoreState = null;
       globals.action.moveLeft = false;
     }
   }
@@ -128,7 +130,21 @@ function updateStory() {
 }
 
 function playGame() {
-  globals.highScore = globals.historyScore[0].score;
+  if (globals.action.esc) {
+    globals.isPaused = !globals.isPaused;
+    globals.action.esc = false;
+    if (globals.isPaused && globals.currentMusic !== Music.NO_MUSIC) {
+      globals.sounds[globals.currentMusic].pause();
+    } else if (!globals.isPaused && globals.currentMusic !== Music.NO_MUSIC) {
+      globals.sounds[globals.currentMusic].play();
+    }
+  }
+
+  if (globals.isPaused) return;
+
+  if (globals.historyScore.length > 0) {
+    globals.highScore = globals.historyScore[0].score;
+  }
 
   if (globals.score > globals.highScore) {
     globals.highScore = globals.score;
@@ -148,6 +164,17 @@ function updateScore() {
   }
 }
 function playSound() {
+  if (globals.soundQueue && globals.soundQueue.length > 0) {
+    for (let i = 0; i < globals.soundQueue.length; i++) {
+      const soundId = globals.soundQueue[i];
+      if (soundId !== Sound.NO_SOUND && globals.sounds[soundId]) {
+        globals.sounds[soundId].currentTime = 0;
+        globals.sounds[soundId].play();
+      }
+    }
+    globals.soundQueue = [];
+  }
+
   if (globals.currentSound != Sound.NO_SOUND) {
     globals.sounds[globals.currentSound].currentTime = 0;
     globals.sounds[globals.currentSound].play();
@@ -195,13 +222,18 @@ function updateSunAndMoon(sprite) {
 
   handleTimerReset();
 
-  if (!globals.isDark && sprite.id === SpriteID.SUN) {
-    sprite.imageSet.xSize = maxSize;
-    sprite.state = State.SUN;
-    globals.saturate = 1;
-
-    updateSunSize(sprite, minSize, maxSize, totalTime);
-  } else if (globals.isDark) {
+  if (!globals.isDark) {
+    if (sprite.id === SpriteID.SUN) {
+      sprite.state = State.SUN;
+      updateSunSize(sprite, minSize, maxSize, totalTime);
+    } else if (sprite.id === SpriteID.MOON) {
+      const remainingTime = Math.max(0, globals.timer.value);
+      const progress = remainingTime / totalTime;
+      const moonSize = maxSize * (1 - progress);
+      sprite.imageSet.xSize = moonSize;
+      sprite.imageSet.ySize = moonSize;
+    }
+  } else {
     updateMoonVisibility(sprite);
   }
 }
@@ -236,8 +268,11 @@ function updateSunSize(sprite, minSize, maxSize, totalTime) {
 function updateMoonVisibility(sprite) {
   if (sprite.id === SpriteID.SUN) {
     sprite.state = State.SUN_OFF;
+    sprite.imageSet.xSize = 0;
   } else if (sprite.id === SpriteID.MOON) {
     sprite.state = State.MOON;
+    sprite.imageSet.xSize = 59;
+    sprite.imageSet.ySize = 55;
 
     if (globals.timer.value <= 0) {
       globals.gameState = Game.LOAD_ENTER_NAME;
@@ -333,8 +368,6 @@ function updateHUD() {
 
 function updateMainMenu() {
   updateJosephs();
-
-  globals.currentSound = Sound.SCROLL;
 }
 
 function updateSpriteMenu(sprite) {
@@ -364,7 +397,7 @@ function detectCollisionsBetweenSpriteAndSprite(sprite) {
   if (isOverLap && rightJoseph.state !== State.FALL_RIGHT_JOSEPH) {
     rightJoseph.state = State.FALL_RIGHT_JOSEPH;
     sprite.state = State.FALL_LEFT_JOSEPH;
-    fallTimer = 1;
+    fallTimer = 2.0;
   }
   return isOverLap;
 }
@@ -400,7 +433,7 @@ function rectIntersect(x1, x2) {
 function updateJoseph1(sprite) {
   switch (sprite.state) {
     case State.RIGHT_JOSEPH:
-      sprite.physics.vx = sprite.physics.vLimit;
+      sprite.physics.vx = sprite.physics.vLimit * 3;
       break;
 
     case State.FALL_RIGHT_JOSEPH:
@@ -408,18 +441,18 @@ function updateJoseph1(sprite) {
       break;
 
     default:
-      console.error("Error, Game State invalid");
+      break;
   }
 
   sprite.xPos += sprite.physics.vx * globals.deltaTime;
 
-  updateAnimationFrames(sprite);
+  updateAnimationFramesTimeBased(sprite);
 }
 
 function updateJoseph2(sprite) {
   switch (sprite.state) {
     case State.LEFT_JOSEPH:
-      sprite.physics.vx = -sprite.physics.vLimit;
+      sprite.physics.vx = -sprite.physics.vLimit * 3;
       break;
 
     case State.FALL_LEFT_JOSEPH:
@@ -427,13 +460,33 @@ function updateJoseph2(sprite) {
       break;
 
     default:
-      console.error("Error, Game State invalid");
+      break;
   }
 
   sprite.xPos += sprite.physics.vx * globals.deltaTime;
 
   detectCollisionsBetweenSpriteAndSprite(sprite);
-  updateAnimationFrames(sprite);
+  updateAnimationFramesTimeBased(sprite);
+}
+
+function updateAnimationFramesTimeBased(sprite) {
+  if (sprite.state === State.FALL_LEFT_JOSEPH || sprite.state === State.FALL_RIGHT_JOSEPH) {
+    sprite.frames.frameCounter = 0;
+    sprite.frames.framesChangeCounter = 0;
+    return;
+  }
+
+  if (!sprite.animTimer) sprite.animTimer = 0;
+  sprite.animTimer += globals.deltaTime;
+
+  const frameDuration = 0.12;
+  if (sprite.animTimer >= frameDuration) {
+    sprite.frames.frameCounter++;
+    sprite.animTimer = 0;
+    if (sprite.frames.frameCounter >= sprite.frames.framesPerState) {
+      sprite.frames.frameCounter = 0;
+    }
+  }
 }
 
 function updateJosephs() {

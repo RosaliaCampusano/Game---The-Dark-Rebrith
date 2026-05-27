@@ -200,16 +200,15 @@ export const ParticleState =
 
 export const GRAVITY = 80;
 
-//Keyboard key codes
 export const Key = {
-    UP:                 87,         //W
-    DOWN:               83,         //S
-    RIGHT:              68,         //D
-    LEFT:               65,         //A
-    ATTACK:             76,         //L
-    MERGE_THRONE:       77,         //M   
-    ESC:                27,
-    ENTER:              13,     
+    UP:                 "KeyW",
+    DOWN:               "KeyS",
+    RIGHT:              "KeyD",
+    LEFT:               "KeyA",
+    ATTACK:             "KeyL",
+    MERGE_THRONE:       "KeyM",
+    ESC:                "Escape",
+    ENTER:              "Enter",
 }
 
 export const Tile = {

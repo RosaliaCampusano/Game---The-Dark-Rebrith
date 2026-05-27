@@ -79,7 +79,7 @@ export class Goblin extends Enemies
                 break;
     
             default:
-                console.error("Error, Game State invalid");
+                break;
         }
     
         this.xPos += this.physics.vx * globals.deltaTime;

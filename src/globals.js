@@ -133,6 +133,10 @@ export default {
 
   currentMusic: -1,
 
+  soundQueue: [],
+
+  isPaused: false,
+
   incorrectKey: false,
 
   isMergeWithTheThrone: false,
