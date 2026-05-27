@@ -165,7 +165,7 @@ function renderMesageToDoor() {
     const text = globals.messageToDoor.text;
     const x = globals.messageToDoor.x;
     const y = globals.messageToDoor.y - 8;
-    globals.ctx.font = "4px emulogic";
+    globals.ctx.font = "7px emulogic";
     globals.ctx.textAlign = "center";
     globals.ctx.fillStyle = "white";
     globals.ctx.fillText(text, x, y);
