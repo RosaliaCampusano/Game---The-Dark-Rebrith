@@ -41,7 +41,9 @@ export default class Key extends Sprite
             );
             if (carrying) {
                 globals.messageToDoor.text = "You carry a key already";
-                globals.incorrectKey = true;
+                globals.messageToDoor.x = this.originalPos.xPos;
+                globals.messageToDoor.y = this.originalPos.yPos - 5;
+                globals.messageTimer = 2.0;
                 return;
             }
 

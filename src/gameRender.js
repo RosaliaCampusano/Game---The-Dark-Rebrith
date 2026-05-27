@@ -160,17 +160,19 @@ function renderPlayer() {
 }
 
 function renderMesageToDoor() {
-  if (globals.incorrectKey === true) {
+  if (globals.messageTimer > 0) {
+    globals.messageTimer -= globals.deltaTime;
     globals.ctx.font = "5px emulogic";
-    globals.ctx.fillStyle = globals.messageToDoor.color;
+    globals.ctx.fillStyle = "white";
     globals.ctx.textAlign = "center";
-    globals.ctx.strokeStyle = "black";
     globals.ctx.fillText(
       globals.messageToDoor.text,
       globals.messageToDoor.x - 10,
       globals.messageToDoor.y
     );
-    globals.incorrectKey = false;
+    if (globals.messageTimer <= 0) {
+      globals.incorrectKey = false;
+    }
   }
 }
 
@@ -230,11 +232,15 @@ function renderSpritesHUD() {
     const xPos = Math.floor(sprite.xPos);
     const yPos = Math.floor(sprite.yPos);
 
-    let scale = 1;
+    let drawW = sprite.imageSet.xSize;
+    let drawH = sprite.imageSet.ySize;
+
     if (sprite.id === SpriteID.SUN || sprite.id === SpriteID.MOON) {
-      scale = 0.55;
+      drawW = sprite.imageSet.xSize * 0.4;
+      drawH = sprite.imageSet.ySize * 0.4;
     } else if (sprite.id === SpriteID.THRONEHUB) {
-      scale = 0.6;
+      drawW = sprite.imageSet.xSize * 0.45;
+      drawH = sprite.imageSet.ySize * 0.45;
     }
 
     globals.ctxHUD.drawImage(
@@ -245,8 +251,8 @@ function renderSpritesHUD() {
       sprite.imageSet.ySize,
       xPos,
       yPos,
-      sprite.imageSet.xSize * scale,
-      sprite.imageSet.ySize * scale
+      drawW,
+      drawH
     );
 
     globals.ctxHUD.filter = `saturate(1)`;

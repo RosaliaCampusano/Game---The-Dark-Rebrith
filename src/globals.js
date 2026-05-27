@@ -139,6 +139,8 @@ export default {
 
   incorrectKey: false,
 
+  messageTimer: 0,
+
   isMergeWithTheThrone: false,
 
   madnessDeleted: false,
