@@ -227,15 +227,8 @@ function updateSunAndMoon(sprite) {
       sprite.state = State.SUN;
       updateSunSize(sprite, minSize, maxSize, totalTime);
     } else if (sprite.id === SpriteID.MOON) {
-      const remainingTime = Math.max(0, globals.timer.value);
-      const progress = remainingTime / totalTime;
-      if (progress <= 0.5) {
-        sprite.imageSet.xSize = 59;
-        sprite.imageSet.ySize = 55;
-      } else {
-        sprite.imageSet.xSize = 0;
-        sprite.imageSet.ySize = 0;
-      }
+      sprite.imageSet.xSize = 0;
+      sprite.imageSet.ySize = 0;
     }
   } else {
     updateMoonVisibility(sprite);

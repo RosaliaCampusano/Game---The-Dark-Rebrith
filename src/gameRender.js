@@ -114,6 +114,11 @@ function drawGame() {
 
   renderSprites();
   renderMesageToDoor();
+
+  if (globals.isDark) {
+    globals.ctx.restore();
+  }
+
   restoreCamera();
 
   if (globals.isPaused) {
